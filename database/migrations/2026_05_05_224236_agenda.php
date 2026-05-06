@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('agenda', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->id('id_agenda');
+            $table->enum('status_ativo', ['ativo', 'finalizado']);
+            $table->datetime('data_inicio');
+            $table->datetime('data_fim');
         });
     }
 

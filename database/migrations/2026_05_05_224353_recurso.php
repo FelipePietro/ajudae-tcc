@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('recurso', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->id('id_recurso');
+            $table->string('nome_recurso', 255);
+            $table->string('descricao_recurso', 255);
         });
     }
 

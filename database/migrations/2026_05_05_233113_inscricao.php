@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('habilidade', function (Blueprint $table) {
-            $table->id('id_habilidade');
-            $table->string('nome_habilidade', 255);
-             $table->string('descricao_habilidade', 255);
+        Schema::create('inscricao', function (Blueprint $table) {
+            $table->id('id_inscricao');
+            $table->enum('status_inscricao', ['inscrito', 'participando', 'participou', 'não participou']);
+            $table->datetime('dt_inscricao');
         });
     }
 
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('habilidade');
+        Schema::dropIfExists('inscricao');
     }
 };

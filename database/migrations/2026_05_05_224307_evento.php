@@ -12,8 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evento', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+            $table->id('id_evento');
+            $table->string('logradouro_evento', 64);
+            $table->char('cep_evento', 8);
+            $table->string('cidade_evento', 64);
+            $table->string('bairro_evento', 64);
+            $table->char('uf_evento', 2);
+            $table->string('nm_evento', 64);
+            $table->string('descricao_evento', 256);
+            $table->enum('status_evento', ['cancelado', 'finalizado', 'aguardando a confirmação', 'reprovado']);
+            $table->string('imagem_evento_link', 255);
         });
     }
 

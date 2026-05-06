@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('habilidade', function (Blueprint $table) {
-            $table->id('id_habilidade');
-            $table->string('nome_habilidade', 255);
-             $table->string('descricao_habilidade', 255);
+        Schema::create('notificacao', function (Blueprint $table) {
+            $table->id('sq_notificacao');
+            $table->enum('status_confirmacao', ['lido', 'não lido', 'confirmado', 'desconfirmado']);
+            $table->string('mensagem_notificacao', 255);
         });
     }
 
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('habilidade');
+        Schema::dropIfExists('notificacao');
     }
 };

@@ -12,8 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('assinatura', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_assinatura');
+            $table->string('dispositivo', 100);
+            $table->ipAddress('ip_assinatura');
             $table->timestamps();
+            $table->string('user_agent_assinatura', 255);
+            $table->string('documento_url', 255);
+            $table->char('documento_hash', 64);
+            $table->string('geoloc_assinatura', 100);
         });
     }
 

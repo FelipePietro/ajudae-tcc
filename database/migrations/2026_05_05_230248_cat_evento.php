@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('habilidade', function (Blueprint $table) {
-            $table->id('id_habilidade');
-            $table->string('nome_habilidade', 255);
-             $table->string('descricao_habilidade', 255);
+        Schema::create('cat_evento', function (Blueprint $table) {
+            $table->id('id_categoria');
+            $table->string('nome_categoria', 64);
         });
     }
 
@@ -23,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('habilidade');
+        Schema::dropIfExists('cat_evento');
     }
 };
