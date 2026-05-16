@@ -14,7 +14,18 @@ return new class extends Migration
         Schema::create('habilidade', function (Blueprint $table) {
             $table->id('id_habilidade');
             $table->string('nome_habilidade', 255);
-             $table->string('descricao_habilidade', 255);
+            $table->string('descricao_habilidade', 255);
+
+        });
+
+        Schema::create('habilidade_pessoa', function (Blueprint $table) {
+            $table->id('id_habilidade_pessoa');
+
+            $table->unsignedBigInteger('id_habilidade');
+            $table->foreign('id_habilidade')->references('id_habilidade')->on('habilidade');
+
+            $table->unsignedBigInteger('id_pessoa');
+            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
         });
     }
 
@@ -23,6 +34,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('habilidade_pessoa');
         Schema::dropIfExists('habilidade');
+        
     }
 };

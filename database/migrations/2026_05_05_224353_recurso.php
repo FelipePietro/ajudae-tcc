@@ -16,6 +16,15 @@ return new class extends Migration
             $table->string('nome_recurso', 255);
             $table->string('descricao_recurso', 255);
         });
+            Schema::create('pessoa_recurso', function (Blueprint $table) {
+            $table->id('id_recurso_pessoa');
+
+            $table->unsignedBigInteger('id_recurso');
+            $table->foreign('id_recurso')->references('id_recurso')->on('recurso');
+
+            $table->unsignedBigInteger('id_pessoa');
+            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+        });
     }
 
     /**
@@ -23,6 +32,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('recurso_pessoa');
         Schema::dropIfExists('recurso');
+        
     }
 };

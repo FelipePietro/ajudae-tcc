@@ -9,9 +9,11 @@ class Recurso extends Model
 {
     use HasFactory;
     protected $table = 'recurso';
+    protected $primaryKey = 'id_recurso';
+    public $timestamps = false;
 
     protected $fillable = [
-        'nome',
-        'descricao'
+        'nome_recurso',
+        'descricao_recurso'
     ];
 }

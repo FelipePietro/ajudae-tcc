@@ -9,9 +9,11 @@ class Habilidade extends Model
 {
     use HasFactory;
     protected $table = 'habilidade';
+    protected $primaryKey = 'id_habilidade';
+    public $timestamps = false;
 
     protected $fillable = [
-        'nome_Habilidade',
-        'descricao_Habilidade'
+        'nome_habilidade',
+        'descricao_habilidade'
     ];
 }

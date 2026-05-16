@@ -9,6 +9,8 @@ class Causa extends Model
 {
     use HasFactory;
     protected $table = 'causa';
+    protected $primaryKey = 'id_causa';
+    public $timestamps = false;
 
     protected $fillable = [
         'nome_causa',
