@@ -22,6 +22,13 @@ return new class extends Migration
             $table->string('descricao_evento', 256);
             $table->enum('status_evento', ['cancelado', 'finalizado', 'aguardando a confirmação', 'reprovado']);
             $table->string('imagem_evento_link', 255);
+            $table->timestamps();
+
+            $table->unsignedBigInteger('id_ong');
+            $table->foreign('id_ong')->references('id_ong')->on('ong');
+
+            $table->unsignedBigInteger('id_pessoa');
+            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
         });
     }
 

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->enum('status_ativo', ['ativo', 'finalizado']);
             $table->datetime('data_inicio');
             $table->datetime('data_fim');
+            $table->timestamps();
 
             $table->unsignedBigInteger('id_evento');
             $table->foreign('id_evento')->references('id_evento')->on('evento');

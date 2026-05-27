@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('rg_responsavel_ong_link', 255);
             $table->string('login_ong', 64);
             $table->char('senha_ong', 64);
+            $table->timestamps();
         });
     }
 

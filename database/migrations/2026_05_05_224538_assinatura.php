@@ -22,24 +22,24 @@ return new class extends Migration
             $table->string('geoloc_assinatura', 100);
         });
 
-        Schema::create('causa_pessoa', function (Blueprint $table) {
-            $table->id('id_causa_pessoa');
+        Schema::create('assinatura_pessoa', function (Blueprint $table) {
+            $table->id('id_assinatura_pessoa');
 
-            $table->unsignedBigInteger('id_causa');
-            $table->foreign('id_causa')->references('id_causa')->on('causa');
+            $table->unsignedBigInteger('id_assinatura');
+            $table->foreign('id_assinatura')->references('id_assinatura')->on('assinatura');
 
             $table->unsignedBigInteger('id_pessoa');
             $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
         });
 
-        Schema::create('causa_pessoa', function (Blueprint $table) {
-            $table->id('id_causa_pessoa');
+        Schema::create('aassinatura_ong', function (Blueprint $table) {
+            $table->id('id_aassinatura_ong');
 
-            $table->unsignedBigInteger('id_causa');
-            $table->foreign('id_causa')->references('id_causa')->on('causa');
+            $table->unsignedBigInteger('id_assinatura');
+            $table->foreign('id_assinatura')->references('id_assinatura')->on('assinatura');
 
-            $table->unsignedBigInteger('id_pessoa');
-            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+            $table->unsignedBigInteger('id_ong');
+            $table->foreign('id_ong')->references('id_ong')->on('ong');
         });
     }
 
