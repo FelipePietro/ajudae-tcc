@@ -11,10 +11,34 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::apiResource('recursos', RecursoController::class);
+Route::controller(RecursoController::class)->prefix('recursos')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
 
-Route::apiResource('causas', CausaController::class);
+Route::controller(CausaController::class)->prefix('causas')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
 
-Route::apiResource('habilidades', HabilidadeController::class);
+Route::controller(HabilidadeController::class)->prefix('habilidades')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
 
-Route::apiResource('cat_eventos', CatEventoController::class);
+Route::controller(CatEventoController::class)->prefix('cat_eventos')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});

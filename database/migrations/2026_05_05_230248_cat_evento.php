@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('cat_evento', function (Blueprint $table) {
             $table->id('id_categoria');
             $table->string('nome_categoria', 64);
+
+            $table->unsignedBigInteger('id_evento');
+            $table->foreign('id_evento')->references('id_evento')->on('evento');
         });
     }
 

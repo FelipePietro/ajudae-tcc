@@ -15,7 +15,15 @@ return new class extends Migration
             $table->id('sq_notificacao');
             $table->enum('status_confirmacao', ['lido', 'não lido', 'confirmado', 'desconfirmado']);
             $table->string('mensagem_notificacao', 255);
+
+            $table->unsignedBigInteger('id_agenda');
+            $table->foreign('id_agenda')->references('id_agenda')->on('agenda');
+
+            $table->unsignedBigInteger('id_pessoa');
+            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+
         });
+
     }
 
     /**

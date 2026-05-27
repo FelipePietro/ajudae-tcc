@@ -21,6 +21,26 @@ return new class extends Migration
             $table->char('documento_hash', 64);
             $table->string('geoloc_assinatura', 100);
         });
+
+        Schema::create('causa_pessoa', function (Blueprint $table) {
+            $table->id('id_causa_pessoa');
+
+            $table->unsignedBigInteger('id_causa');
+            $table->foreign('id_causa')->references('id_causa')->on('causa');
+
+            $table->unsignedBigInteger('id_pessoa');
+            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+        });
+
+        Schema::create('causa_pessoa', function (Blueprint $table) {
+            $table->id('id_causa_pessoa');
+
+            $table->unsignedBigInteger('id_causa');
+            $table->foreign('id_causa')->references('id_causa')->on('causa');
+
+            $table->unsignedBigInteger('id_pessoa');
+            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+        });
     }
 
     /**

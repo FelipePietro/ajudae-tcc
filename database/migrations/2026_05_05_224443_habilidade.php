@@ -26,6 +26,9 @@ return new class extends Migration
 
             $table->unsignedBigInteger('id_pessoa');
             $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+
+            $table->integer('nivel_habilidade', );
+
         });
     }
 
