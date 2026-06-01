@@ -55,7 +55,7 @@ class Pessoa extends Authenticatable
     'rg_pessoa',
     'antecedentes_pessoa_link',
     'cnh_pessoa_link',
-    'login_pessoa',      // <- obrigatório
+    'login_pessoa',      
     'senha_pessoa',
     'pfp_pessoa_link',
     'rg_pessoa_link',

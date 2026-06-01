@@ -11,6 +11,23 @@ use Illuminate\Validation\Rule;
 
 class PessoaController extends Controller
 {
+    public function index()
+    {
+        $pessoas = Pessoa::all();
+        return response()->json($pessoas);
+    }
+
+    public function show($id)
+    {
+        $pessoa = Pessoa::find($id);
+        if (!$pessoa) {
+            return response()->json(['message' => 'Pessoa não encontrada.'], 404);
+        }
+        return response()->json($pessoa);
+    }
+
+
+
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -129,5 +146,19 @@ class PessoaController extends Controller
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logout realizado com sucesso.'
+        ]);
+    }
+
+    public function me(Request $request)
+    {
+        return response()->json($request->user());
     }
 }

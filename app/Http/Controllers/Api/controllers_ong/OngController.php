@@ -117,4 +117,17 @@ class OngController extends Controller
         'token_type' => 'Bearer',
     ]);
 }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logout realizado com sucesso.'
+        ]);
+    }
+
+    public function me(Request $request)
+    {
+        return response()->json($request->user());
 }
