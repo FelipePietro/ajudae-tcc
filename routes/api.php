@@ -1,4 +1,3 @@
-```php
 <?php
 
 use Illuminate\Http\Request;
@@ -40,43 +39,50 @@ Route::prefix('v1/ongs')->group(function () {
 });
 
 //--------------------------------RECURSOS--------------------------------//
-Route::controller(RecursoController::class)->prefix('recursos')->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+Route::prefix('v1/recursos')->group(function () {
+    Route::get('/', [RecursoController::class, 'index']);
+    Route::get('/{id}', [RecursoController::class, 'show']);
+
+    Route::middleware(['auth:sanctum', 'abilities:admin'])->group(function () {
+        Route::post('/', [RecursoController::class, 'store']);
+        Route::put('/{id}', [RecursoController::class, 'update']);
+        Route::delete('/{id}', [RecursoController::class, 'destroy']);
+    });
 });
 
 //--------------------------------CAUSAS--------------------------------//
-Route::controller(CausaController::class)->prefix('causas')->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+route::prefix('v1/causas')->group(function () {
+    Route::get('/', [CausaController::class, 'index']);
+    Route::get('/{id}', [CausaController::class, 'show']);
+
+    Route::middleware(['auth:sanctum', 'abilities:admin'])->group(function () {
+        Route::post('/', [CausaController::class, 'store']);
+        Route::put('/{id}', [CausaController::class, 'update']);
+        Route::delete('/{id}', [CausaController::class, 'destroy']);
+    });
 });
 
 //--------------------------------HABILIDADES--------------------------------//
-Route::controller(HabilidadeController::class)->prefix('habilidades')->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+route::prefix('v1/habilidades')->group(function () {
+    Route::get('/', [HabilidadeController::class, 'index']);
+    Route::get('/{id}', [HabilidadeController::class, 'show']);
+
+    Route::middleware(['auth:sanctum', 'abilities:admin'])->group(function () {
+        Route::post('/', [HabilidadeController::class, 'store']);
+        Route::put('/{id}', [HabilidadeController::class, 'update']);
+        Route::delete('/{id}', [HabilidadeController::class, 'destroy']);
+    });
 });
 
 //--------------------------------CATEGORIAS DE EVENTO--------------------------------//
-Route::controller(CatEventoController::class)->prefix('cat_eventos')->group(function () {
-    Route::get('/', 'index');
-    Route::post('/', 'store');
-    Route::get('/{id}', 'show');
-    Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy');
+route::prefix('v1/categorias-evento')->group(function () {
+    Route::get('/', [CatEventoController::class, 'index']);
+    Route::get('/{id}', [CatEventoController::class, 'show']);
+
+    Route::middleware(['auth:sanctum', 'abilities:admin'])->group(function () {
+        Route::post('/', [CatEventoController::class, 'store']);
+        Route::put('/{id}', [CatEventoController::class, 'update']);
+        Route::delete('/{id}', [CatEventoController::class, 'destroy']);
+    });
 });
 
-//--------------------------------NOTIFICAÇÕES--------------------------------//
-Route::get('/notifications', [NotificationController::class, 'index']);
-Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
-```

@@ -18,6 +18,13 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
+    public function show(int $id): JsonResponse
+    {
+        $notification = Notification::query()->findOrFail($id);
+
+        return response()->json($notification);
+    }
+
     public function markAsRead(int $id): JsonResponse
     {
         $notification = Notification::query()->findOrFail($id);
