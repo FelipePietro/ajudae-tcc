@@ -8,7 +8,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pessoa', function (Blueprint $table) {
-            $table->id('id_pessoa');
+            $table->id('pessoa_id');
             $table->string('nm_pessoa', 64);
             $table->enum('genero_pessoa', ['masculino', 'feminino', 'outro', 'prefiro não dizer']);
             $table->char('cpf_pessoa', 11);

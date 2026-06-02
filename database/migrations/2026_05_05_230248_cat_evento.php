@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('cat_evento', function (Blueprint $table) {
-            $table->id('id_categoria');
+            $table->id('cat_evento_id');
             $table->string('nome_categoria', 64);
 
-            $table->unsignedBigInteger('id_evento');
-            $table->foreign('id_evento')->references('id_evento')->on('evento');
+            $table->unsignedBigInteger('evento_id');
+            $table->foreign('evento_id')->references('evento_id')->on('evento');
         });
     }
 

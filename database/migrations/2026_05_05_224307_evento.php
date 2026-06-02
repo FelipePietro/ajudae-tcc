@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('evento', function (Blueprint $table) {
-            $table->id('id_evento');
+            $table->id('evento_id');
             $table->string('logradouro_evento', 64);
             $table->char('cep_evento', 8);
             $table->string('cidade_evento', 64);
@@ -24,11 +24,11 @@ return new class extends Migration
             $table->string('imagem_evento_link', 255);
             $table->timestamps();
 
-            $table->unsignedBigInteger('id_ong');
-            $table->foreign('id_ong')->references('id_ong')->on('ong');
+            $table->unsignedBigInteger('ong_id');
+            $table->foreign('ong_id')->references('ong_id')->on('ong');
 
-            $table->unsignedBigInteger('id_pessoa');
-            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+            $table->unsignedBigInteger('pessoa_id');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
         });
     }
 

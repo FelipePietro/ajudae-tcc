@@ -12,18 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('recurso', function (Blueprint $table) {
-            $table->id('id_recurso');
+            $table->id('recurso_id');
             $table->string('nome_recurso', 255);
             $table->string('descricao_recurso', 255);
         });
             Schema::create('pessoa_recurso', function (Blueprint $table) {
-            $table->id('id_recurso_pessoa');
+            $table->id('pessoa_recurso_id');
 
-            $table->unsignedBigInteger('id_recurso');
-            $table->foreign('id_recurso')->references('id_recurso')->on('recurso');
+            $table->unsignedBigInteger('recurso_id');
+            $table->foreign('recurso_id')->references('recurso_id')->on('recurso');
 
-            $table->unsignedBigInteger('id_pessoa');
-            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+            $table->unsignedBigInteger('pessoa_id');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
 
             $table->string('detalhes_recurso', 255);
         });
@@ -34,7 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('recurso_pessoa');
+        Schema::dropIfExists('pessoa_recurso');
         Schema::dropIfExists('recurso');
         
     }

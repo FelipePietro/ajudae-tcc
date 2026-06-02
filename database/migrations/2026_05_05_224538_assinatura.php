@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('assinatura', function (Blueprint $table) {
-            $table->id('id_assinatura');
+            $table->id('assinatura_id');
             $table->string('dispositivo', 100);
             $table->ipAddress('ip_assinatura');
             $table->timestamps();
@@ -23,23 +23,23 @@ return new class extends Migration
         });
 
         Schema::create('assinatura_pessoa', function (Blueprint $table) {
-            $table->id('id_assinatura_pessoa');
+            $table->id('assinatura_pessoa_id');
 
-            $table->unsignedBigInteger('id_assinatura');
-            $table->foreign('id_assinatura')->references('id_assinatura')->on('assinatura');
+            $table->unsignedBigInteger('assinatura_id');
+            $table->foreign('assinatura_id')->references('assinatura_id')->on('assinatura');
 
-            $table->unsignedBigInteger('id_pessoa');
-            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+            $table->unsignedBigInteger('pessoa_id');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
         });
 
         Schema::create('aassinatura_ong', function (Blueprint $table) {
-            $table->id('id_aassinatura_ong');
+            $table->id('aassinatura_ong_id');
 
-            $table->unsignedBigInteger('id_assinatura');
-            $table->foreign('id_assinatura')->references('id_assinatura')->on('assinatura');
+            $table->unsignedBigInteger('assinatura_id');
+            $table->foreign('assinatura_id')->references('assinatura_id')->on('assinatura');
 
-            $table->unsignedBigInteger('id_ong');
-            $table->foreign('id_ong')->references('id_ong')->on('ong');
+            $table->unsignedBigInteger('ong_id');
+            $table->foreign('ong_id')->references('ong_id')->on('ong');
         });
     }
 

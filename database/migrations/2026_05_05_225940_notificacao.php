@@ -12,15 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notificacao', function (Blueprint $table) {
-            $table->id('sq_notificacao');
+            $table->id('notificacao_id');
             $table->enum('status_confirmacao', ['lido', 'não lido', 'confirmado', 'desconfirmado']);
             $table->string('mensagem_notificacao', 255);
 
-            $table->unsignedBigInteger('id_agenda');
-            $table->foreign('id_agenda')->references('id_agenda')->on('agenda');
+            $table->unsignedBigInteger('agenda_id');
+            $table->foreign('agenda_id')->references('agenda_id')->on('agenda');
 
-            $table->unsignedBigInteger('id_pessoa');
-            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+            $table->unsignedBigInteger('pessoa_id');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
 
             $table->timestamps();
         });

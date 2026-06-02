@@ -9,11 +9,17 @@ class Causa extends Model
 {
     use HasFactory;
     protected $table = 'causa';
-    protected $primaryKey = 'id_causa';
+    protected $primaryKey = 'causa_id';
     public $timestamps = false;
 
     protected $fillable = [
         'nome_causa',
         'descricao_causa'
     ];
+
+    public function pessoas(): BelongsToMany
+    {
+        return $this->belongsToMany(Pessoa::class);
+    }
+
 }

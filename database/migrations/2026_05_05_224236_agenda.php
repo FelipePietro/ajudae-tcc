@@ -12,25 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('agenda', function (Blueprint $table) {
-            $table->id('id_agenda');
+            $table->id('agenda_id');
             $table->enum('status_ativo', ['ativo', 'finalizado']);
             $table->datetime('data_inicio');
             $table->datetime('data_fim');
             $table->timestamps();
 
-            $table->unsignedBigInteger('id_evento');
-            $table->foreign('id_evento')->references('id_evento')->on('evento');
+            $table->unsignedBigInteger('evento_id');
+            $table->foreign('evento_id')->references('evento_id')->on('evento');
 
         });
 
         Schema::create('p_ag_inscreve', function (Blueprint $table) {
-            $table->id('id_inscricao');
+            $table->id('inscricao_id');
 
-            $table->unsignedBigInteger('id_agenda');
-            $table->foreign('id_agenda')->references('id_agenda')->on('agenda');
+            $table->unsignedBigInteger('agenda_id');
+            $table->foreign('agenda_id')->references('agenda_id')->on('agenda');
 
-            $table->unsignedBigInteger('id_pessoa');
-            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+            $table->unsignedBigInteger('pessoa_id');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
 
             $table->enum('status_inscricao', ['inscrito', 'participando', 'participou', 'não participou']);
             $table->datetime('dt_inscricao');

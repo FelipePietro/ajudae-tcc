@@ -12,19 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('causa', function (Blueprint $table) {
-            $table->id('id_causa');
+            $table->id('causa_id');
             $table->string('nome_causa', 255);
             $table->string('descricao_causa', 255);
         });
 
             Schema::create('causa_pessoa', function (Blueprint $table) {
-            $table->id('id_causa_pessoa');
+            $table->id('causa_pessoa_id');
 
-            $table->unsignedBigInteger('id_causa');
-            $table->foreign('id_causa')->references('id_causa')->on('causa');
+            $table->unsignedBigInteger('causa_id');
+            $table->foreign('causa_id')->references('causa_id')->on('causa');
 
-            $table->unsignedBigInteger('id_pessoa');
-            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+            $table->unsignedBigInteger('pessoa_id');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
         });
     }
 

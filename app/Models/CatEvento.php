@@ -9,10 +9,13 @@ class cat_evento extends Model
 {
     use HasFactory;
     protected $table = 'cat_evento';
-    protected $primaryKey = 'id_categoria';
+    protected $primaryKey = 'cat_evento_id';
     public $timestamps = false;
 
     protected $fillable = [
-        'nome_categoria',
+        'nome_categoria'
     ];
+
+
+    
 }

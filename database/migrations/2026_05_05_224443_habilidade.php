@@ -12,20 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('habilidade', function (Blueprint $table) {
-            $table->id('id_habilidade');
+            $table->id('habilidade_id');
             $table->string('nome_habilidade', 255);
             $table->string('descricao_habilidade', 255);
 
         });
 
         Schema::create('habilidade_pessoa', function (Blueprint $table) {
-            $table->id('id_habilidade_pessoa');
+            $table->id('habilidade_pessoa_id');
 
-            $table->unsignedBigInteger('id_habilidade');
-            $table->foreign('id_habilidade')->references('id_habilidade')->on('habilidade');
+            $table->unsignedBigInteger('habilidade_id');
+            $table->foreign('habilidade_id')->references('habilidade_id')->on('habilidade');
 
-            $table->unsignedBigInteger('id_pessoa');
-            $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa');
+            $table->unsignedBigInteger('pessoa_id');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
 
             $table->integer('nivel_habilidade', );
 
