@@ -16,6 +16,8 @@ class cat_evento extends Model
         'nome_categoria'
     ];
 
-
-    
+    public function eventos()
+    {
+        return $this->hasMany(Evento::class, 'cat_evento_id');
+    }
 }

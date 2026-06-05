@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Habilidade extends Model
 {
@@ -19,6 +20,7 @@ class Habilidade extends Model
 
     public function pessoas(): BelongsToMany
     {
-        return $this->belongsToMany(Pessoa::class);
+        return $this->belongsToMany(Pessoa::class)
+            ->withPivot('nivel_habilidade');
     }
 }

@@ -11,7 +11,7 @@ return new class extends Migration
             $table->id('pessoa_id');
             $table->string('nm_pessoa', 64);
             $table->enum('genero_pessoa', ['masculino', 'feminino', 'outro', 'prefiro não dizer']);
-            $table->char('cpf_pessoa', 11);
+            $table->char('cpf_pessoa', 11) ->unique();
             $table->date('dt_nasc');
             $table->string('email_pessoa', 128);
             $table->char('tele_pessoa', 11);
