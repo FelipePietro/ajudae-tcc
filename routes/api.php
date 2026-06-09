@@ -84,5 +84,20 @@ route::prefix('v1/categorias-evento')->group(function () {
         Route::put('/{id}', [CatEventoController::class, 'update']);
         Route::delete('/{id}', [CatEventoController::class, 'destroy']);
     });
+
+    //--------------------------------AGENDAS--------------------------------//
+Route::prefix('v1/agendas')->group(function () {
+    Route::get('/', [AgendaController::class, 'index']);
+    Route::get('/{id}', [AgendaController::class, 'show']);
+
+    Route::middleware(['auth:sanctum', 'abilities:admin,ong'])->group(function () {
+        Route::post('/', [AgendaController::class, 'store']);
+        Route::put('/{id}', [AgendaController::class, 'update']);
+        Route::delete('/{id}', [AgendaController::class, 'destroy']);
+        
+        // Rotas para alterar status
+        Route::patch('/{id}/ativar', [AgendaController::class, 'ativar']);
+        Route::patch('/{id}/finalizar', [AgendaController::class, 'finalizar']);
+    });
 });
 
