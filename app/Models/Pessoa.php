@@ -20,7 +20,7 @@ class Pessoa extends Authenticatable
     /**
      * Chave primária da tabela.
      */
-    protected $primaryKey = 'id_pessoa';
+    protected $primaryKey = 'pessoa_id';
 
 
     public $timestamps = true;
@@ -61,6 +61,8 @@ class Pessoa extends Authenticatable
     'senha_pessoa',
     'pfp_pessoa_link',
     'rg_pessoa_link',
+    'exclusao_pendente',
+    'deletar_em',
 ];
 
     /**
@@ -77,6 +79,8 @@ class Pessoa extends Authenticatable
     protected $casts = [
         'dt_nasc' => 'date',
         'dt_asc' => 'date',
+        'exclusao_pendente' => 'boolean',
+        'deletar_em' => 'datetime',
     ];
 
     /**
@@ -93,20 +97,42 @@ class Pessoa extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
+    public function habilidades(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Habilidade::class,
+            'habilidade_pessoa',
+            'pessoa_id',
+            'habilidade_id'
+        )->withPivot('nivel_habilidade');
+    }
+
     public function causas(): BelongsToMany
     {
-        return $this->belongsToMany(Causa::class);
+        return $this->belongsToMany(
+            Causa::class,
+            'causa_pessoa',
+            'pessoa_id',
+            'causa_id'
+        );
     }
 
     public function recursos(): BelongsToMany
     {
-        return $this->belongsToMany(Recurso::class)
-            ->withPivot('detalhes_recurso');
+        return $this->belongsToMany(
+            Recurso::class,
+            'pessoa_recurso',
+            'pessoa_id',
+            'recurso_id'
+        )->withPivot('detalhes_recurso');
     }
 
-    public function habilidades(): BelongsToMany
+    public function inscricoes(): HasMany
     {
-        return $this->belongsToMany(Habilidade::class)
-             ->withPivot('nivel_habilidade');
+        return $this->hasMany(
+            Inscricao::class,
+            'pessoa_id',
+            'pessoa_id'
+        );
     }
-}
+    }

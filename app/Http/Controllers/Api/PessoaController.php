@@ -161,4 +161,156 @@ class PessoaController extends Controller
     {
         return response()->json($request->user());
     }
+
+public function update(Request $request, $id)
+{
+    $pessoa = Pessoa::find($id);
+
+    if (!$pessoa) {
+        return response()->json([
+            'message' => 'Pessoa não encontrada.'
+        ], 404);
+    }
+
+    // Impede que uma pessoa altere os dados de outra conta
+    if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
+        return response()->json([
+            'message' => 'Você não tem permissão para alterar esta conta.'
+        ], 403);
+    }
+
+    $validated = $request->validate([
+        'email_pessoa' => [
+            'sometimes',
+            'email',
+            'max:128',
+            Rule::unique('pessoa', 'email_pessoa')
+                ->ignore($pessoa->pessoa_id, 'pessoa_id'),
+        ],
+
+        'tele_pessoa' => [
+            'sometimes',
+            'string',
+            'size:11',
+        ],
+
+        'cep_pessoa' => [
+            'sometimes',
+            'string',
+            'size:8',
+        ],
+
+        'logradouro_pessoa' => [
+            'sometimes',
+            'string',
+            'max:64',
+        ],
+
+        'compl_pessoa' => [
+            'sometimes',
+            'nullable',
+            'string',
+            'max:64',
+        ],
+
+        'cidade_pessoa' => [
+            'sometimes',
+            'string',
+            'max:64',
+        ],
+
+        'bairro_pessoa' => [
+            'sometimes',
+            'string',
+            'max:64',
+        ],
+
+        'uf_pessoa' => [
+            'sometimes',
+            'string',
+            'size:2',
+        ],
+
+        'pfp_pessoa_link' => [
+            'sometimes',
+            'string',
+            'max:255',
+        ],
+
+        'senha_pessoa' => [
+            'sometimes',
+            'string',
+            'min:8',
+            'confirmed',
+        ],
+    ]);
+
+    // Se a senha foi enviada, criptografa antes de salvar
+    if (isset($validated['senha_pessoa'])) {
+        $validated['senha_pessoa'] = Hash::make(
+            $validated['senha_pessoa']
+        );
+    }
+
+    $pessoa->update($validated);
+
+    return response()->json([
+        'message' => 'Pessoa atualizada com sucesso.',
+        'user' => $pessoa->fresh(),
+    ], 200);
+}
+
+    public function destroy(Request $request, $id)
+{
+    $pessoa = Pessoa::find($id);
+
+    if (!$pessoa) {
+        return response()->json([
+            'message' => 'Pessoa não encontrada.'
+        ], 404);
+    }
+
+    if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
+        return response()->json([
+            'message' => 'Você não tem permissão para excluir esta conta.'
+        ], 403);
+    }
+
+    $pessoa->update([
+        'exclusao_pendente' => true,
+        'deletar_em' => now()->addDays(7),
+    ]);
+
+    return response()->json([
+        'message' => 'A exclusão da conta foi agendada para daqui a 7 dias.',
+        'deletar_em' => $pessoa->deletar_em,
+    ], 200);
+}
+
+    public function cancelarExclusao(Request $request, $id)
+{
+    $pessoa = Pessoa::find($id);
+
+    if (!$pessoa) {
+        return response()->json([
+            'message' => 'Pessoa não encontrada.'
+        ], 404);
+    }
+
+    if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
+        return response()->json([
+            'message' => 'Você não tem permissão para alterar esta conta.'
+        ], 403);
+    }
+
+    $pessoa->update([
+        'exclusao_pendente' => false,
+        'deletar_em' => null,
+    ]);
+
+    return response()->json([
+        'message' => 'Exclusão cancelada com sucesso.'
+    ]);
+}
+
 }

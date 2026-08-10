@@ -26,20 +26,20 @@ return new class extends Migration
             $table->id('assinatura_pessoa_id');
 
             $table->unsignedBigInteger('assinatura_id');
-            $table->foreign('assinatura_id')->references('assinatura_id')->on('assinatura');
+            $table->foreign('assinatura_id')->references('assinatura_id')->on('assinatura') ->cascadeOnDelete();
 
             $table->unsignedBigInteger('pessoa_id');
-            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa') ->cascadeOnDelete();
         });
 
         Schema::create('aassinatura_ong', function (Blueprint $table) {
             $table->id('aassinatura_ong_id');
 
             $table->unsignedBigInteger('assinatura_id');
-            $table->foreign('assinatura_id')->references('assinatura_id')->on('assinatura');
+            $table->foreign('assinatura_id')->references('assinatura_id')->on('assinatura') ->cascadeOnDelete();
 
             $table->unsignedBigInteger('ong_id');
-            $table->foreign('ong_id')->references('ong_id')->on('ong');
+            $table->foreign('ong_id')->references('ong_id')->on('ong') ->cascadeOnDelete();
         });
     }
 

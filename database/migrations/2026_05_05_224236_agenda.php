@@ -16,25 +16,42 @@ return new class extends Migration
             $table->enum('status_ativo', ['ativo', 'finalizado']);
             $table->datetime('data_inicio');
             $table->datetime('data_fim');
-            $table->timestamps();
-
             $table->unsignedBigInteger('evento_id');
-            $table->foreign('evento_id')->references('evento_id')->on('evento');
-
+            $table->timestamps();
+        
         });
 
         Schema::create('p_ag_inscreve', function (Blueprint $table) {
             $table->id('inscricao_id');
 
             $table->unsignedBigInteger('agenda_id');
-            $table->foreign('agenda_id')->references('agenda_id')->on('agenda');
+            $table->foreign('agenda_id')
+                ->references('agenda_id')
+                ->on('agenda')
+                ->cascadeOnDelete();
 
             $table->unsignedBigInteger('pessoa_id');
-            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
+            $table->foreign('pessoa_id')
+                ->references('pessoa_id')
+                ->on('pessoa')
+                ->cascadeOnDelete();
 
-            $table->enum('status_inscricao', ['inscrito', 'participando', 'participou', 'não participou']);
+            $table->enum('status_inscricao', [
+                'pendente',
+                'aprovado',
+                'reprovado',
+                'participando',
+                'participou',
+                'não participou'
+            ])->default('pendente');
+
             $table->datetime('dt_inscricao');
-            
+
+            // Impede inscrição duplicada na mesma agenda
+            $table->unique([
+                'agenda_id',
+                'pessoa_id'
+            ]);
         });
     }
 
@@ -42,7 +59,8 @@ return new class extends Migration
      * Reverse the migrations.
      */
     public function down(): void
-    {
-        Schema::dropIfExists('agenda');
-    }
+        {
+            Schema::dropIfExists('p_ag_inscreve');
+            Schema::dropIfExists('agenda');
+        }
 };

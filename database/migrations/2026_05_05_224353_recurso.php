@@ -20,10 +20,11 @@ return new class extends Migration
             $table->id('pessoa_recurso_id');
 
             $table->unsignedBigInteger('recurso_id');
-            $table->foreign('recurso_id')->references('recurso_id')->on('recurso');
+            $table->foreign('recurso_id')->references('recurso_id')->on('recurso') ->cascadeOnDelete();
 
             $table->unsignedBigInteger('pessoa_id');
-            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa') ->cascadeOnDelete();
+        
 
             $table->string('detalhes_recurso', 255);
         });

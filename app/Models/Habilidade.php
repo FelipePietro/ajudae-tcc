@@ -8,19 +8,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Habilidade extends Model
 {
-    use HasFactory;
     protected $table = 'habilidade';
+
     protected $primaryKey = 'habilidade_id';
+
     public $timestamps = false;
 
     protected $fillable = [
         'nome_habilidade',
-        'descricao_habilidade'
+        'descricao_habilidade',
     ];
 
     public function pessoas(): BelongsToMany
     {
-        return $this->belongsToMany(Pessoa::class)
-            ->withPivot('nivel_habilidade');
+        return $this->belongsToMany(
+            Pessoa::class,
+            'habilidade_pessoa',
+            'habilidade_id',
+            'pessoa_id'
+        )->withPivot('nivel_habilidade');
     }
 }

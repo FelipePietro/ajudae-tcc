@@ -4,20 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class cat_evento extends Model
+class CatEvento extends Model
 {
     use HasFactory;
+
     protected $table = 'cat_evento';
+
     protected $primaryKey = 'cat_evento_id';
+
     public $timestamps = false;
 
     protected $fillable = [
-        'nome_categoria'
+        'nome_categoria',
     ];
 
-    public function eventos()
+    public function eventos(): HasMany
     {
-        return $this->hasMany(Evento::class, 'cat_evento_id');
+        return $this->hasMany(
+            Evento::class,
+            'cat_evento_id',
+            'cat_evento_id'
+        );
     }
 }

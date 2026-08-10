@@ -34,6 +34,8 @@ return new class extends Migration
             $table->string('login_ong', 64) ->unique();
             $table->char('senha_ong', 64);
             $table->timestamps();
+            $table->boolean('exclusao_pendente')->default(false);
+            $table->timestamp('deletar_em')->nullable();
         });
     }
 

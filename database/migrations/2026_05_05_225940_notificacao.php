@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('mensagem_notificacao', 255);
 
             $table->unsignedBigInteger('agenda_id');
-            $table->foreign('agenda_id')->references('agenda_id')->on('agenda');
+            $table->foreign('agenda_id')->references('agenda_id')->on('agenda') ->cascadeOnDelete();
 
             $table->unsignedBigInteger('pessoa_id');
-            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa') ->cascadeOnDelete();
 
             $table->timestamps();
         });

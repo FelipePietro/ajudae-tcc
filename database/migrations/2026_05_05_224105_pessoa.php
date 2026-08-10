@@ -32,6 +32,9 @@ return new class extends Migration
             $table->string('pfp_pessoa_link', 255);
             $table->string('rg_pessoa_link', 255);
             $table->timestamps();
+            $table->timestamp('deletar_em')->nullable();
+            $table->boolean('exclusao_pendente')->default(false);
+            
         });
     }
 

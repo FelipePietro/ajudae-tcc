@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Evento extends Model
 {
@@ -18,25 +20,46 @@ class Evento extends Model
         'cidade_evento',
         'bairro_evento',
         'uf_evento',
+
         'nm_evento',
         'descricao_evento',
         'status_evento',
         'imagem_evento_link',
+
+        'ong_id',
+        'pessoa_id',
+        'cat_evento_id',
     ];
 
     protected $casts = [
-        'status_evento' => 'string',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
-    public function ong()
+    public function ong(): BelongsTo
     {
-        return $this->belongsTo(Ong::class, 'ong_id');
+        return $this->belongsTo(
+            Ong::class,
+            'ong_id',
+            'ong_id'
+        );
     }
 
     public function pessoa()
     {
-        return $this->belongsTo(Pessoa::class, 'pessoa_id');
+        return $this->belongsTo(
+            Pessoa::class,
+            'pessoa_id',
+            'pessoa_id'
+        );
+}
+
+    public function categoria(): BelongsTo
+    {
+        return $this->belongsTo(
+            CatEvento::class,
+            'cat_evento_id',
+            'cat_evento_id'
+        );
     }
 }

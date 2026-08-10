@@ -22,13 +22,14 @@ return new class extends Migration
             $table->id('habilidade_pessoa_id');
 
             $table->unsignedBigInteger('habilidade_id');
-            $table->foreign('habilidade_id')->references('habilidade_id')->on('habilidade');
+            $table->foreign('habilidade_id')->references('habilidade_id')->on('habilidade') ->cascadeOnDelete();
 
             $table->unsignedBigInteger('pessoa_id');
-            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa');
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa') ->cascadeOnDelete();
 
             $table->integer('nivel_habilidade', );
 
+            $table ->unique(['habilidade_id', 'pessoa_id']);
         });
     }
 

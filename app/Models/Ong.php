@@ -12,7 +12,7 @@ class Ong extends Model
 
     protected $table = 'ong';
 
-    protected $primaryKey = 'id_ong';
+    protected $primaryKey = 'ong_id';
 
     public $timestamps = false;
 

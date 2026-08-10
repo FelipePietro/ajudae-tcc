@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Agenda extends Model
 {
@@ -16,6 +17,7 @@ class Agenda extends Model
         'status_ativo',
         'data_inicio',
         'data_fim',
+        'evento_id'
     ];
 
     protected $casts = [
@@ -63,5 +65,14 @@ class Agenda extends Model
     public function isFinalizado()
     {
         return $this->status_ativo === 'finalizado';
+    }
+
+    public function inscricoes(): HasMany
+    {
+        return $this->hasMany(
+            Inscricao::class,
+            'agenda_id',
+            'agenda_id'
+        );
     }
 }
