@@ -1,6 +1,6 @@
 <nav class="navbar">
     <a href="/" class="navbar-brand">
-        <span class="brand-aju">Aju</span><span class="brand-dae">daê</span>
+        <span class="brand-aju">Ajud</span><span class="brand-dae">aê</span>
     </a>
 
     <ul class="navbar-links">

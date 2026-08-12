@@ -2,7 +2,7 @@
     <div class="footer-top">
         <div class="footer-brand">
             <a href="/" class="navbar-brand">
-                <span class="brand-aju-white">Aju</span><span class="brand-dae">daê</span>
+                <span class="brand-aju-white">Ajud</span><span class="brand-dae">aê</span>
             </a>
             <p>Plataforma de voluntariado gamificado</p>
         </div>

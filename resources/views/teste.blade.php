@@ -14,6 +14,8 @@
         <div class="grupo-botoes">
             <x-botao-primario href="/cadastro" texto="Começar agora — é grátis" />
             <x-botao-secundario href="/ong" texto="Cadastrar minha ONG" />
+            <x-botao-declined href="/ong" texto="Deletar minha ONG" />
+            <x-botao-dourado href="/ong" texto="Atualizar minha ONG" />
         </div>
 
         <x-input nome="email" tipo="email" placeholder="seuemail@exemplo.com" />

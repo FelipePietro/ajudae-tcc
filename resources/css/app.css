@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Outfit:wght@400;700&display=swap');
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -15,6 +16,8 @@
     padding: 2rem;
     display: flex;
     flex-direction: column;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400; 
     gap: 1.5rem;
 }
 
@@ -29,6 +32,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
     padding: 0 2rem;
     height: 60px;
     background-color: #f5f5f0;
@@ -38,6 +43,7 @@
 .navbar-brand {
     font-weight: 700;
     font-size: 1.2rem;
+    font-family: 'Fraunces', serif;
     text-decoration: none;
 }
 
@@ -100,6 +106,8 @@
 
 /* Footer */
 .footer {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
     background-color: #1a2e23;
     color: #ccc;
     padding: 2rem;
@@ -116,6 +124,7 @@
     font-size: 0.85rem;
     margin-top: 0.3rem;
     color: #aaa;
+    
 }
 
 .footer-links {
@@ -169,6 +178,26 @@
 .btn-secundario:hover {
     background-color: #1a3a2a;
     color: #fff;
+}
+
+.btn-declined {
+    background-color: #C0392B;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.7rem 1.5rem;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.btn-dourado {
+    background-color: #E8920A;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.7rem 1.5rem;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 /* Inputs */
