@@ -28,3 +28,7 @@ Route::get('/candidatura', function () {
         'habilidades_user'   => ['Trabalho em equipe', 'Comunicação', 'Jardinagem'],
     ]);
 });
+
+Route::get('/minhas-candidaturas', function () {
+    return view('minhas-candidaturas');
+});
