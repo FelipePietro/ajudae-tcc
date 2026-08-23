@@ -28,4 +28,14 @@ class Habilidade extends Model
             'pessoa_id'
         )->withPivot('nivel_habilidade');
     }
+
+    public function eventos()
+    {
+        return $this->belongsToMany(
+            Evento::class,
+            'evento_habilidade',
+            'habilidade_id',
+            'evento_id'
+        );
+    }
 }

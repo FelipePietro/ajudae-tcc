@@ -16,9 +16,17 @@ return new class extends Migration
             $table->string('cidade_evento', 64);
             $table->string('bairro_evento', 64);
             $table->char('uf_evento', 2);
+            $table->string('compl_evento', 64)->nullable();
 
             $table->string('nm_evento', 64);
             $table->string('descricao_evento', 256);
+            $table->unsignedInteger('vagas_evento');
+
+            $table->enum('modalidade_evento', [
+                'presencial',
+                'online',
+                'hibrido'
+            ]);
 
             $table->enum('status_evento', [
                 'aguardando a confirmação',

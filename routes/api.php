@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\CatEventoController;
 
 use App\Http\Controllers\Api\AgendaController;
 use App\Http\Controllers\Api\EventoController;
+use App\Http\Controllers\Api\EventoHabilidadeController;
 use App\Http\Controllers\Api\InscricaoController;
 
 use App\Http\Controllers\Api\PessoaHabilidadeController;
@@ -312,6 +313,7 @@ Route::prefix('v1/eventos')->group(function () {
     // Públicas
     Route::get('/', [EventoController::class, 'index']);
     Route::get('/{id}', [EventoController::class, 'show']);
+    Route::get('/eventos/{id}/habilidades', [EventoHabilidadeController::class, 'index']);
 
     // ONG
     Route::middleware([
@@ -322,6 +324,8 @@ Route::prefix('v1/eventos')->group(function () {
         Route::post('/', [EventoController::class, 'store']);
         Route::put('/{id}', [EventoController::class, 'update']);
         Route::delete('/{id}', [EventoController::class, 'destroy']);
+        Route::post('/eventos/{id}/habilidades', [EventoHabilidadeController::class, 'store']);
+        Route::delete('/eventos/{id}/habilidades/{hid}', [EventoHabilidadeController::class, 'destroy']);
     });
 
     // Admin

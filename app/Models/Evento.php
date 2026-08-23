@@ -21,8 +21,12 @@ class Evento extends Model
         'bairro_evento',
         'uf_evento',
 
+        'compl_evento',
+
         'nm_evento',
         'descricao_evento',
+        'vagas_evento',
+        'modalidade_evento',
         'status_evento',
         'imagem_evento_link',
 
@@ -60,6 +64,16 @@ class Evento extends Model
             CatEvento::class,
             'cat_evento_id',
             'cat_evento_id'
+        );
+    }
+
+    public function habilidades()
+    {
+        return $this->belongsToMany(
+            Habilidade::class,
+            'evento_habilidade',
+            'evento_id',
+            'habilidade_id'
         );
     }
 }

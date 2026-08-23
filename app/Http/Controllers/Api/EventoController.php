@@ -48,7 +48,8 @@ class EventoController extends Controller
     {
         $evento = Evento::with([
             'ong',
-            'categoria'
+            'categoria',
+            'habilidades'
         ])->find($id);
 
         if (!$evento) {
@@ -86,6 +87,23 @@ class EventoController extends Controller
                 'required',
                 'integer',
                 'exists:cat_evento,cat_evento_id'
+            ],
+
+            'compl_evento' => [
+                'nullable',
+                'string',
+                'max:64'
+            ],
+
+            'vagas_evento' => [
+                'required',
+                'integer',
+                'min:1'
+            ],
+
+            'modalidade_evento' => [
+                'required',
+                'in:presencial,online,hibrido'
             ],
         ]);
 
@@ -216,6 +234,24 @@ class EventoController extends Controller
                 'sometimes',
                 'integer',
                 'exists:cat_evento,cat_evento_id'
+            ],
+
+            'compl_evento' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:64'
+            ],
+
+            'vagas_evento' => [
+                'sometimes',
+                'integer',
+                'min:1'
+            ],
+
+            'modalidade_evento' => [
+                'sometimes',
+                'in:presencial,online,hibrido'
             ],
         ]);
 
