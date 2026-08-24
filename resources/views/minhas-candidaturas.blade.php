@@ -1,5 +1,5 @@
 @php
-    $limiteVisivel = 3; // quantos cards ficam abertos antes do "ver mais" em cada seção
+    $limiteVisivel = 3;
 
     $candidaturasPendentes = [
         [
@@ -91,11 +91,7 @@
     ];
 
     $candidaturasDesistidas = [];
-
-    // isso depois será substituído por dados reais do usuário logado, mas por enquanto é só para deixar a tela navegável e com conteúdo de exemplo.
-
 @endphp
-
 
 <html lang="pt-BR">
 
@@ -113,26 +109,25 @@
         <a href="/" class="navbar-brand">
             <span class="brand-aju">Ajud</span><span class="brand-dae">aê</span>
         </a>
-        <span class="navbar-centro">&lt; Feed de eventos</span>
+        <span class="navbar-centro hidden sm:block">&lt; Feed de eventos</span>
         <div class="navbar-direita">
             <a href="/perfil" class="avatar">LP</a>
-            {{-- Depois trocar por: {{ substr(Auth::user()->nm_pessoa, 0, 2) }} --}}
-            <span class="navbar-nome">Lucas Pereira</span>
-            {{-- Depois trocar por: {{ Auth::user()->nm_pessoa }} --}}
+            <span class="navbar-nome hidden sm:block">Lucas Pereira</span>
         </div>
     </nav>
 
     {{-- BARRA DE XP --}}
     <div class="barra-xp-wrapper">
-        <span>Nível 3 — Aprendiz</span>
+        <span class="hidden sm:block">Nível 3 — Aprendiz</span>
+        <span class="sm:hidden text-xs">Nv.3</span>
         <div class="barra-xp">
             <div class="barra-xp-preenchida" style="width: 75%"></div>
         </div>
         <span class="barra-xp-valor">450 / 600 XP</span>
     </div>
 
-    {{-- Wrapper geral: layout genérico usado 1x, vira utilitário --}}
-    <div class="max-w-[1100px] mx-auto my-8 px-6 grid grid-cols-[1fr_300px] gap-8">
+    {{-- WRAPPER — responsivo: 1 coluna mobile, 2 colunas desktop --}}
+    <div class="mc-layout max-w-[1100px] mx-auto my-6 px-4 flex flex-col gap-6 lg:grid lg:grid-cols-[1fr_300px] lg:gap-8 lg:my-8 lg:px-6">
 
         {{-- COLUNA PRINCIPAL --}}
         <div>
@@ -140,8 +135,8 @@
             <h1 class="text-xl font-bold text-verde-900 m-0 mb-1">Minhas candidaturas</h1>
             <p class="text-[0.85rem] text-gray-400 m-0 mb-6">Acompanhe o status de todas as suas candidaturas</p>
 
-            {{-- CARDS DE RESUMO --}}
-            <div class="grid grid-cols-4 gap-4 mb-6">
+            {{-- RESUMO — 2 colunas mobile, 4 desktop --}}
+            <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
                 <div class="resumo-card">
                     <span class="resumo-numero">{{ count($candidaturasPendentes) }}</span>
                     <span class="resumo-label">Pendentes</span>
@@ -160,16 +155,18 @@
                 </div>
             </div>
 
-            {{-- ABAS --}}
-            <div class="flex gap-0 border-b-2 border-gray-200 mb-5" data-mc-tabs>
-                <button type="button" class="aba ativa" data-aba="pendente">Pendente ({{ count($candidaturasPendentes) }})</button>
-                <button type="button" class="aba" data-aba="aprovado">Aprovado ({{ count($candidaturasAprovadas) }})</button>
-                <button type="button" class="aba" data-aba="recusado">Recusado ({{ count($candidaturasRecusadas) }})</button>
-                <button type="button" class="aba" data-aba="desistencias">Desistências ({{ count($candidaturasDesistidas) }})</button>
+            {{-- ABAS — scroll horizontal em mobile --}}
+            <div class="mc-tabs-scroll overflow-x-auto">
+                <div class="flex gap-0 border-b-2 border-gray-200 mb-5 min-w-max sm:min-w-0" data-mc-tabs>
+                    <button type="button" class="aba ativa" data-aba="pendente">Pendente ({{ count($candidaturasPendentes) }})</button>
+                    <button type="button" class="aba" data-aba="aprovado">Aprovado ({{ count($candidaturasAprovadas) }})</button>
+                    <button type="button" class="aba" data-aba="recusado">Recusado ({{ count($candidaturasRecusadas) }})</button>
+                    <button type="button" class="aba" data-aba="desistencias">Desistências ({{ count($candidaturasDesistidas) }})</button>
+                </div>
             </div>
 
             {{-- SEÇÃO PENDENTES --}}
-            <section data-secao="pendente">
+            <section data-secao="pendente" class="mc-secao">
                 <p class="mc-secao-label">Candidaturas pendentes ({{ count($candidaturasPendentes) }})</p>
 
                 @foreach (array_slice($candidaturasPendentes, 0, $limiteVisivel) as $c)
@@ -202,7 +199,6 @@
                             />
                         @endforeach
                     </div>
-
                     <div class="text-center my-2 mb-4">
                         <button type="button" class="btn-secundario btn-sm" data-toggle-extra
                             data-label-mais="Ver todas as {{ count($candidaturasPendentes) }} pendentes →"
@@ -214,7 +210,7 @@
             </section>
 
             {{-- SEÇÃO APROVADOS --}}
-            <section data-secao="aprovado" class="hidden">
+            <section data-secao="aprovado" class="mc-secao hidden">
                 <p class="mc-secao-label">Candidaturas aprovadas ({{ count($candidaturasAprovadas) }})</p>
 
                 @foreach (array_slice($candidaturasAprovadas, 0, $limiteVisivel) as $c)
@@ -247,7 +243,6 @@
                             />
                         @endforeach
                     </div>
-
                     <div class="text-center my-2 mb-4">
                         <button type="button" class="btn-secundario btn-sm" data-toggle-extra
                             data-label-mais="Ver todas as {{ count($candidaturasAprovadas) }} aprovadas →"
@@ -259,7 +254,7 @@
             </section>
 
             {{-- SEÇÃO RECUSADOS --}}
-            <section data-secao="recusado" class="hidden">
+            <section data-secao="recusado" class="mc-secao hidden">
                 <p class="mc-secao-label">Candidaturas recusadas ({{ count($candidaturasRecusadas) }})</p>
 
                 @foreach (array_slice($candidaturasRecusadas, 0, $limiteVisivel) as $c)
@@ -275,52 +270,22 @@
                         :dataRodape="$c['dataRodape']"
                     />
                 @endforeach
-
-                @if (count($candidaturasRecusadas) > $limiteVisivel)
-                    <div data-extra class="hidden">
-                        @foreach (array_slice($candidaturasRecusadas, $limiteVisivel) as $c)
-                            <x-candidatura-card
-                                :icone="$c['icone']"
-                                :titulo="$c['titulo']"
-                                :organizacao="$c['organizacao']"
-                                status="recusado"
-                                :tags="$c['tags']"
-                                :motivoRecusa="$c['motivoRecusa']"
-                                :idEvento="$c['idEvento']"
-                                :idsEventosSimilares="$c['idsEventosSimilares']"
-                                :dataRodape="$c['dataRodape']"
-                            />
-                        @endforeach
-                    </div>
-
-                    <div class="text-center my-2 mb-4">
-                        <button type="button" class="btn-secundario btn-sm" data-toggle-extra
-                            data-label-mais="Ver todas as {{ count($candidaturasRecusadas) }} recusadas →"
-                            data-label-menos="Ver menos ↑">
-                            Ver todas as {{ count($candidaturasRecusadas) }} recusadas →
-                        </button>
-                    </div>
-                @endif
             </section>
 
             {{-- SEÇÃO DESISTÊNCIAS --}}
-            <section data-secao="desistencias" class="hidden">
+            <section data-secao="desistencias" class="mc-secao hidden">
                 <p class="mc-secao-label">Desistências ({{ count($candidaturasDesistidas) }})</p>
 
                 @if (count($candidaturasDesistidas) === 0)
                     <div class="text-center text-sm text-gray-400 py-10 border border-dashed border-gray-200 rounded-xl">
                         Você ainda não desistiu de nenhuma candidatura.
                     </div>
-                @else
-                    @foreach (array_slice($candidaturasDesistidas, 0, $limiteVisivel) as $c)
-                        {{-- mesmo padrão das outras seções quando houver dados --}}
-                    @endforeach
                 @endif
             </section>
 
         </div>
 
-        {{-- SIDEBAR --}}
+        {{-- SIDEBAR — aparece abaixo em mobile, à direita em desktop --}}
         <aside>
 
             <div class="sidebar-card">
@@ -374,7 +339,7 @@
                         </div>
                     </li>
                     <li class="atividade-item">
-                        <span class="atividade-dot badge"></span>
+                        <span class="atividade-dot xp"></span>
                         <div>
                             <p>Badge 🌱 conquistado — Plantador de Sementes</p>
                             <span>10 abr</span>
@@ -400,7 +365,7 @@
     <script>
         (function () {
             const tabsWrapper = document.querySelector('[data-mc-tabs]');
-            if (!tabsWrapper) return; // essa tela não está na página, não faz nada
+            if (!tabsWrapper) return;
 
             const abas = tabsWrapper.querySelectorAll('[data-aba]');
             const secoes = document.querySelectorAll('[data-secao]');
