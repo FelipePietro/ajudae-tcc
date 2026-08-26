@@ -126,239 +126,237 @@
         <span class="barra-xp-valor">450 / 600 XP</span>
     </div>
 
-    {{-- WRAPPER — responsivo: 1 coluna mobile, 2 colunas desktop --}}
-    <div class="mc-layout max-w-[1100px] mx-auto my-6 px-4 flex flex-col gap-6 lg:grid lg:grid-cols-[1fr_300px] lg:gap-8 lg:my-8 lg:px-6">
+    {{-- MAIN — flex:1 garante que o footer fique no fundo --}}
+    <main>
+        <div class="max-w-[1100px] w-full mx-auto py-8 px-6 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px]">
 
-        {{-- COLUNA PRINCIPAL --}}
-        <div>
+            {{-- COLUNA PRINCIPAL --}}
+            <div>
+                <h1 class="text-xl font-bold text-verde-900 m-0 mb-1">Minhas candidaturas</h1>
+                <p class="text-[0.85rem] text-gray-400 m-0 mb-6">Acompanhe o status de todas as suas candidaturas</p>
 
-            <h1 class="text-xl font-bold text-verde-900 m-0 mb-1">Minhas candidaturas</h1>
-            <p class="text-[0.85rem] text-gray-400 m-0 mb-6">Acompanhe o status de todas as suas candidaturas</p>
+                {{-- RESUMO --}}
+                <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
+                    <div class="resumo-card">
+                        <span class="resumo-numero">{{ count($candidaturasPendentes) }}</span>
+                        <span class="resumo-label">Pendentes</span>
+                    </div>
+                    <div class="resumo-card">
+                        <span class="resumo-numero">{{ count($candidaturasAprovadas) }}</span>
+                        <span class="resumo-label">Aprovados</span>
+                    </div>
+                    <div class="resumo-card">
+                        <span class="resumo-numero recusado">{{ count($candidaturasRecusadas) }}</span>
+                        <span class="resumo-label">Recusados</span>
+                    </div>
+                    <div class="resumo-card">
+                        <span class="resumo-numero">{{ count($candidaturasDesistidas) }}</span>
+                        <span class="resumo-label">Desistências</span>
+                    </div>
+                </div>
 
-            {{-- RESUMO — 2 colunas mobile, 4 desktop --}}
-            <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
-                <div class="resumo-card">
-                    <span class="resumo-numero">{{ count($candidaturasPendentes) }}</span>
-                    <span class="resumo-label">Pendentes</span>
+                {{-- ABAS --}}
+                <div class="overflow-x-auto">
+                    <div class="flex gap-0 border-b-2 border-gray-200 mb-5 min-w-max sm:min-w-0" data-mc-tabs>
+                        <button type="button" class="aba ativa" data-aba="pendente">Pendente ({{ count($candidaturasPendentes) }})</button>
+                        <button type="button" class="aba" data-aba="aprovado">Aprovado ({{ count($candidaturasAprovadas) }})</button>
+                        <button type="button" class="aba" data-aba="recusado">Recusado ({{ count($candidaturasRecusadas) }})</button>
+                        <button type="button" class="aba" data-aba="desistencias">Desistências ({{ count($candidaturasDesistidas) }})</button>
+                    </div>
                 </div>
-                <div class="resumo-card">
-                    <span class="resumo-numero">{{ count($candidaturasAprovadas) }}</span>
-                    <span class="resumo-label">Aprovados</span>
-                </div>
-                <div class="resumo-card">
-                    <span class="resumo-numero recusado">{{ count($candidaturasRecusadas) }}</span>
-                    <span class="resumo-label">Recusados</span>
-                </div>
-                <div class="resumo-card">
-                    <span class="resumo-numero">{{ count($candidaturasDesistidas) }}</span>
-                    <span class="resumo-label">Desistências</span>
-                </div>
+
+                {{-- SEÇÃO PENDENTES --}}
+                <section data-secao="pendente">
+                    <p class="mc-secao-label">Candidaturas pendentes ({{ count($candidaturasPendentes) }})</p>
+
+                    @foreach (array_slice($candidaturasPendentes, 0, $limiteVisivel) as $c)
+                        <x-candidatura-card
+                            :icone="$c['icone']"
+                            :titulo="$c['titulo']"
+                            :organizacao="$c['organizacao']"
+                            status="pendente"
+                            :tags="$c['tags']"
+                            :mensagem="$c['mensagem']"
+                            :idEvento="$c['idEvento']"
+                            :idCandidatura="$c['idCandidatura']"
+                            :dataRodape="$c['dataRodape']"
+                        />
+                    @endforeach
+
+                    @if (count($candidaturasPendentes) > $limiteVisivel)
+                        <div data-extra class="hidden">
+                            @foreach (array_slice($candidaturasPendentes, $limiteVisivel) as $c)
+                                <x-candidatura-card
+                                    :icone="$c['icone']"
+                                    :titulo="$c['titulo']"
+                                    :organizacao="$c['organizacao']"
+                                    status="pendente"
+                                    :tags="$c['tags']"
+                                    :mensagem="$c['mensagem']"
+                                    :idEvento="$c['idEvento']"
+                                    :idCandidatura="$c['idCandidatura']"
+                                    :dataRodape="$c['dataRodape']"
+                                />
+                            @endforeach
+                        </div>
+                        <div class="text-center my-2 mb-4">
+                            <button type="button" class="btn-secundario btn-sm" data-toggle-extra
+                                data-label-mais="Ver todas as {{ count($candidaturasPendentes) }} pendentes →"
+                                data-label-menos="Ver menos ↑">
+                                Ver todas as {{ count($candidaturasPendentes) }} pendentes →
+                            </button>
+                        </div>
+                    @endif
+                </section>
+
+                {{-- SEÇÃO APROVADOS --}}
+                <section data-secao="aprovado" class="hidden">
+                    <p class="mc-secao-label">Candidaturas aprovadas ({{ count($candidaturasAprovadas) }})</p>
+
+                    @foreach (array_slice($candidaturasAprovadas, 0, $limiteVisivel) as $c)
+                        <x-candidatura-card
+                            :icone="$c['icone']"
+                            :titulo="$c['titulo']"
+                            :organizacao="$c['organizacao']"
+                            status="aprovado"
+                            :tags="$c['tags']"
+                            :xp="$c['xp']"
+                            :idEvento="$c['idEvento']"
+                            :termoUrl="$c['termoUrl']"
+                            :dataRodape="$c['dataRodape']"
+                        />
+                    @endforeach
+
+                    @if (count($candidaturasAprovadas) > $limiteVisivel)
+                        <div data-extra class="hidden">
+                            @foreach (array_slice($candidaturasAprovadas, $limiteVisivel) as $c)
+                                <x-candidatura-card
+                                    :icone="$c['icone']"
+                                    :titulo="$c['titulo']"
+                                    :organizacao="$c['organizacao']"
+                                    status="aprovado"
+                                    :tags="$c['tags']"
+                                    :xp="$c['xp']"
+                                    :idEvento="$c['idEvento']"
+                                    :termoUrl="$c['termoUrl']"
+                                    :dataRodape="$c['dataRodape']"
+                                />
+                            @endforeach
+                        </div>
+                        <div class="text-center my-2 mb-4">
+                            <button type="button" class="btn-secundario btn-sm" data-toggle-extra
+                                data-label-mais="Ver todas as {{ count($candidaturasAprovadas) }} aprovadas →"
+                                data-label-menos="Ver menos ↑">
+                                Ver todas as {{ count($candidaturasAprovadas) }} aprovadas →
+                            </button>
+                        </div>
+                    @endif
+                </section>
+
+                {{-- SEÇÃO RECUSADOS --}}
+                <section data-secao="recusado" class="hidden">
+                    <p class="mc-secao-label">Candidaturas recusadas ({{ count($candidaturasRecusadas) }})</p>
+
+                    @foreach (array_slice($candidaturasRecusadas, 0, $limiteVisivel) as $c)
+                        <x-candidatura-card
+                            :icone="$c['icone']"
+                            :titulo="$c['titulo']"
+                            :organizacao="$c['organizacao']"
+                            status="recusado"
+                            :tags="$c['tags']"
+                            :motivoRecusa="$c['motivoRecusa']"
+                            :idEvento="$c['idEvento']"
+                            :idsEventosSimilares="$c['idsEventosSimilares']"
+                            :dataRodape="$c['dataRodape']"
+                        />
+                    @endforeach
+                </section>
+
+                {{-- SEÇÃO DESISTÊNCIAS --}}
+                <section data-secao="desistencias" class="hidden">
+                    <p class="mc-secao-label">Desistências ({{ count($candidaturasDesistidas) }})</p>
+
+                    @if (count($candidaturasDesistidas) === 0)
+                        <div class="text-center text-sm text-gray-400 py-10 border border-dashed border-gray-200 rounded-xl">
+                            Você ainda não desistiu de nenhuma candidatura.
+                        </div>
+                    @endif
+                </section>
             </div>
 
-            {{-- ABAS — scroll horizontal em mobile --}}
-            <div class="mc-tabs-scroll overflow-x-auto">
-                <div class="flex gap-0 border-b-2 border-gray-200 mb-5 min-w-max sm:min-w-0" data-mc-tabs>
-                    <button type="button" class="aba ativa" data-aba="pendente">Pendente ({{ count($candidaturasPendentes) }})</button>
-                    <button type="button" class="aba" data-aba="aprovado">Aprovado ({{ count($candidaturasAprovadas) }})</button>
-                    <button type="button" class="aba" data-aba="recusado">Recusado ({{ count($candidaturasRecusadas) }})</button>
-                    <button type="button" class="aba" data-aba="desistencias">Desistências ({{ count($candidaturasDesistidas) }})</button>
+            {{-- SIDEBAR --}}
+            <aside>
+                <div class="sidebar-card">
+                    <p class="sidebar-titulo">Seu progresso</p>
+                    <div class="sidebar-nivel">
+                        <span><strong>Nível 3 — Aprendiz</strong></span>
+                        <span class="sidebar-xp">450 XP</span>
+                    </div>
+                    <div class="sidebar-barra">
+                        <div class="sidebar-barra-fill" style="width: 75%"></div>
+                    </div>
+                    <div class="sidebar-barra-labels">
+                        <span>0 XP</span>
+                        <span>150 XP para Nível 4</span>
+                        <span>600 XP</span>
+                    </div>
+                    <div class="sidebar-stats">
+                        <div class="sidebar-stat">
+                            <span class="sidebar-stat-numero">8</span>
+                            <span class="sidebar-stat-label">Eventos</span>
+                        </div>
+                        <div class="sidebar-stat dourado">
+                            <span class="sidebar-stat-numero">3</span>
+                            <span class="sidebar-stat-label">Badges</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {{-- SEÇÃO PENDENTES --}}
-            <section data-secao="pendente" class="mc-secao">
-                <p class="mc-secao-label">Candidaturas pendentes ({{ count($candidaturasPendentes) }})</p>
-
-                @foreach (array_slice($candidaturasPendentes, 0, $limiteVisivel) as $c)
-                    <x-candidatura-card
-                        :icone="$c['icone']"
-                        :titulo="$c['titulo']"
-                        :organizacao="$c['organizacao']"
-                        status="pendente"
-                        :tags="$c['tags']"
-                        :mensagem="$c['mensagem']"
-                        :idEvento="$c['idEvento']"
-                        :idCandidatura="$c['idCandidatura']"
-                        :dataRodape="$c['dataRodape']"
-                    />
-                @endforeach
-
-                @if (count($candidaturasPendentes) > $limiteVisivel)
-                    <div data-extra class="hidden">
-                        @foreach (array_slice($candidaturasPendentes, $limiteVisivel) as $c)
-                            <x-candidatura-card
-                                :icone="$c['icone']"
-                                :titulo="$c['titulo']"
-                                :organizacao="$c['organizacao']"
-                                status="pendente"
-                                :tags="$c['tags']"
-                                :mensagem="$c['mensagem']"
-                                :idEvento="$c['idEvento']"
-                                :idCandidatura="$c['idCandidatura']"
-                                :dataRodape="$c['dataRodape']"
-                            />
-                        @endforeach
-                    </div>
-                    <div class="text-center my-2 mb-4">
-                        <button type="button" class="btn-secundario btn-sm" data-toggle-extra
-                            data-label-mais="Ver todas as {{ count($candidaturasPendentes) }} pendentes →"
-                            data-label-menos="Ver menos ↑">
-                            Ver todas as {{ count($candidaturasPendentes) }} pendentes →
-                        </button>
-                    </div>
-                @endif
-            </section>
-
-            {{-- SEÇÃO APROVADOS --}}
-            <section data-secao="aprovado" class="mc-secao hidden">
-                <p class="mc-secao-label">Candidaturas aprovadas ({{ count($candidaturasAprovadas) }})</p>
-
-                @foreach (array_slice($candidaturasAprovadas, 0, $limiteVisivel) as $c)
-                    <x-candidatura-card
-                        :icone="$c['icone']"
-                        :titulo="$c['titulo']"
-                        :organizacao="$c['organizacao']"
-                        status="aprovado"
-                        :tags="$c['tags']"
-                        :xp="$c['xp']"
-                        :idEvento="$c['idEvento']"
-                        :termoUrl="$c['termoUrl']"
-                        :dataRodape="$c['dataRodape']"
-                    />
-                @endforeach
-
-                @if (count($candidaturasAprovadas) > $limiteVisivel)
-                    <div data-extra class="hidden">
-                        @foreach (array_slice($candidaturasAprovadas, $limiteVisivel) as $c)
-                            <x-candidatura-card
-                                :icone="$c['icone']"
-                                :titulo="$c['titulo']"
-                                :organizacao="$c['organizacao']"
-                                status="aprovado"
-                                :tags="$c['tags']"
-                                :xp="$c['xp']"
-                                :idEvento="$c['idEvento']"
-                                :termoUrl="$c['termoUrl']"
-                                :dataRodape="$c['dataRodape']"
-                            />
-                        @endforeach
-                    </div>
-                    <div class="text-center my-2 mb-4">
-                        <button type="button" class="btn-secundario btn-sm" data-toggle-extra
-                            data-label-mais="Ver todas as {{ count($candidaturasAprovadas) }} aprovadas →"
-                            data-label-menos="Ver menos ↑">
-                            Ver todas as {{ count($candidaturasAprovadas) }} aprovadas →
-                        </button>
-                    </div>
-                @endif
-            </section>
-
-            {{-- SEÇÃO RECUSADOS --}}
-            <section data-secao="recusado" class="mc-secao hidden">
-                <p class="mc-secao-label">Candidaturas recusadas ({{ count($candidaturasRecusadas) }})</p>
-
-                @foreach (array_slice($candidaturasRecusadas, 0, $limiteVisivel) as $c)
-                    <x-candidatura-card
-                        :icone="$c['icone']"
-                        :titulo="$c['titulo']"
-                        :organizacao="$c['organizacao']"
-                        status="recusado"
-                        :tags="$c['tags']"
-                        :motivoRecusa="$c['motivoRecusa']"
-                        :idEvento="$c['idEvento']"
-                        :idsEventosSimilares="$c['idsEventosSimilares']"
-                        :dataRodape="$c['dataRodape']"
-                    />
-                @endforeach
-            </section>
-
-            {{-- SEÇÃO DESISTÊNCIAS --}}
-            <section data-secao="desistencias" class="mc-secao hidden">
-                <p class="mc-secao-label">Desistências ({{ count($candidaturasDesistidas) }})</p>
-
-                @if (count($candidaturasDesistidas) === 0)
-                    <div class="text-center text-sm text-gray-400 py-10 border border-dashed border-gray-200 rounded-xl">
-                        Você ainda não desistiu de nenhuma candidatura.
-                    </div>
-                @endif
-            </section>
+                <div class="sidebar-card">
+                    <p class="sidebar-titulo">Atividade recente</p>
+                    <ul class="atividade-lista">
+                        <li class="atividade-item">
+                            <span class="atividade-dot pendente"></span>
+                            <div>
+                                <p>Candidatura enviada — Limpeza de Parques</p>
+                                <span>28 abr</span>
+                            </div>
+                        </li>
+                        <li class="atividade-item">
+                            <span class="atividade-dot pendente"></span>
+                            <div>
+                                <p>Candidatura enviada — Aulas de Reforço</p>
+                                <span>27 abr</span>
+                            </div>
+                        </li>
+                        <li class="atividade-item">
+                            <span class="atividade-dot xp"></span>
+                            <div>
+                                <p>+150 XP — Campanha de Vacinação</p>
+                                <span>10 abr</span>
+                            </div>
+                        </li>
+                        <li class="atividade-item">
+                            <span class="atividade-dot xp"></span>
+                            <div>
+                                <p>Badge 🌱 conquistado — Plantador de Sementes</p>
+                                <span>10 abr</span>
+                            </div>
+                        </li>
+                        <li class="atividade-item">
+                            <span class="atividade-dot recusado"></span>
+                            <div>
+                                <p>Candidatura recusada — Mutirão de Pintura</p>
+                                <span>30 mar</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="/feed" class="btn-primario btn-block">🌐 Buscar novos eventos</a>
+                </div>
+            </aside>
 
         </div>
-
-        {{-- SIDEBAR — aparece abaixo em mobile, à direita em desktop --}}
-        <aside>
-
-            <div class="sidebar-card">
-                <p class="sidebar-titulo">Seu progresso</p>
-                <div class="sidebar-nivel">
-                    <span><strong>Nível 3 — Aprendiz</strong></span>
-                    <span class="sidebar-xp">450 XP</span>
-                </div>
-                <div class="sidebar-barra">
-                    <div class="sidebar-barra-fill" style="width: 75%"></div>
-                </div>
-                <div class="sidebar-barra-labels">
-                    <span>0 XP</span>
-                    <span>150 XP para Nível 4</span>
-                    <span>600 XP</span>
-                </div>
-                <div class="sidebar-stats">
-                    <div class="sidebar-stat">
-                        <span class="sidebar-stat-numero">8</span>
-                        <span class="sidebar-stat-label">Eventos</span>
-                    </div>
-                    <div class="sidebar-stat dourado">
-                        <span class="sidebar-stat-numero">3</span>
-                        <span class="sidebar-stat-label">Badges</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="sidebar-card">
-                <p class="sidebar-titulo">Atividade recente</p>
-                <ul class="atividade-lista">
-                    <li class="atividade-item">
-                        <span class="atividade-dot pendente"></span>
-                        <div>
-                            <p>Candidatura enviada — Limpeza de Parques</p>
-                            <span>28 abr</span>
-                        </div>
-                    </li>
-                    <li class="atividade-item">
-                        <span class="atividade-dot pendente"></span>
-                        <div>
-                            <p>Candidatura enviada — Aulas de Reforço</p>
-                            <span>27 abr</span>
-                        </div>
-                    </li>
-                    <li class="atividade-item">
-                        <span class="atividade-dot xp"></span>
-                        <div>
-                            <p>+150 XP — Campanha de Vacinação</p>
-                            <span>10 abr</span>
-                        </div>
-                    </li>
-                    <li class="atividade-item">
-                        <span class="atividade-dot xp"></span>
-                        <div>
-                            <p>Badge 🌱 conquistado — Plantador de Sementes</p>
-                            <span>10 abr</span>
-                        </div>
-                    </li>
-                    <li class="atividade-item">
-                        <span class="atividade-dot recusado"></span>
-                        <div>
-                            <p>Candidatura recusada — Mutirão de Pintura</p>
-                            <span>30 mar</span>
-                        </div>
-                    </li>
-                </ul>
-                <a href="/feed" class="btn-primario btn-block">🌐 Buscar novos eventos</a>
-            </div>
-
-        </aside>
-
-    </div>
+    </main>
 
     <x-footer />
 

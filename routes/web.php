@@ -32,3 +32,7 @@ Route::get('/candidatura', function () {
 Route::get('/minhas-candidaturas', function () {
     return view('minhas-candidaturas');
 });
+
+Route::post('/candidatura/confirmar', function () {
+    return redirect('/minhas-candidaturas');
+});

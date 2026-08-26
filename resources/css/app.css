@@ -39,33 +39,22 @@
    e o footer fique sempre colado no fundo.
    ===================================================== */
 html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: 'Outfit', sans-serif;
-    background-color: #f5f5f0;
-    color: #1a3a2a;
+    @apply min-h-screen m-0 p-0;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
 }
 
-/* Faz o conteúdo crescer e empurrar o footer para baixo */
-body > *:not(.footer) {
-    flex-shrink: 0;
+body > .navbar,
+body > .barra-xp-wrapper {
+    @apply shrink-0;
 }
 
-/* O wrapper principal cresce para ocupar o espaço restante */
-body > div:not(.footer) {
-    flex: 1 0 auto;
+body > div:not(.navbar):not(.barra-xp-wrapper):not(.footer) {
+    @apply flex-1;
 }
 
 .footer {
-    @apply bg-verde-950 text-gray-300 p-8;
-    flex-shrink: 0;
+    @apply bg-verde-950 text-gray-300 p-8 w-full mt-auto;
 }
 
 /* =====================================================
