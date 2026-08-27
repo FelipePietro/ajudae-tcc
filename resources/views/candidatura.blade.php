@@ -14,7 +14,7 @@
             <span class="brand-aju">Ajud</span><span class="brand-dae">aê</span>
         </a>
         <ul class="navbar-links">
-            <li><a href="/evento/{{ $id_evento }}">&lt; Voltar ao evento</a></li>
+            <li><a href="/eventos/{{ $id_evento }}">&lt; Voltar ao evento</a></li>
         </ul>
     </nav>
 
@@ -106,7 +106,7 @@
                 </div>
 
                 <div class="botoes-candidatura">
-                    <a href="/evento/{{ $id_evento }}" class="btn-cancelar">Cancelar</a>
+                    <a href="/eventos/{{ $id_evento }}" class="btn-cancelar">Cancelar</a>
                     <button type="submit" class="btn-primario">✅ Confirmar candidatura</button>
                 </div>
             </form>

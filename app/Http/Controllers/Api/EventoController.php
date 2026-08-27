@@ -49,7 +49,7 @@ class EventoController extends Controller
         $evento = Evento::with([
             'ong',
             'categoria',
-            'habilidades'
+            'habilidades'43
         ])->find($id);
 
         if (!$evento) {
