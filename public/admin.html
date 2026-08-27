@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel admin — Ajudaê</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body, h1, h2, h3, p, dl, dt, dd, ul { margin: 0; }
+        button { font-family: inherit; }
+        .ong-body { margin: 0; min-height: 100vh; background: #f4f1ea; font-family: 'Outfit', sans-serif; color: #1a2e23; }
+        .ong-shell { display: flex; min-height: 100vh; }
+        .ong-sidebar { width: 250px; flex-shrink: 0; background: #163528; color: #e8efe9; padding: 1.25rem 1rem 1rem; display: flex; flex-direction: column; }
+        .ong-sidebar-brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: #f6efe0; margin-bottom: 1rem; }
+        .ong-sidebar-logo { width: 28px; height: 28px; display: grid; place-items: center; }
+        .ong-sidebar-logo svg { width: 24px; height: 24px; }
+        .ong-sidebar-nome { font-family: 'Fraunces', serif; font-size: 1.45rem; font-weight: 700; }
+        .ong-sidebar-org { display: block; width: 100%; border: 0; background: #e6c56a; color: #163528; border-radius: 999px; padding: .55rem .8rem; font-weight: 600; font-size: .9rem; margin-bottom: 1.1rem; text-align: center; }
+        .ong-sidebar-label { margin: .7rem .4rem .35rem; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: #9bb3a3; }
+        .ong-sidebar-nav { display: flex; flex-direction: column; gap: .2rem; }
+        .ong-sidebar-link { display: flex; align-items: center; gap: .55rem; color: #d7e4dc; text-decoration: none; padding: .55rem .7rem; border-radius: 10px; font-size: .92rem; }
+        .ong-sidebar-link.is-active { background: #2c5844; color: #fff; font-weight: 600; position: relative; }
+        .ong-sidebar-link.is-active::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 2px; background: #fff; }
+        .ong-sidebar-ico { width: 1.1rem; text-align: center; }
+        .ong-badge { margin-left: auto; background: #e6a04a; color: #fff; border-radius: 999px; min-width: 1.25rem; height: 1.25rem; display: grid; place-items: center; font-size: .7rem; font-weight: 700; padding: 0 .3rem; }
+        .ong-sidebar-user { margin-top: auto; display: flex; align-items: center; gap: .7rem; padding: .85rem .4rem .2rem; border-top: 1px solid #2c5844; }
+        .ong-sidebar-user strong, .ong-sidebar-user small { display: block; }
+        .ong-sidebar-user strong { font-size: .88rem; }
+        .ong-sidebar-user small { color: #9bb3a3; font-size: .75rem; }
+        .ong-avatar { width: 36px; height: 36px; border-radius: 50%; background: #2f6a49; display: grid; place-items: center; font-size: .75rem; font-weight: 700; }
+        .ong-main { flex: 1; min-width: 0; padding: 1.4rem 1.8rem 2rem; }
+
+        .admin-topo { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .8rem; margin-bottom: 1rem; }
+        .cand-breadcrumb { color: #6b7c72; font-size: .85rem; }
+        .cand-breadcrumb span { margin: 0 .35rem; }
+        .admin-topo-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .85rem; color: #6b7c72; }
+        .admin-alerta { background: #fdeeee; color: #8a2b24; border-radius: 12px; padding: .8rem 1rem; font-size: .88rem; margin-bottom: 1rem; }
+        .admin-stats { display: grid; grid-template-columns: 1fr; gap: .75rem; margin-bottom: 1.2rem; }
+        .admin-stat { border-radius: 16px; padding: 1rem; }
+        .admin-stat strong { display: block; font-family: 'Fraunces', serif; font-size: 1.8rem; line-height: 1; }
+        .admin-stat p { margin-top: .45rem; font-size: .88rem; font-weight: 600; }
+        .admin-stat small { display: block; margin-top: .25rem; font-size: .75rem; color: #6b7c72; }
+        .admin-stat-laranja { background: #f6ead8; }
+        .admin-stat-laranja strong { color: #b86a12; }
+        .admin-stat-azul { background: #e8f0fa; }
+        .admin-stat-azul strong { color: #2a5f9e; }
+        .admin-stat-amarelo { background: #f8f1d8; }
+        .admin-stat-amarelo strong { color: #c08a14; }
+        .admin-stat-vermelho { background: #fdeceb; }
+        .admin-stat-vermelho strong { color: #c0392b; }
+        .admin-stat-claro { background: #fff; }
+        .admin-stat-claro strong { color: #163528; }
+
+        .admin-corpo { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .admin-tabs { display: flex; gap: 1.2rem; overflow-x: auto; margin-bottom: 1rem; border-bottom: 1px solid #e4ddd0; }
+        .admin-tabs span { flex-shrink: 0; padding: .7rem 0; color: #6b7c72; font-size: .92rem; }
+        .admin-tabs .is-active { color: #163528; font-weight: 700; border-bottom: 2px solid #2f6a49; }
+        .admin-tabs small { color: #8a9790; font-weight: 500; }
+
+        .admin-card { background: #fff; border: 1px solid #e6e1d6; border-radius: 16px; padding: 1rem; margin-bottom: .75rem; }
+        .admin-card-topo { display: flex; flex-direction: column; gap: .7rem; margin-bottom: .75rem; }
+        .admin-card-topo h2 { font-size: 1.05rem; }
+        .admin-card-links { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+        .admin-card-links small { color: #8a9790; font-size: .75rem; }
+        .admin-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .45rem; }
+        .admin-tag { border-radius: 999px; padding: .15rem .55rem; font-size: .75rem; font-weight: 600; }
+        .admin-tag-verde { background: #def0dc; color: #215c38; }
+        .admin-tag-cinza { background: #f3f1ea; color: #3d5248; }
+        .admin-tag-ouro { background: #f7e3c4; color: #9a5a12; }
+        .admin-meta { display: grid; grid-template-columns: 1fr; gap: .7rem; background: #f6f4ee; border-radius: 12px; padding: .8rem; font-size: .88rem; }
+        .admin-meta dt { display: inline; font-weight: 600; }
+        .admin-meta dt::after { content: ': '; }
+        .admin-meta dd { display: inline; color: #3d5248; }
+        .admin-meta div div { margin-bottom: .35rem; }
+        .admin-meta div div:last-child { margin-bottom: 0; }
+        .admin-desc { margin-top: .75rem; background: #f6f4ee; border-radius: 12px; padding: .8rem; font-size: .88rem; color: #3d5248; }
+        .admin-motivo { display: block; margin-top: .75rem; font-size: .85rem; color: #5d6f65; }
+        .admin-motivo textarea { width: 100%; margin-top: .4rem; border: 1px solid #ddd6c8; border-radius: 12px; padding: .7rem; font: inherit; font-size: .88rem; }
+        .admin-card-acoes { display: flex; flex-direction: column; gap: .7rem; margin-top: .75rem; }
+        .admin-card-acoes div { display: flex; flex-wrap: wrap; gap: .45rem; }
+        .admin-btn-ok, .admin-btn-no, .admin-btn-ghost { border-radius: 999px; padding: .5rem .9rem; font-size: .88rem; text-decoration: none; font-family: inherit; }
+        .admin-btn-ok { border: 0; background: #1a3d2b; color: #fff; }
+        .admin-btn-no { border: 1px solid #f0c3c0; background: #fff5f4; color: #c0392b; }
+        .admin-btn-ghost { display: inline-block; border: 1px solid #ddd6c8; background: #fff; color: #3d5248; }
+
+        .admin-widget { background: #fff; border: 1px solid #e6e1d6; border-radius: 16px; padding: 1rem; margin-bottom: .75rem; }
+        .admin-widget h3 { font-size: .9rem; margin-bottom: .8rem; }
+        .admin-widget ul { padding: 0; list-style: none; }
+        .admin-widget li { display: flex; align-items: flex-start; gap: .5rem; font-size: .85rem; margin-bottom: .7rem; }
+        .admin-widget li:last-child { margin-bottom: 0; }
+        .admin-widget li p { flex: 1; }
+        .admin-widget li small { flex-shrink: 0; color: #8a9790; font-size: .75rem; }
+        .admin-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: .4rem; flex-shrink: 0; }
+        .admin-dot-preto { background: #1a2e23; }
+        .admin-dot-ouro { background: #e6a04a; }
+        .admin-dot-azul { background: #3b82c4; }
+        .admin-dot-vermelho { background: #c0392b; }
+        .admin-hoje div { display: flex; justify-content: space-between; padding: .45rem 0; border-bottom: 1px solid #f0ebe3; font-size: .88rem; }
+        .admin-hoje div:last-child { border-bottom: 0; }
+        .admin-hoje .is-alerta dd { color: #c0392b; font-weight: 700; }
+        .admin-atalhos { display: flex; flex-direction: column; gap: .45rem; }
+        .admin-atalhos a { border: 1px solid #e6e1d6; background: #f6f4ee; color: #3d5248; text-decoration: none; border-radius: 12px; padding: .55rem .8rem; font-size: .85rem; }
+
+        .ong-menu-check { position: absolute; opacity: 0; pointer-events: none; }
+        .ong-menu-btn, .ong-menu-bg { display: none; }
+
+        @media (max-width: 1023px) {
+            .ong-menu-btn {
+                display: grid;
+                place-items: center;
+                position: fixed;
+                top: 12px;
+                left: 12px;
+                z-index: 60;
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                background: #163528;
+                color: #fff;
+                font-size: 1.15rem;
+                cursor: pointer;
+            }
+            .ong-menu-check:checked + .ong-menu-btn { background: #e6c56a; color: #163528; }
+            .ong-menu-bg {
+                position: fixed;
+                inset: 0;
+                z-index: 40;
+                background: rgba(0,0,0,.4);
+            }
+            .ong-shell:has(.ong-menu-check:checked) .ong-menu-bg { display: block; }
+            .ong-sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                z-index: 50;
+                height: 100vh;
+                overflow-y: auto;
+                transform: translateX(-100%);
+                transition: transform .2s ease;
+            }
+            .ong-shell:has(.ong-menu-check:checked) .ong-sidebar { transform: translateX(0); }
+            .ong-main { padding: 4rem 1.2rem 1.5rem; min-width: 0; }
+            .admin-stats { grid-template-columns: 1fr 1fr; }
+            .admin-meta { grid-template-columns: 1fr 1fr; }
+            .admin-card-topo { flex-direction: row; justify-content: space-between; align-items: flex-start; }
+            .admin-card-acoes { flex-direction: row; align-items: center; justify-content: space-between; }
+        }
+
+        @media (max-width: 767px) {
+            .admin-topo { flex-direction: column; }
+            .admin-stats { grid-template-columns: 1fr; }
+            .admin-meta { grid-template-columns: 1fr; }
+            .admin-card-topo, .admin-card-acoes {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .admin-card-topo h2 { font-size: 1rem; }
+        }
+
+        @media (min-width: 1024px) {
+            .admin-stats { grid-template-columns: repeat(5, 1fr); }
+            .admin-corpo { grid-template-columns: minmax(0, 1fr) 280px; }
+            .admin-meta { grid-template-columns: 1fr 1fr; }
+            .admin-card-topo { flex-direction: row; justify-content: space-between; align-items: flex-start; }
+            .admin-card-acoes { flex-direction: row; align-items: center; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body class="ong-body">
+<div class="ong-shell">
+    <input type="checkbox" id="ong-menu" class="ong-menu-check">
+    <label for="ong-menu" class="ong-menu-btn">☰</label>
+    <label for="ong-menu" class="ong-menu-bg"></label>
+
+    <aside class="ong-sidebar">
+        <a href="/admin.html" class="ong-sidebar-brand">
+            <span class="ong-sidebar-logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3c1.8 3.2 2.2 5.4 1.4 7.2C12.6 12 11 13 9.5 14.2 8 15.4 7 17 7 19c2.4-1 4.4-1.2 6.2-.4 1.6.7 2.8 2.2 3.8 4.2 1.6-4.6.6-8.2-1.4-10.2C13.8 10.8 12.6 9.4 12 3Z" fill="#E6C56A"/>
+                </svg>
+            </span>
+            <span class="ong-sidebar-nome">Ajudaê</span>
+        </a>
+
+        <span class="ong-sidebar-org">Administrador</span>
+
+        <p class="ong-sidebar-label">Moderação</p>
+        <nav class="ong-sidebar-nav">
+            <a href="/admin.html" class="ong-sidebar-link is-active"><span class="ong-sidebar-ico">▣</span> Painel admin</a>
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">☰</span> Fila de eventos <span class="ong-badge">7</span></a>
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">⌂</span> Cadastros ONG <span class="ong-badge">1</span></a>
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">↑</span> Upgrades org. <span class="ong-badge">3</span></a>
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">⚑</span> Denúncias <span class="ong-badge">2</span></a>
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">◌</span> Solicit. LGPD <span class="ong-badge">4</span></a>
+        </nav>
+
+        <p class="ong-sidebar-label">Plataforma</p>
+        <nav class="ong-sidebar-nav">
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">☺</span> Usuários</a>
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">▦</span> Relatórios</a>
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">▤</span> Log de ações</a>
+            <a href="#" class="ong-sidebar-link"><span class="ong-sidebar-ico">⚙</span> Configurações</a>
+        </nav>
+
+        <div class="ong-sidebar-user">
+            <span class="ong-avatar">AD</span>
+            <div>
+                <strong>Admin</strong>
+                <small>Superadministrador</small>
+            </div>
+        </div>
+    </aside>
+
+    <main class="ong-main">
+        <div class="admin-topo">
+            <nav class="cand-breadcrumb">Dashboard <span>›</span> Painel de administração</nav>
+            <div class="admin-topo-acoes">
+                <time datetime="2025-05-27T22:31">qua., 27 de mai. — 22:31</time>
+                <a href="#" class="admin-btn-ghost">▤ Ver log completo</a>
+            </div>
+        </div>
+
+        <p class="admin-alerta">17 itens pendentes de revisão: 3 upgrades para organizador, 1 ONG cadastrada, 2 denúncias ativas e 4 solicitações LGPD. 2 solicitações LGPD vencem em menos de 48h.</p>
+
+        <section class="admin-stats">
+            <article class="admin-stat admin-stat-laranja">
+                <strong>3</strong>
+                <p>Upgrades para Organizador</p>
+                <small>↑ 2 novos hoje</small>
+            </article>
+            <article class="admin-stat admin-stat-azul">
+                <strong>1</strong>
+                <p>Cadastros de ONG pendentes</p>
+                <small>há 6h na fila</small>
+            </article>
+            <article class="admin-stat admin-stat-amarelo">
+                <strong>7</strong>
+                <p>Eventos para aprovação</p>
+                <small>3 enviados hoje</small>
+            </article>
+            <article class="admin-stat admin-stat-vermelho">
+                <strong>2</strong>
+                <p>Denúncias abertas</p>
+                <small>1 crítica</small>
+            </article>
+            <article class="admin-stat admin-stat-claro">
+                <strong>4</strong>
+                <p>Solicitações LGPD</p>
+                <small>2 vencem em 48h ⚠️</small>
+            </article>
+        </section>
+
+        <div class="admin-corpo">
+            <div>
+                <div class="admin-tabs">
+                    <span class="is-active">Eventos <small>(7)</small></span>
+                    <span>ONGs <small>(1)</small></span>
+                    <span>Upgrades <small>(3)</small></span>
+                    <span>Denúncias <small>(2)</small></span>
+                    <span>LGPD <small>(4)</small></span>
+                </div>
+
+                <article class="admin-card">
+                    <header class="admin-card-topo">
+                        <div>
+                            <h2>Limpeza de Parques — Parque da Cantareira</h2>
+                            <div class="admin-tags">
+                                <span class="admin-tag admin-tag-verde">ONG</span>
+                                <span class="admin-tag admin-tag-cinza">Verde SP</span>
+                                <span class="admin-tag admin-tag-cinza">Organizador: Carlos F.</span>
+                                <span class="admin-tag admin-tag-ouro">Meio Ambiente</span>
+                            </div>
+                        </div>
+                        <div class="admin-card-links">
+                            <small>enviado há 2h</small>
+                            <a href="#" class="admin-btn-ghost">Ver perfil do org.</a>
+                        </div>
+                    </header>
+                    <dl class="admin-meta">
+                        <div>
+                            <div><dt>Data</dt><dd>15 maio 2025, 08:00–16:00</dd></div>
+                            <div><dt>Vagas</dt><dd>30</dd></div>
+                        </div>
+                        <div>
+                            <div><dt>Local</dt><dd>Rua do Horto, 1488 — Horto Florestal, SP</dd></div>
+                            <div><dt>Habilidades</dt><dd>Trabalho em equipe, Disposição física</dd></div>
+                        </div>
+                    </dl>
+                    <p class="admin-desc">Junte-se a nós para uma manhã de limpeza e preservação do parque. Traremos luvas, sacos e ferramentas. Leve protetor solar e roupa confortável.</p>
+                    <label class="admin-motivo">
+                        Motivo da recusa (obrigatório ao recusar)
+                        <textarea rows="2" placeholder="Ex: Endereço incompleto, solicite revisão do organizador..."></textarea>
+                    </label>
+                    <footer class="admin-card-acoes">
+                        <div>
+                            <button type="button" class="admin-btn-ok">✓ Aprovar e publicar</button>
+                            <button type="button" class="admin-btn-no">✕ Recusar com motivo</button>
+                        </div>
+                        <a href="#" class="admin-btn-ghost">Ver evento completo</a>
+                    </footer>
+                </article>
+
+                <article class="admin-card">
+                    <header class="admin-card-topo">
+                        <div>
+                            <h2>Mutirão de Pintura Comunitária</h2>
+                            <div class="admin-tags">
+                                <span class="admin-tag admin-tag-cinza">Ind.</span>
+                                <span class="admin-tag admin-tag-cinza">Carlos Ferreira</span>
+                                <span class="admin-tag admin-tag-cinza">Habitação</span>
+                            </div>
+                        </div>
+                        <div class="admin-card-links">
+                            <small>enviado há 4h</small>
+                            <a href="#" class="admin-btn-ghost">Ver perfil do org.</a>
+                        </div>
+                    </header>
+                    <dl class="admin-meta">
+                        <div>
+                            <div><dt>Data</dt><dd>20 jun. 2025, 09:00–17:00</dd></div>
+                            <div><dt>Vagas</dt><dd>20</dd></div>
+                        </div>
+                        <div>
+                            <div><dt>Local</dt><dd>Rua das Flores, 200 — Vila Madalena, SP</dd></div>
+                            <div><dt>Habilidades</dt><dd>Pintura, Trabalho em equipe</dd></div>
+                        </div>
+                    </dl>
+                    <p class="admin-desc">Vamos revitalizar a fachada do centro comunitário com tinta doada. Não é preciso experiência prévia.</p>
+                    <label class="admin-motivo">
+                        Motivo da recusa (obrigatório ao recusar)
+                        <textarea rows="2" placeholder="Ex: Endereço incompleto, solicite revisão do organizador..."></textarea>
+                    </label>
+                    <footer class="admin-card-acoes">
+                        <div>
+                            <button type="button" class="admin-btn-ok">✓ Aprovar e publicar</button>
+                            <button type="button" class="admin-btn-no">✕ Recusar com motivo</button>
+                        </div>
+                        <a href="#" class="admin-btn-ghost">Ver evento completo</a>
+                    </footer>
+                </article>
+            </div>
+
+            <aside>
+                <section class="admin-widget">
+                    <h3>Atividade recente</h3>
+                    <ul>
+                        <li><span class="admin-dot admin-dot-preto"></span><p>Evento <strong>Doação de Roupas</strong> aprovado e publicado</p><small>10min</small></li>
+                        <li><span class="admin-dot admin-dot-ouro"></span><p>Upgrade negado para <strong>Roberto Torres</strong> — XP insuficiente</p><small>1h</small></li>
+                        <li><span class="admin-dot admin-dot-azul"></span><p>ONG <strong>Ação Verde</strong> ativada após verificação</p><small>3h</small></li>
+                        <li><span class="admin-dot admin-dot-vermelho"></span><p>Evento <strong>Barraca de Saúde</strong> recusado — local inválido</p><small>5h</small></li>
+                        <li><span class="admin-dot admin-dot-preto"></span><p>Upgrade aprovado para <strong>Mariana Santos</strong></p><small>ontem</small></li>
+                        <li><span class="admin-dot admin-dot-ouro"></span><p>LGPD: exportação enviada para <strong>Ana Costa</strong></p><small>ontem</small></li>
+                    </ul>
+                </section>
+
+                <section class="admin-widget">
+                    <h3>Plataforma hoje</h3>
+                    <dl class="admin-hoje">
+                        <div><dt>Usuários ativos</dt><dd>2.418</dd></div>
+                        <div><dt>Novos cadastros</dt><dd>+34</dd></div>
+                        <div><dt>Eventos publicados</dt><dd>142</dd></div>
+                        <div><dt>Candidaturas hoje</dt><dd>+287</dd></div>
+                        <div><dt>ONGs verificadas</dt><dd>38</dd></div>
+                        <div class="is-alerta"><dt>Usuários suspensos</dt><dd>3</dd></div>
+                    </dl>
+                </section>
+
+                <section class="admin-widget">
+                    <h3>Acesso rápido</h3>
+                    <nav class="admin-atalhos">
+                        <a href="#">Fila de eventos</a>
+                        <a href="#">Solicitações LGPD</a>
+                        <a href="#">Denúncias abertas</a>
+                        <a href="#">Upgrades de organizador</a>
+                    </nav>
+                </section>
+            </aside>
+        </div>
+    </main>
+</div>
+</body>
+</html>
