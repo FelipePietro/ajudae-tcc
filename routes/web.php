@@ -9,3 +9,7 @@ Route::get('/teste', function () {
 Route::get('/admin', function () {
     return view('admin');
 });
+
+Route::get('/candidatos', function () {
+    return view('candidatos');
+});
