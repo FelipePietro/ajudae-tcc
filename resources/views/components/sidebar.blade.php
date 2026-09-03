@@ -64,10 +64,12 @@
   </div>
 
   <div class="sidebar-user">
-    <div class="avatar avatar-user">{{ auth()->user()->initials() ?? 'CF' }}</div>
+    <div class="avatar avatar-user">
+      {{ auth()->user()?->initials() ?? 'CF' }}
+    </div>
     <div>
-      <div class="user-name">{{ auth()->user()->name ?? 'Carlos Ferreira' }}</div>
-      <div class="user-org">{{ auth()->user()->organizacao->nome ?? 'Instituto Esperança' }}</div>
+      <div class="user-name">{{ auth()->user()?->name ?? 'Carlos Ferreira' }}</div>
+      <div class="user-org">{{ auth()->user()?->organizacao?->nome ?? 'Instituto Esperança' }}</div>
     </div>
   </div>
 </aside>

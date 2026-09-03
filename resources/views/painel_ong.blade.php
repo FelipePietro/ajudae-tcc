@@ -13,13 +13,12 @@
 <div class="app">
 
   <!-- SIDEBAR -->
-<div class="app">
-  <x-sidebar active="dashboard" />
-
-  <main class="main">
-    {{-- conteúdo específico de cada aba --}}
-  </main>
-</div>
+  <x-sidebar
+    active="painel-ong"
+    :eventos-count="$eventosCount ?? null"
+    :candidatos-count="$candidatosCount ?? null"
+    :notificacoes-count="$notificacoesCount ?? null"
+  />
 
   <!-- MAIN -->
   <main class="main">
@@ -29,20 +28,24 @@
     <!-- ORG CARD -->
     <section class="org-card">
       <div class="org-identity">
-        <div class="org-logo">🌱</div>
+        <div class="org-logo">{{ $ong['icone'] ?? '🌱' }}</div>
         <div>
-          <h1 class="org-name">Instituto Esperança Social</h1>
-          <p class="org-sub">Esperança Social · São Paulo, SP</p>
+          <h1 class="org-name">{{ $ong['nome'] }}</h1>
+          <p class="org-sub">{{ $ong['nome_fantasia'] }} · {{ $ong['cidade'] }}, {{ $ong['estado'] }}</p>
           <div class="org-tags">
-            <span class="tag tag-active">✓ Ativa</span>
-            <span class="tag tag-cnpj">CNPJ 11.222.333/0001-81</span>
-            <span class="tag tag-plain">Assistência social · Educação</span>
-            <span class="tag tag-verified">Conta verificada</span>
+            @if (!empty($ong['ativa']))
+              <span class="tag tag-active">✓ Ativa</span>
+            @endif
+            <span class="tag tag-cnpj">CNPJ {{ $ong['cnpj'] }}</span>
+            <span class="tag tag-plain">{{ $ong['area_atuacao'] }}</span>
+            @if (!empty($ong['verificada']))
+              <span class="tag tag-verified">Conta verificada</span>
+            @endif
           </div>
         </div>
       </div>
       <div class="org-actions">
-        <button class="btn btn-outline">Editar perfil</button>
+        <a href="{{ route('perfil-ong.editar') }}" class="btn btn-outline">Editar perfil</a>
         <button class="btn btn-primary">+ Criar evento</button>
       </div>
     </section>
@@ -50,23 +53,23 @@
     <!-- STATS -->
     <section class="stats-grid">
       <div class="stat-card">
-        <div class="stat-value stat-dark">4</div>
+        <div class="stat-value stat-dark">{{ $stats['eventos_ativos'] ?? count($eventos) }}</div>
         <div class="stat-label">Eventos ativos</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value stat-orange">3</div>
+        <div class="stat-value stat-orange">{{ $stats['funcionarios'] ?? count($funcionarios) }}</div>
         <div class="stat-label">Funcionários</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value stat-blue">128</div>
+        <div class="stat-value stat-blue">{{ $stats['total_voluntarios'] ?? 0 }}</div>
         <div class="stat-label">Total voluntários</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value stat-dark">32</div>
+        <div class="stat-value stat-dark">{{ $stats['eventos_realizados'] ?? 0 }}</div>
         <div class="stat-label">Eventos realizados</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value stat-green">2.580</div>
+        <div class="stat-value stat-green">{{ $stats['horas_doadas'] ?? 0 }}</div>
         <div class="stat-label">Horas doadas (est.)</div>
       </div>
     </section>
@@ -86,90 +89,54 @@
 
         <!-- EVENTS TABLE -->
         <section class="panel">
-          <div class="panel-header">
+          <div class="panel-header" style="margin-bottom: 1.25rem;">
             <div>
-              <h2 class="panel-title">Eventos da ONG</h2>
-              <p class="panel-sub">4 ativos · 1 aguardando aprovação</p>
+              <h2 class="panel-title" style="margin-bottom: 0.35rem;">Eventos da ONG</h2>
+              <p class="panel-sub">
+                {{ collect($eventos)->where('status_class', 'status-published')->count() }} ativos ·
+                {{ collect($eventos)->where('status_class', 'status-waiting')->count() }} aguardando aprovação
+              </p>
             </div>
             <button class="btn btn-primary">+ Criar evento</button>
           </div>
 
-          <table class="events-table">
-            <thead>
-              <tr>
-                <th>Evento</th>
-                <th>Responsável</th>
-                <th>Status</th>
-                <th>Candidatos</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <div class="event-name">Limpeza de Parques</div>
-                  <div class="event-meta">15 maio 2025 · Horto Florestal</div>
-                </td>
-                <td>
-                  <div class="resp-name">Carlos F.</div>
-                  <div class="resp-role">Organizador</div>
-                </td>
-                <td><span class="status status-published">Publicado</span></td>
-                <td><span class="count-pending">8 pend.</span></td>
-                <td class="actions-cell">
+          <div class="space-y-4">
+            @forelse ($eventos as $evento)
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-[#EEF7F2] border border-[#c8e0d4] rounded-xl px-5 py-4">
+                <div class="text-3xl bg-[#d4eddf] p-2.5 rounded-[10px] shrink-0">
+                  {{ $evento['icone'] ?? '🌿' }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <strong class="text-sm text-[#1a3a2a] block">
+                    {{ $evento['nome'] ?? 'Evento' }}
+                  </strong>
+                  <p class="text-[0.82rem] text-gray-500 mt-1 flex flex-col sm:flex-row sm:gap-2">
+                    <span>📅 {{ $evento['data'] ?? 'Data não informada' }}</span>
+                    <span>📍 {{ $evento['local'] ?? 'Local não informado' }}</span>
+                    <span>👥 {{ $evento['candidatos'] ?? '0 pend.' }}</span>
+                  </p>
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="status {{ $evento['status_class'] ?? 'status-published' }}">{{ $evento['status'] ?? 'Publicado' }}</span>
+                    @if (!empty($evento['responsavel']))
+                      <span class="text-[11px] font-semibold text-[#2d5c4d] bg-[#dfeee8] rounded-full px-2 py-1">
+                        {{ $evento['responsavel'] }} · {{ $evento['cargo'] }}
+                      </span>
+                    @else
+                      <span class="text-[11px] font-semibold text-[#7a4a00] bg-[#fff1d6] rounded-full px-2 py-1">
+                        Sem responsável
+                      </span>
+                    @endif
+                  </div>
+                </div>
+                <div class="flex gap-2 self-end sm:self-center">
                   <button class="btn btn-sm btn-outline">Ver</button>
-                  <button class="btn btn-sm btn-outline">Editar</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="event-name">Doação de Roupas</div>
-                  <div class="event-meta">20 maio 2025 · Brás, SP</div>
-                </td>
-                <td>
-                  <div class="resp-name">Maria L.</div>
-                  <div class="resp-role">Organizadora</div>
-                </td>
-                <td><span class="status status-published">Publicado</span></td>
-                <td><span class="count-pending">15 pend.</span></td>
-                <td class="actions-cell">
-                  <button class="btn btn-sm btn-outline">Ver</button>
-                  <button class="btn btn-sm btn-outline">Editar</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="event-name">Campanha de Vacinação</div>
-                  <div class="event-meta">28 maio 2025 · Centro, SP</div>
-                </td>
-                <td>
-                  <div class="resp-none">— sem responsável</div>
-                </td>
-                <td><span class="status status-waiting">Aguardando aprovação</span></td>
-                <td><span class="count-zero">0 pend.</span></td>
-                <td class="actions-cell">
-                  <button class="btn btn-sm btn-outline">Ver</button>
-                  <button class="btn btn-sm btn-outline">Atribuir</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="event-name">Aula de Reforço Escolar</div>
-                  <div class="event-meta">05 jun 2025 · Cidade Tiradentes</div>
-                </td>
-                <td>
-                  <div class="resp-name">Carlos F.</div>
-                  <div class="resp-role">Organizador</div>
-                </td>
-                <td><span class="status status-published">Publicado</span></td>
-                <td><span class="count-pending">4 pend.</span></td>
-                <td class="actions-cell">
-                  <button class="btn btn-sm btn-outline">Ver</button>
-                  <button class="btn btn-sm btn-outline">Editar</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <button class="btn btn-sm btn-outline">{{ $evento['responsavel'] ? 'Editar' : 'Atribuir' }}</button>
+                </div>
+              </div>
+            @empty
+              <p class="text-sm text-gray-500">Nenhum evento cadastrado ainda.</p>
+            @endforelse
+          </div>
         </section>
 
         <!-- STAFF LIST -->
@@ -177,51 +144,37 @@
           <div class="panel-header">
             <div>
               <h2 class="panel-title">Funcionários da ONG</h2>
-              <p class="panel-sub">2 ativos · 1 convite pendente</p>
+              <p class="panel-sub">
+                {{ collect($funcionarios)->where('status', 'accepted')->count() }} ativos ·
+                {{ collect($funcionarios)->where('status', 'pending')->count() }} convite(s) pendente(s)
+              </p>
             </div>
             <button class="btn btn-outline">Convidar organizador</button>
           </div>
 
           <ul class="staff-list">
-            <li class="staff-row">
-              <div class="staff-identity">
-                <div class="avatar avatar-green">CF</div>
-                <div>
-                  <div class="staff-name">Carlos Ferreira</div>
-                  <div class="staff-meta">2 eventos designados · Organizador principal</div>
+            @forelse ($funcionarios as $funcionario)
+              <li class="staff-row">
+                <div class="staff-identity">
+                  <div class="avatar avatar-{{ $funcionario['cor'] ?? 'green' }}">{{ $funcionario['iniciais'] ?? '??' }}</div>
+                  <div>
+                    <div class="staff-name">{{ $funcionario['nome'] ?? 'Sem nome' }}</div>
+                    <div class="staff-meta">{{ $funcionario['meta'] ?? '' }}</div>
+                  </div>
                 </div>
-              </div>
-              <div class="staff-actions">
-                <span class="pill pill-accepted">Aceito</span>
-                <button class="btn btn-sm btn-danger">Remover</button>
-              </div>
-            </li>
-            <li class="staff-row">
-              <div class="staff-identity">
-                <div class="avatar avatar-yellow">ML</div>
-                <div>
-                  <div class="staff-name">Maria Lima</div>
-                  <div class="staff-meta">1 evento designado</div>
+                <div class="staff-actions">
+                  @if (($funcionario['status'] ?? '') === 'accepted')
+                    <span class="pill pill-accepted">Aceito</span>
+                    <button class="btn btn-sm btn-danger">Remover</button>
+                  @else
+                    <span class="pill pill-pending">Pendente</span>
+                    <button class="btn btn-sm btn-outline">Remover</button>
+                  @endif
                 </div>
-              </div>
-              <div class="staff-actions">
-                <span class="pill pill-accepted">Aceito</span>
-                <button class="btn btn-sm btn-danger">Remover</button>
-              </div>
-            </li>
-            <li class="staff-row">
-              <div class="staff-identity">
-                <div class="avatar avatar-blue">PS</div>
-                <div>
-                  <div class="staff-name">Pedro Santos</div>
-                  <div class="staff-meta">Nenhum evento · convite aguardando resposta</div>
-                </div>
-              </div>
-              <div class="staff-actions">
-                <span class="pill pill-pending">Pendente</span>
-                <button class="btn btn-sm btn-outline">Remover</button>
-              </div>
-            </li>
+              </li>
+            @empty
+              <p class="text-sm text-gray-500">Nenhum funcionário cadastrado ainda.</p>
+            @endforelse
           </ul>
 
           <div class="notice">
@@ -242,35 +195,35 @@
               <span class="info-icon">🏛</span>
               <div>
                 <div class="info-label">Razão social</div>
-                <div class="info-value">Instituto Esperança Social</div>
+                <div class="info-value">{{ $ong['nome'] }}</div>
               </div>
             </li>
             <li>
               <span class="info-icon">🪪</span>
               <div>
                 <div class="info-label">CNPJ</div>
-                <div class="info-value">11.222.333/0001-81</div>
+                <div class="info-value">{{ $ong['cnpj'] }}</div>
               </div>
             </li>
             <li>
               <span class="info-icon">📍</span>
               <div>
                 <div class="info-label">Cidade / Estado</div>
-                <div class="info-value">São Paulo, SP</div>
+                <div class="info-value">{{ $ong['cidade'] }}, {{ $ong['estado'] }}</div>
               </div>
             </li>
             <li>
               <span class="info-icon">🌐</span>
               <div>
                 <div class="info-label">Site</div>
-                <div class="info-value info-link">esperancasocial.org.br</div>
+                <div class="info-value info-link">{{ $ong['site'] }}</div>
               </div>
             </li>
             <li>
               <span class="info-icon">📅</span>
               <div>
                 <div class="info-label">Cadastro aprovado em</div>
-                <div class="info-value">12 jan. 2024</div>
+                <div class="info-value">{{ $ong['aprovado_em'] }}</div>
               </div>
             </li>
           </ul>
@@ -279,34 +232,17 @@
         <section class="panel">
           <h2 class="panel-title">Atividade recente</h2>
           <ul class="activity-list">
-            <li class="activity-row">
-              <span class="dot dot-green"></span>
-              <div>
-                <div class="activity-text">Carlos aprovou candidatura de Ana Costa para <strong>Limpeza de Parques</strong></div>
-                <div class="activity-time">hoje, 14:32</div>
-              </div>
-            </li>
-            <li class="activity-row">
-              <span class="dot dot-orange"></span>
-              <div>
-                <div class="activity-text">Evento <strong>Campanha de Vacinação</strong> enviado para aprovação</div>
-                <div class="activity-time">ontem, 09:15</div>
-              </div>
-            </li>
-            <li class="activity-row">
-              <span class="dot dot-blue"></span>
-              <div>
-                <div class="activity-text">Pedro Santos convidado para a equipe via e-mail</div>
-                <div class="activity-time">há 2 dias</div>
-              </div>
-            </li>
-            <li class="activity-row">
-              <span class="dot dot-green"></span>
-              <div>
-                <div class="activity-text"><strong>Doação de Roupas</strong> publicado — 15 candidaturas recebidas</div>
-                <div class="activity-time">há 3 dias</div>
-              </div>
-            </li>
+            @forelse ($atividades ?? [] as $atividade)
+              <li class="activity-row">
+                <span class="dot dot-{{ $atividade['cor'] ?? 'green' }}"></span>
+                <div>
+                  <div class="activity-text">{!! $atividade['texto'] ?? '' !!}</div>
+                  <div class="activity-time">{{ $atividade['tempo'] ?? '' }}</div>
+                </div>
+              </li>
+            @empty
+              <p class="text-sm text-gray-500">Nenhuma atividade recente.</p>
+            @endforelse
           </ul>
         </section>
 
