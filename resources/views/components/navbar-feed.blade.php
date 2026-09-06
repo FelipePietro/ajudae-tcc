@@ -5,7 +5,7 @@
 
     <ul class="navbar-links">
         <li><a href="/feed">Feed</a></li>
-        <li><a href="/candidaturas">Candidaturas</a></li>
+        <li><a href="/minhas-candidaturas">Candidaturas</a></li>
         <li><a href="/perfil">Meu Perfil</a></li>
         <li><a href="/ranking">Ranking</a></li>
         <li>
