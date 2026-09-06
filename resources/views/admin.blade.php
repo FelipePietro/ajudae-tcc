@@ -10,16 +10,27 @@
 <div class="ong-shell">
     <x-admin-sidebar />
 
-    <main class="ong-main">
+    <main class="ong-main admin-main">
         <div class="admin-topo">
-            <nav class="cand-breadcrumb">Dashboard <span>›</span> Painel de administração</nav>
+            <nav class="admin-breadcrumb">
+                <span>Dashboard</span>
+                <span class="admin-breadcrumb-sep" aria-hidden="true">›</span>
+                <strong>Painel de administração</strong>
+            </nav>
             <div class="admin-topo-acoes">
-                <time datetime="2025-05-27T22:31">qua., 27 de mai. — 22:31</time>
-                <x-botao-secundario href="#" texto="Ver log completo" />
+                <time datetime="2025-05-27T22:31">qua., 27 de mai. · 22:31</time>
+                <a href="#" class="btn-secundario admin-log-btn">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="6" y="3" width="12" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                        <path d="M9 3.5h6v3H9z" fill="currentColor"/>
+                        <path d="M9 11h6M9 14.5h6M9 18h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                    Ver log completo
+                </a>
             </div>
         </div>
 
-        <p class="admin-alerta">17 itens pendentes de revisão: 3 upgrades para organizador, 1 ONG cadastrada, 2 denúncias ativas e 4 solicitações LGPD. 2 solicitações LGPD vencem em menos de 48h.</p>
+        <p class="admin-alerta"><strong>17</strong> <b>itens pendentes de revisão</b> — 7 eventos aguardam aprovação, 3 upgrades para organizador, 1 ONG cadastrada, 2 denúncias ativas e 4 solicitações LGPD. <span>2 solicitações LGPD vencem em menos de 48h.</span></p>
 
         <section class="admin-stats">
             <article class="admin-stat admin-stat-laranja">
@@ -50,13 +61,13 @@
         </section>
 
         <div class="admin-corpo">
-            <div>
+            <div class="admin-fila">
                 <div class="admin-tabs">
-                    <span class="is-active">Eventos <small>(7)</small></span>
-                    <span>ONGs <small>(1)</small></span>
-                    <span>Upgrades <small>(3)</small></span>
-                    <span>Denúncias <small>(2)</small></span>
-                    <span>LGPD <small>(4)</small></span>
+                    <span class="is-active">Eventos <em>7</em></span>
+                    <span>ONGs <em>1</em></span>
+                    <span>Upgrades <em>3</em></span>
+                    <span>Denúncias <em>2</em></span>
+                    <span>LGPD <em>4</em></span>
                 </div>
 
                 <article class="admin-card">
@@ -65,8 +76,7 @@
                             <h2>Limpeza de Parques — Parque da Cantareira</h2>
                             <div class="admin-tags">
                                 <span class="admin-tag admin-tag-verde">ONG</span>
-                                <span class="admin-tag admin-tag-cinza">Verde SP</span>
-                                <span class="admin-tag admin-tag-cinza">Organizador: Carlos F.</span>
+                                <span class="admin-tag-txt">Verde SP • Organizador: Carlos F.</span>
                                 <span class="admin-tag admin-tag-ouro">Meio Ambiente</span>
                             </div>
                         </div>
@@ -105,7 +115,7 @@
                             <h2>Mutirão de Pintura Comunitária</h2>
                             <div class="admin-tags">
                                 <span class="admin-tag admin-tag-cinza">Ind.</span>
-                                <span class="admin-tag admin-tag-cinza">Carlos Ferreira</span>
+                                <span class="admin-tag-txt">· Carlos Ferreira</span>
                                 <span class="admin-tag admin-tag-cinza">Habitação</span>
                             </div>
                         </div>
