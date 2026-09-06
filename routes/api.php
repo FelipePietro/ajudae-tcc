@@ -452,3 +452,52 @@ Route::middleware([
         [InscricaoController::class, 'updateStatus']
     );
 });
+
+###### ROTAS TEMPORÁRIAS ######
+
+Route::get('/ong/eventos/{id}/candidatos', function ($id) {
+
+    /*
+     * Depois substituímos pelo Evento::findOrFail($id)
+     * e pelas candidaturas reais.
+     */
+
+    return redirect()->route(
+        'ong.candidatos',
+        [
+            'evento' => $id,
+        ]
+    );
+
+})->name('ong.eventos.candidatos');
+
+Route::patch('/ong/candidatos/{id}/aprovar', function ($id) {
+
+    return back()->with(
+        'success',
+        'Candidatura aprovada com sucesso.'
+    );
+
+})->name('ong.candidatos.aprovar');
+
+
+Route::patch('/ong/candidatos/{id}/recusar', function ($id) {
+
+    return back()->with(
+        'success',
+        'Candidatura recusada.'
+    );
+
+})->name('ong.candidatos.recusar');
+
+
+Route::post('/ong/candidatos/aprovar-lote', function (Request $request) {
+
+    return back()->with(
+        'success',
+        'Candidaturas selecionadas aprovadas.'
+    );
+
+})->name('ong.candidatos.aprovar-lote');
+
+###### ROTAS TEMPORÁRIAS ######

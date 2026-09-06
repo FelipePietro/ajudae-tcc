@@ -106,10 +106,14 @@
 
     {{-- NAVBAR --}}
     <nav class="navbar">
-        <a href="/" class="navbar-brand">
+        <a href="/feed" class="navbar-brand">
             <span class="brand-aju">Ajud</span><span class="brand-dae">aê</span>
         </a>
-        <span class="navbar-centro hidden sm:block">&lt; Feed de eventos</span>
+        <a href="/feed" class="navbar-centro">
+            <span class="hidden sm:inline">← Feed de eventos</span>
+            <span class="sm:hidden">←</span>
+        </a>
+
         <div class="navbar-direita">
             <a href="/perfil" class="avatar">LP</a>
             <span class="navbar-nome hidden sm:block">Lucas Pereira</span>

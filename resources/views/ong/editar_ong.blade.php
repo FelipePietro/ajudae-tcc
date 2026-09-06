@@ -16,12 +16,12 @@
       Ajud<span class="text-accent">ae</span>
     </a>
     <nav class="hidden sm:flex gap-8 mr-8 text-sm text-text-main">
-      <a href="#" class="no-underline hover:text-accent-dark">Início</a>
-      <a href="#" class="no-underline hover:text-accent-dark">Eventos</a>
-      <a href="#" class="no-underline hover:text-accent-dark">Voluntários</a>
+      <a href="{{ route('ong.painel') }}" class="no-underline hover:text-accent-dark">Início</a>
+      <a href="{{ route('ong.eventos.index') }}" class="no-underline hover:text-accent-dark">Eventos</a>
+      <a href="{{ route('ong.candidatos') }}" class="no-underline hover:text-accent-dark">Voluntários</a>
     </nav>
     <div class="flex gap-3 items-center">
-      <a href="#" class="no-underline inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold bg-green-dark text-white hover:opacity-90 transition">Sair</a>
+      <a href="{{ route('ong.painel') }}" class="no-underline inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold bg-green-dark text-white hover:opacity-90 transition">Sair</a>
     </div>
   </div>
 </header>
@@ -46,8 +46,8 @@
     </div>
   @endif
 
-  <form class="w-full" method="POST" action="{{ route('perfil-ong.atualizar', $ong['id']) }}" enctype="multipart/form-data">
-    @csrf
+<form action="{{ route('ong.perfil.atualizar', $ong['id']) }}" method="POST">
+      @csrf
     @method('PUT')
 
     <!-- IDENTIFICAÇÃO -->
@@ -178,7 +178,7 @@
 
     <!-- AÇÕES -->
     <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mb-6">
-      <a href="{{ route('dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold bg-transparent text-text-muted border border-border hover:bg-black/[0.03] transition no-underline">Cancelar</a>
+      <a href="{{ route('ong.perfil', $ong['id']) }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold bg-transparent text-text-muted border border-border hover:bg-black/[0.03] transition no-underline">Cancelar</a>
       <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 rounded-full text-[15px] font-semibold bg-accent text-white hover:bg-accent-dark transition">Salvar alterações →</button>
     </div>
 

@@ -1,214 +1,629 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Outfit:wght@400;700&display=swap');
-@import 'tailwindcss';
+/*
+|--------------------------------------------------------------------------
+| PAINEL DA ONG
+|--------------------------------------------------------------------------
+| Tailwind e fontes são carregados pelo app.css.
+| Aqui ficam apenas estilos específicos do painel da ONG.
+|--------------------------------------------------------------------------
+*/
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@reference "./app.css";
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Paleta do projeto — vira classes utilitárias automaticamente:
-       bg-forest, text-orange, border-line, etc. */
-    --color-forest: #1A3D2B;
-    --color-forest-light: #1E4028;
-    --color-cream: #F7F6F2;
-    --color-card: #FFFFFF;
-    --color-ink: #1F2420;
-    --color-muted: #6B7269;
-    --color-faint: #9AA094;
-    --color-line: #E7E5DF;
-    --color-orange: #E8920A;
-    --color-blue: #3A6EA5;
-    --color-green: #3F8F5F;
-    --color-status-green: #DFF2E4;
-    --color-status-green-ink: #2F7A4C;
-    --color-status-amber: #FBE9CF;
-    --color-status-amber-ink: #B5721B;
-    --color-danger: #FBE3E1;
-    --color-danger-ink: #C04836;
+/* ============================================================
+   ORG CARD
+   ============================================================ */
+
+.org-card {
+    @apply bg-white border border-[#E7E5DF]
+           rounded-[14px]
+           px-[26px] py-[22px]
+           flex items-start justify-between
+           gap-5 mb-[18px];
 }
 
-/* ============ BASE ============ */
-* { @apply m-0 p-0 box-border; }
-
-body {
-    @apply bg-cream text-ink text-sm leading-[1.45];
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+.org-identity {
+    @apply flex gap-4 min-w-0;
 }
 
-a { @apply no-underline; color: inherit; }
-button { @apply cursor-pointer; font-family: inherit; }
-ul { list-style: none; }
-
-/* ============ APP LAYOUT ============ */
-.app { @apply flex min-h-screen; }
-
-/* ============ SIDEBAR ============ */
-.sidebar { @apply w-[220px] shrink-0 bg-forest text-[#eef1ec] flex flex-col justify-between p-5 px-3.5; }
-
-.logo {
-    @apply text-xl font-bold text-white mb-3.5 pl-1.5;
-    font-family: "Fraunces", Georgia, serif;
-}
-.logo-accent { @apply text-orange; }
-
-.role-pill { @apply inline-block text-xs bg-white/8 text-[#cfd6c9] px-2.5 py-1 rounded-full mb-5 ml-1.5; }
-
-.nav-group { @apply mb-5; }
-.nav-label { @apply text-[11px] uppercase tracking-wider text-[#7f8b78] px-2.5 mb-1.5; }
-
-.nav-item { @apply flex items-center gap-2.5 py-[9px] px-2.5 rounded-lg text-sm text-[#d7ddd1] mb-0.5 transition-colors; }
-.nav-item:hover { @apply bg-white/5; }
-.nav-item.active { @apply bg-white text-forest font-semibold; }
-
-.nav-icon { @apply w-4 text-center text-[13px] opacity-[85%] mr-0.5; }
-
-.badge { @apply ml-auto text-[11px] font-semibold px-[7px] py-px rounded-full; }
-.badge-neutral { @apply bg-white/14 text-[#eef1ec]; }
-.nav-item.active .badge-neutral { @apply bg-[#eef1ec] text-forest; }
-.badge-alert { @apply bg-orange text-white; }
-
-.sidebar-user { @apply flex items-center gap-2.5 py-3 px-2 border-t border-white/10; }
-
-.avatar { @apply w-[34px] h-[34px] rounded-full flex items-center justify-center text-xs font-bold shrink-0; }
-.avatar-user { @apply bg-[#cfe3d3] text-forest; }
-.avatar-green { @apply bg-[#cfe3d3] text-forest; }
-.avatar-yellow { @apply bg-[#fbe6b8] text-[#97650f]; }
-.avatar-blue { @apply bg-[#cfe0f2] text-blue; }
-
-.user-name { @apply text-[13px] font-semibold text-white; }
-.user-org { @apply text-[11px] text-[#9aa694]; }
-
-/* ============ MAIN ============ */
-.main { @apply flex-1 px-8 pt-[22px] pb-12 max-w-[1400px]; }
-
-.breadcrumb { @apply text-[13px] text-faint mb-[18px]; }
-.breadcrumb .sep { @apply mx-1; }
-.breadcrumb .current { @apply text-ink font-medium; }
-
-/* ============ ORG CARD ============ */
-.org-card { @apply bg-card border border-line rounded-[14px] p-[22px] px-[26px] flex items-start justify-between gap-5 mb-[18px]; }
-.org-identity { @apply flex gap-4; }
-.org-logo { @apply w-[58px] h-[58px] rounded-xl bg-forest-light flex items-center justify-center text-[26px] shrink-0; }
-.org-name { @apply text-xl font-bold mb-[3px]; }
-.org-sub { @apply text-[13px] text-muted mb-3; }
-.org-tags { @apply flex flex-wrap gap-2; }
-
-.tag { @apply text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap; }
-.tag-active { @apply bg-status-green text-status-green-ink; }
-.tag-cnpj { @apply bg-[#e7eef7] text-blue; }
-.tag-plain { @apply bg-[#f0efe9] text-muted; }
-.tag-verified { @apply bg-status-amber text-status-amber-ink; }
-
-.org-actions { @apply flex gap-2.5 shrink-0; }
-
-/* ============ BUTTONS ============ */
-.btn { @apply rounded-lg text-[13px] font-semibold px-4 py-[9px] border border-transparent whitespace-nowrap transition-opacity; }
-.btn:hover { @apply opacity-[85%]; }
-.btn-primary { @apply bg-forest text-white; }
-.btn-outline { @apply bg-white border-line text-ink; }
-.btn-danger { @apply bg-white border-[#f0d3cf] text-danger-ink; }
-.btn-sm { @apply px-3 py-1.5 text-xs; }
-.btn-block { @apply w-full text-center; }
-
-/* ============ STATS ============ */
-.stats-grid { @apply flex gap-3.5 mb-[22px]; }
-.stat-card { @apply flex-1 bg-card border border-line rounded-[10px] p-5 min-w-0; }
-.stat-value { @apply text-3xl font-bold mb-1; }
-.stat-dark { @apply text-ink; }
-.stat-orange { @apply text-orange; }
-.stat-blue { @apply text-blue; }
-.stat-green { @apply text-green; }
-.stat-label { @apply text-[13px] text-muted; }
-
-/* ============ TABS ============ */
-.tabs { @apply flex gap-[22px] border-b border-line mb-5; }
-.tab { @apply bg-transparent border-0 py-2.5 px-0.5 text-sm font-medium text-muted border-b-2 border-transparent; }
-.tab.active { @apply text-ink font-semibold border-ink; }
-
-/* ============ CONTENT GRID ============ */
-.content-grid { @apply flex gap-5 items-start; }
-.left-col { @apply flex-1 min-w-0 flex flex-col gap-5; }
-.right-col { @apply flex-none w-[340px] flex flex-col gap-5; }
-
-/* ============ PANEL ============ */
-.panel { @apply bg-card border border-line rounded-[14px] p-[22px]; }
-.panel-header { @apply flex items-center justify-between mb-4; }
-.panel-title { @apply text-base font-bold mb-0.5; }
-.panel-sub { @apply text-[12.5px] text-muted; }
-
-/* ============ EVENTS TABLE ============ */
-.events-table { @apply w-full border-collapse; }
-.events-table th { @apply text-left text-xs font-medium text-faint px-2.5 py-2 border-b border-line; }
-.events-table td { @apply px-2.5 py-3.5 border-b border-line align-middle; }
-.events-table tr:last-child td { @apply border-b-0; }
-
-.event-name { @apply font-semibold text-sm mb-0.5; }
-.event-meta { @apply text-xs text-muted; }
-.resp-name { @apply font-medium; }
-.resp-role { @apply text-xs text-muted; }
-.resp-none { @apply text-faint italic; }
-
-.status { @apply inline-block text-xs font-semibold px-2.5 py-1 rounded-md whitespace-nowrap; }
-.status-published { @apply bg-status-green text-status-green-ink; }
-.status-waiting { @apply bg-status-amber text-status-amber-ink; }
-
-.count-pending { @apply text-orange font-semibold text-[13px]; }
-.count-zero { @apply text-faint text-[13px]; }
-.actions-cell { @apply flex gap-2 whitespace-nowrap; }
-
-/* ============ STAFF LIST ============ */
-.staff-list { @apply flex flex-col; }
-.staff-row { @apply flex items-center justify-between py-3.5 border-b border-line; }
-.staff-row:last-child { @apply border-b-0; }
-.staff-identity { @apply flex items-center gap-3; }
-
-.staff-name { @apply font-semibold text-sm; }
-.staff-meta { @apply text-xs text-muted; }
-.staff-actions { @apply flex items-center gap-2.5; }
-
-.pill { @apply text-xs font-semibold px-3 py-1 rounded-full; }
-.pill-accepted { @apply bg-status-green text-status-green-ink; }
-.pill-pending { @apply bg-status-amber text-status-amber-ink; }
-
-.notice { @apply flex gap-2.5 items-start bg-[#fbf3e2] border border-[#f2e2bb] rounded-lg px-3.5 py-3 text-[13px] text-[#7a5c1e] mt-4; }
-.notice-icon { @apply shrink-0; }
-
-/* ============ INFO LIST (coluna direita) ============ */
-.info-list { @apply flex flex-col gap-4 mt-3.5; }
-.info-list li { @apply flex gap-3 items-start; }
-.info-icon { @apply text-[15px] w-5 shrink-0 opacity-75; }
-.info-label { @apply text-xs text-muted mb-0.5; }
-.info-value { @apply text-sm font-semibold; }
-.info-link { @apply text-blue font-medium; }
-
-/* ============ ACTIVITY LIST ============ */
-.activity-list { @apply flex flex-col gap-4 mt-3.5; }
-.activity-row { @apply flex gap-2.5 items-start; }
-.dot { @apply w-2 h-2 rounded-full mt-1.5 shrink-0; }
-.dot-green { @apply bg-green; }
-.dot-orange { @apply bg-orange; }
-.dot-blue { @apply bg-blue; }
-.activity-text { @apply text-[13.5px] leading-relaxed; }
-.activity-time { @apply text-xs text-faint mt-0.5; }
-
-/* ============ QUICK ACTIONS ============ */
-.quick-actions { @apply flex flex-col gap-2.5 mt-3.5; }
-
-/* ============ RESPONSIVE ============ */
-@media (max-width: 1100px) {
-    .content-grid { @apply flex-col; }
-    .right-col { @apply w-full; flex-basis: auto; }
-    .stats-grid { @apply flex-wrap; }
-    .stat-card { flex: 1 1 30%; }
+.org-logo {
+    @apply w-[58px] h-[58px]
+           rounded-xl
+           bg-[#1E4028]
+           flex items-center justify-center
+           text-[26px]
+           shrink-0;
 }
 
-@media (max-width: 720px) {
-    .app { @apply flex-col; }
-    .sidebar { @apply w-full flex-row flex-wrap; }
-    .stat-card { flex: 1 1 45%; }
-    .org-card { @apply flex-col; }
+.org-name {
+    @apply text-xl font-bold mb-[3px];
+}
+
+.org-sub {
+    @apply text-[13px] text-[#6B7269] mb-3;
+}
+
+.org-tags {
+    @apply flex flex-wrap gap-2;
+}
+
+.tag {
+    @apply text-xs px-2.5 py-1
+           rounded-full font-medium
+           whitespace-nowrap;
+}
+
+.tag-active {
+    @apply bg-[#DFF2E4] text-[#2F7A4C];
+}
+
+.tag-cnpj {
+    @apply bg-[#E7EEF7] text-[#3A6EA5];
+}
+
+.tag-plain {
+    @apply bg-[#F0EFE9] text-[#6B7269];
+}
+
+.tag-verified {
+    @apply bg-[#FBE9CF] text-[#B5721B];
+}
+
+.org-actions {
+    @apply flex gap-2.5 shrink-0;
+}
+
+
+/* ============================================================
+   BOTÕES DO PAINEL
+   ============================================================ */
+
+.btn {
+    @apply inline-flex
+           items-center
+           justify-center
+           rounded-lg
+           text-[13px]
+           font-semibold
+           px-4 py-[9px]
+           border border-transparent
+           whitespace-nowrap
+           transition;
+}
+
+.btn:hover {
+    @apply opacity-85;
+}
+
+.btn-primary {
+    @apply bg-[#1A3D2B] text-white;
+}
+
+.btn-outline {
+    @apply bg-white border-[#E7E5DF] text-[#1F2420];
+}
+
+.btn-danger {
+    @apply bg-white border-[#F0D3CF] text-[#C04836];
+}
+
+.btn-sm {
+    @apply px-3 py-1.5 text-xs;
+}
+
+.btn-block {
+    @apply w-full text-center;
+}
+
+
+/* ============================================================
+   ESTATÍSTICAS
+   ============================================================ */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+
+    @apply mb-[22px];
+}
+
+.stat-card {
+    @apply bg-white
+           border border-[#E7E5DF]
+           rounded-[10px]
+           p-5
+           min-w-0;
+}
+
+.stat-value {
+    @apply text-3xl font-bold mb-1;
+}
+
+.stat-dark {
+    @apply text-[#1F2420];
+}
+
+.stat-orange {
+    @apply text-[#E8920A];
+}
+
+.stat-blue {
+    @apply text-[#3A6EA5];
+}
+
+.stat-green {
+    @apply text-[#3F8F5F];
+}
+
+.stat-label {
+    @apply text-[13px] text-[#6B7269];
+}
+
+
+/* ============================================================
+   GRID PRINCIPAL
+   ============================================================ */
+
+.content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+
+    @apply gap-5 items-start;
+}
+
+.left-col {
+    @apply min-w-0
+           w-full
+           flex flex-col
+           gap-5;
+}
+
+.right-col {
+    @apply min-w-0
+           w-full
+           flex flex-col
+           gap-5;
+}
+
+
+/* ============================================================
+   PAINÉIS
+   ============================================================ */
+
+.panel {
+    @apply bg-white
+           border border-[#E7E5DF]
+           rounded-[14px]
+           p-[22px];
+}
+
+.panel-header {
+    @apply flex
+           items-center
+           justify-between
+           gap-4
+           mb-4;
+}
+
+.panel-title {
+    @apply text-base
+           font-bold
+           mb-0.5;
+}
+
+.panel-sub {
+    @apply text-[12.5px]
+           text-[#6B7269];
+}
+
+
+/* ============================================================
+   TABELA DE EVENTOS
+   ============================================================ */
+
+.events-table {
+    @apply w-full border-collapse;
+}
+
+.events-table th {
+    @apply text-left
+           text-xs
+           font-medium
+           text-[#9AA094]
+           px-2.5 py-2
+           border-b border-[#E7E5DF];
+}
+
+.events-table td {
+    @apply px-2.5 py-3.5
+           border-b border-[#E7E5DF]
+           align-middle;
+}
+
+.events-table tr:last-child td {
+    @apply border-b-0;
+}
+
+.event-name {
+    @apply font-semibold
+           text-sm
+           mb-0.5;
+}
+
+.event-meta {
+    @apply text-xs
+           text-[#6B7269];
+}
+
+.resp-name {
+    @apply font-medium;
+}
+
+.resp-role {
+    @apply text-xs
+           text-[#6B7269];
+}
+
+.resp-none {
+    @apply text-[#9AA094]
+           italic;
+}
+
+.status {
+    @apply inline-block
+           text-xs
+           font-semibold
+           px-2.5 py-1
+           rounded-md
+           whitespace-nowrap;
+}
+
+.status-published {
+    @apply bg-[#DFF2E4]
+           text-[#2F7A4C];
+}
+
+.status-waiting {
+    @apply bg-[#FBE9CF]
+           text-[#B5721B];
+}
+
+.count-pending {
+    @apply text-[#E8920A]
+           font-semibold
+           text-[13px];
+}
+
+.count-zero {
+    @apply text-[#9AA094]
+           text-[13px];
+}
+
+.actions-cell {
+    @apply flex
+           gap-2
+           whitespace-nowrap;
+}
+
+
+/* ============================================================
+   FUNCIONÁRIOS
+   ============================================================ */
+
+.staff-list {
+    @apply flex flex-col;
+}
+
+.staff-row {
+    @apply flex
+           items-center
+           justify-between
+           gap-4
+           py-3.5
+           border-b border-[#E7E5DF];
+}
+
+.staff-row:last-child {
+    @apply border-b-0;
+}
+
+.staff-identity {
+    @apply flex
+           items-center
+           gap-3
+           min-w-0;
+}
+
+.avatar {
+    @apply w-[34px]
+           h-[34px]
+           rounded-full
+           flex items-center
+           justify-center
+           text-xs
+           font-bold
+           shrink-0;
+}
+
+.avatar-green {
+    @apply bg-[#CFE3D3]
+           text-[#1A3D2B];
+}
+
+.avatar-yellow {
+    @apply bg-[#FBE6B8]
+           text-[#97650F];
+}
+
+.avatar-blue {
+    @apply bg-[#CFE0F2]
+           text-[#3A6EA5];
+}
+
+.staff-name {
+    @apply font-semibold text-sm;
+}
+
+.staff-meta {
+    @apply text-xs text-[#6B7269];
+}
+
+.staff-actions {
+    @apply flex
+           items-center
+           gap-2.5;
+}
+
+.pill {
+    @apply text-xs
+           font-semibold
+           px-3 py-1
+           rounded-full;
+}
+
+.pill-accepted {
+    @apply bg-[#DFF2E4]
+           text-[#2F7A4C];
+}
+
+.pill-pending {
+    @apply bg-[#FBE9CF]
+           text-[#B5721B];
+}
+
+.notice {
+    @apply flex
+           gap-2.5
+           items-start
+           bg-[#FBF3E2]
+           border border-[#F2E2BB]
+           rounded-lg
+           px-3.5 py-3
+           text-[13px]
+           text-[#7A5C1E]
+           mt-4;
+}
+
+.notice-icon {
+    @apply shrink-0;
+}
+
+
+/* ============================================================
+   DADOS CADASTRAIS
+   ============================================================ */
+
+.info-list {
+    @apply flex
+           flex-col
+           gap-4
+           mt-3.5;
+}
+
+.info-list li {
+    @apply flex
+           gap-3
+           items-start;
+}
+
+.info-icon {
+    @apply text-[15px]
+           w-5
+           shrink-0
+           opacity-75;
+}
+
+.info-label {
+    @apply text-xs
+           text-[#6B7269]
+           mb-0.5;
+}
+
+.info-value {
+    @apply text-sm
+           font-semibold;
+}
+
+.info-link {
+    @apply text-[#3A6EA5]
+           font-medium;
+}
+
+
+/* ============================================================
+   ATIVIDADE RECENTE
+   ============================================================ */
+
+.activity-list {
+    @apply flex
+           flex-col
+           gap-4
+           mt-3.5;
+}
+
+.activity-row {
+    @apply flex
+           gap-2.5
+           items-start;
+}
+
+.dot {
+    @apply w-2
+           h-2
+           rounded-full
+           mt-1.5
+           shrink-0;
+}
+
+.dot-green {
+    @apply bg-[#3F8F5F];
+}
+
+.dot-orange {
+    @apply bg-[#E8920A];
+}
+
+.dot-blue {
+    @apply bg-[#3A6EA5];
+}
+
+.activity-text {
+    @apply text-[13.5px]
+           leading-relaxed;
+}
+
+.activity-time {
+    @apply text-xs
+           text-[#9AA094]
+           mt-0.5;
+}
+
+
+/* ============================================================
+   ACESSO RÁPIDO
+   ============================================================ */
+
+.quick-actions {
+    @apply flex
+           flex-col
+           gap-2.5
+           mt-3.5;
+}
+
+
+/* ============================================================
+   LAYOUT DA PÁGINA
+   ============================================================ */
+
+.ong-page {
+    min-height: 100vh;
+    width: 100%;
+}
+
+.ong-page-content {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+    .ong-page-content {
+        margin-left: 230px;
+        width: calc(100% - 230px);
+    }
+}
+
+
+
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+
+@media (max-width: 1250px) {
+
+    .stats-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .right-col {
+        display: grid;
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .right-col .panel:last-child {
+        grid-column: 1 / -1;
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .stats-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .org-card {
+        @apply flex-col;
+    }
+
+    .org-actions {
+        @apply w-full;
+    }
+
+    .org-actions .btn {
+        @apply flex-1;
+    }
+
+    .right-col {
+        grid-template-columns: 1fr;
+    }
+
+    .right-col .panel:last-child {
+        grid-column: auto;
+    }
+
+    .panel-header {
+        @apply items-start;
+    }
+
+}
+
+
+@media (max-width: 520px) {
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .org-identity {
+        @apply flex-col;
+    }
+
+    .org-actions {
+        @apply flex-col;
+    }
+
+    .org-actions .btn {
+        @apply w-full;
+    }
+
+    .staff-row {
+        @apply items-start;
+    }
+
+    .staff-actions {
+        @apply flex-col
+               items-end;
+    }
+
 }

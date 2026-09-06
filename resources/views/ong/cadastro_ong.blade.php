@@ -9,13 +9,7 @@
 <body>
 
 <header>
-  <div class="logo">Ajud<span>ae</span></div>
-  <nav>
-    <a class="plain" href="#">Início</a>
-    <a class="plain" href="#">Entrar</a>
-    <button class="btn-outline">Sou uma ONG</button>
-    <button class="btn-solid">Me voluntariar</button>
-  </nav>
+  @include('/components/navbar')
 </header>
 
 <div class="hero">

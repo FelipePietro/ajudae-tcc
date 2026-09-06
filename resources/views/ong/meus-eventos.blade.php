@@ -33,46 +33,11 @@
                lg:w-[calc(100%-230px)]"
     >
 
-        {{-- ============================================================= --}}
-        {{-- BREADCRUMB --}}
-        {{-- ============================================================= --}}
-
-        <header
-            class="border-b border-[#dedbd1]
-                   bg-white
-                   px-4 py-4
-                   sm:px-6
-                   lg:px-8"
-        >
-
-            <div
-                class="mx-auto w-full max-w-[1450px]
-                       font-poppins text-xs
-                       text-[#817c70]
-                       sm:text-sm"
-            >
-
-                <a
-                    href="{{ route('ong.dashboard') }}"
-                    class="transition hover:text-[#17392a]"
-                >
-                    Dashboard
-                </a>
-
-                <span class="mx-2">
-                    ›
-                </span>
-
-                <span
-                    class="font-semibold
-                           text-[#17392a]"
-                >
-                    Meus eventos
-                </span>
-
-            </div>
-
-        </header>
+        <x-breadcrumb-ong
+            :itens="[
+                ['label' => 'Meus eventos']
+            ]"
+        />
 
 
         {{-- ============================================================= --}}

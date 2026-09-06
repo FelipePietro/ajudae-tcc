@@ -5,13 +5,6 @@
         <span class="brand-dae">ae</span>
     </a>
 
-<<<<<<< HEAD
-    <ul class="navbar-links">
-        <li><a href="/feed">Feed</a></li>
-        <li><a href="/minhas-candidaturas">Candidaturas</a></li>
-        <li><a href="/perfil">Meu Perfil</a></li>
-        <li><a href="/ranking">Ranking</a></li>
-=======
 
     <button
         type="button"
@@ -29,7 +22,6 @@
         class="navbar-links"
     >
 
->>>>>>> origin/feature/fluxo-usuario
         <li>
             <a href="/feed">
                 Feed
@@ -37,7 +29,7 @@
         </li>
 
         <li>
-            <a href="/candidaturas">
+            <a href="/minhas-candidaturas">
                 Candidaturas
             </a>
         </li>
