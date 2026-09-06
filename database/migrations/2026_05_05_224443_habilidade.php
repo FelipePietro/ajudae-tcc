@@ -31,7 +31,36 @@ return new class extends Migration
 
             $table ->unique(['habilidade_id', 'pessoa_id']);
         });
+
+        Schema::create('evento_habilidade', function (Blueprint $table) {
+
+            $table->id('evento_habilidade_id');
+
+
+            $table->unsignedBigInteger('evento_id');
+
+            $table->foreign('evento_id')
+                ->references('evento_id')
+                ->on('evento')
+                ->cascadeOnDelete();
+
+
+            $table->unsignedBigInteger('habilidade_id');
+
+            $table->foreign('habilidade_id')
+                ->references('habilidade_id')
+                ->on('habilidade')
+                ->cascadeOnDelete();
+
+
+            $table->unique([
+                'evento_id',
+                'habilidade_id'
+            ]);
+
+        });
     }
+
 
     /**
      * Reverse the migrations.
@@ -39,6 +68,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('habilidade_pessoa');
+        Schema::dropIfExists('evento_habilidade');
         Schema::dropIfExists('habilidade');
         
     }
