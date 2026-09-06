@@ -3170,3 +3170,179 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 
 })->name('admin.dashboard');
+
+Route::get('/cadastro', function () {
+
+    $cadastroMock = [
+        'nm_pessoa' => 'Lucas Pereira de Souza',
+        'email_pessoa' => 'lucas@email.com',
+        'login_pessoa' => 'lucaspereira',
+    ];
+
+    $habilidades = [
+        ['habilidade_id' => 1, 'nome_habilidade' => 'Comunicação', 'descricao_habilidade' => 'Contato com público, orientação e acolhimento.'],
+        ['habilidade_id' => 2, 'nome_habilidade' => 'Tecnologia', 'descricao_habilidade' => 'Informática, sistemas, suporte e ferramentas digitais.'],
+        ['habilidade_id' => 3, 'nome_habilidade' => 'Organização', 'descricao_habilidade' => 'Planejamento, logística e apoio operacional.'],
+        ['habilidade_id' => 4, 'nome_habilidade' => 'Ensino', 'descricao_habilidade' => 'Reforço escolar, oficinas e compartilhamento de conhecimento.'],
+        ['habilidade_id' => 5, 'nome_habilidade' => 'Fotografia e mídia', 'descricao_habilidade' => 'Fotos, vídeos e cobertura de atividades.'],
+        ['habilidade_id' => 6, 'nome_habilidade' => 'Primeiros socorros', 'descricao_habilidade' => 'Conhecimentos básicos de atendimento e segurança.'],
+    ];
+
+    $causas = [
+        ['causa_id' => 1, 'nome_causa' => 'Meio Ambiente', 'descricao_causa' => 'Preservação e sustentabilidade.'],
+        ['causa_id' => 2, 'nome_causa' => 'Educação', 'descricao_causa' => 'Ensino, reforço e inclusão educacional.'],
+        ['causa_id' => 3, 'nome_causa' => 'Saúde', 'descricao_causa' => 'Bem-estar, prevenção e qualidade de vida.'],
+        ['causa_id' => 4, 'nome_causa' => 'Proteção Animal', 'descricao_causa' => 'Cuidado, acolhimento e proteção de animais.'],
+        ['causa_id' => 5, 'nome_causa' => 'Assistência Social', 'descricao_causa' => 'Apoio a comunidades em vulnerabilidade.'],
+        ['causa_id' => 6, 'nome_causa' => 'Cultura', 'descricao_causa' => 'Arte, cultura e valorização comunitária.'],
+    ];
+
+    $recursos = [
+        ['recurso_id' => 1, 'nome_recurso' => 'Veículo próprio', 'descricao_recurso' => 'Apoio em transporte ou logística.'],
+        ['recurso_id' => 2, 'nome_recurso' => 'Notebook', 'descricao_recurso' => 'Equipamento para atividades digitais.'],
+        ['recurso_id' => 3, 'nome_recurso' => 'Equipamento fotográfico', 'descricao_recurso' => 'Câmera ou acessórios para registros.'],
+        ['recurso_id' => 4, 'nome_recurso' => 'Ferramentas', 'descricao_recurso' => 'Ferramentas próprias para mutirões.'],
+    ];
+
+    $cepMock = [
+        '01310000' => [
+            'cidade' => 'São Paulo',
+            'uf' => 'SP',
+            'logradouro' => 'Avenida Paulista',
+            'bairro' => 'Bela Vista',
+        ],
+
+        'default' => [
+            'cidade' => 'Guarulhos',
+            'uf' => 'SP',
+            'logradouro' => '',
+            'bairro' => '',
+        ],
+    ];
+
+    $documentoUrl = '/docs/termos-de-uso.pdf';
+
+    $termo = [
+        'titulo' => 'Termos de Uso e Participação Voluntária',
+        'versao' => '1.0',
+        'atualizado_em' => '06/09/2026',
+        'documento_url' => $documentoUrl,
+        'documento_hash' => hash('sha256', $documentoUrl),
+    ];
+
+    return view('/cadastro', [
+        'cadastroMock' => $cadastroMock,
+        'habilidades' => $habilidades,
+        'causas' => $causas,
+        'recursos' => $recursos,
+        'cepMock' => $cepMock,
+        'termo' => $termo,
+    ]);
+
+})->name('cadastro.pessoa');
+
+
+Route::post('/cadastro', function (Request $request) {
+
+    $validated = $request->validate([
+        'nm_pessoa' => ['required', 'string', 'max:64'],
+        'email_pessoa' => ['required', 'email', 'max:128'],
+        'cpf_pessoa' => ['required', 'string'],
+        'tele_pessoa' => ['required', 'string'],
+        'dt_nasc' => ['required', 'date'],
+
+        'genero_pessoa' => [
+            'required',
+            'in:masculino,feminino,outro,prefiro não dizer',
+        ],
+
+        'rg_pessoa' => ['required', 'string', 'max:20'],
+        'login_pessoa' => ['required', 'string', 'max:64'],
+        'senha_pessoa' => ['required', 'string', 'min:8', 'confirmed'],
+
+        'cep_pessoa' => ['required', 'string'],
+        'logradouro_pessoa' => ['required', 'string', 'max:64'],
+        'compl_pessoa' => ['nullable', 'string', 'max:64'],
+        'cidade_pessoa' => ['required', 'string', 'max:64'],
+        'bairro_pessoa' => ['required', 'string', 'max:64'],
+        'uf_pessoa' => ['required', 'string', 'size:2'],
+
+        'bio_pessoa' => ['nullable', 'string', 'max:1000'],
+
+        'pfp_pessoa_link' => ['required', 'string', 'max:255'],
+        'rg_pessoa_link' => ['required', 'string', 'max:255'],
+        'antecedentes_pessoa_link' => ['required', 'string', 'max:255'],
+        'cnh_pessoa_link' => ['required', 'string', 'max:255'],
+
+        'habilidades' => ['required', 'array', 'min:1'],
+        'habilidades.*' => ['integer'],
+        'nivel_habilidade' => ['required', 'array'],
+
+        'causas' => ['required', 'array', 'min:1'],
+        'causas.*' => ['integer'],
+
+        'recursos' => ['nullable', 'array'],
+        'recursos.*' => ['integer'],
+        'detalhes_recurso' => ['nullable', 'string', 'max:255'],
+
+        // Mesma ideia do register() atual da Pessoa.
+        'aceitou_termos' => ['required', 'accepted'],
+    ]);
+
+    // Normaliza os campos mascarados para o futuro payload da API.
+    $validated['cpf_pessoa'] =
+        preg_replace('/\D/', '', $validated['cpf_pessoa']);
+
+    $validated['tele_pessoa'] =
+        preg_replace('/\D/', '', $validated['tele_pessoa']);
+
+    $validated['cep_pessoa'] =
+        preg_replace('/\D/', '', $validated['cep_pessoa']);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ASSINATURA ELETRÔNICA — MOCK
+    |--------------------------------------------------------------------------
+    | Não grava no banco.
+    | Replica os metadados que já estavam previstos no PessoaController.
+    */
+    $documentoUrl = '/docs/termos-de-uso.pdf';
+
+    $assinaturaMock = [
+        'dispositivo' =>
+            $request->header('Sec-CH-UA-Platform')
+            ?? 'Desconhecido',
+
+        'ip_assinatura' =>
+            $request->ip(),
+
+        'user_agent_assinatura' =>
+            $request->userAgent(),
+
+        'documento_url' =>
+            $documentoUrl,
+
+        'documento_hash' =>
+            hash('sha256', $documentoUrl),
+
+        'geoloc_assinatura' =>
+            null,
+
+        'aceito_em' =>
+            now()->toISOString(),
+    ];
+
+    session([
+        'cadastro_pessoa_mock' => $validated,
+        'assinatura_pessoa_mock' => $assinaturaMock,
+    ]);
+
+    return redirect()
+        ->route('login')
+        ->with(
+            'cadastro_sucesso',
+            'Cadastro concluído com sucesso! Agora você já pode entrar.'
+        );
+
+})->name('cadastro.pessoa.finalizar');
