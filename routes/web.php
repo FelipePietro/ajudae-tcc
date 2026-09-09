@@ -66,3 +66,9 @@ Route::get('/usuarios', function () {
 Route::get('/relatorios', function () {
     return view('relatorios');
 });
+
+// Rota de Log Ações
+
+ROute::get('/log-acoes', function () {
+    return view('log-acoes');
+});
