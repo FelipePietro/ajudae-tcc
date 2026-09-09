@@ -1025,3 +1025,24 @@
 
 /* Status / severidade — pílula vermelha */
 .admin-tag-vermelho { background: #fdd9d4; color: #a13e27; }
+
+/* Relatórios — gráficos em CSS */
+.rel-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; margin-bottom: 1.7rem; }
+.rel-grid { display: grid; grid-template-columns: 1fr; gap: 1.4rem; margin-bottom: 1.4rem; }
+.rel-bars { display: flex; align-items: flex-end; gap: .55rem; }
+.rel-col { flex: 1; text-align: center; }
+.rel-track { height: 170px; display: flex; align-items: flex-end; }
+.rel-bar { width: 100%; max-width: 40px; margin: 0 auto; background: linear-gradient(180deg, #2f6a49, #1a3d2b); border-radius: 6px 6px 0 0; }
+.rel-col small { display: block; margin-top: .5rem; color: #8a8b82; font-size: .72rem; }
+.rel-hbar-item { margin-bottom: .95rem; }
+.rel-hbar-item:last-child { margin-bottom: 0; }
+.rel-hbar-top { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: .35rem; }
+.rel-hbar-top b { font-weight: 600; color: #1a1a1a; }
+.rel-hbar-top span { color: #8a8b82; }
+.rel-hbar { height: 8px; background: #efe8d8; border-radius: 999px; overflow: hidden; }
+.rel-hbar > span { display: block; height: 100%; border-radius: 999px; background: #e6a04a; }
+
+@media (min-width: 1024px) {
+    .rel-stats { grid-template-columns: repeat(4, 1fr); }
+    .rel-grid { grid-template-columns: 1.4fr 1fr; }
+}

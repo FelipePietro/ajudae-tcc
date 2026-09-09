@@ -60,3 +60,9 @@ Route::get('/solicitacoes-lgpd', function () {
 Route::get('/usuarios', function () {
     return view('usuarios');
 });
+
+// Rota de Relatórios
+
+Route::get('/relatorios', function () {
+    return view('relatorios');
+});
