@@ -988,3 +988,19 @@
     .dash-corpo { grid-template-columns: minmax(0, 1fr) 300px; }
     .dash-welcome h1 { font-size: 2.15rem; }
 }
+
+/* Fila de eventos — conteúdo da página */
+.fila-cabecalho { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1.2rem; }
+.fila-cabecalho h1 { font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 700; color: #1a1a1a; letter-spacing: -0.02em; }
+.fila-cabecalho p { color: #6e6f68; font-size: .9rem; margin-top: .35rem; }
+.fila-resumo { display: flex; gap: .6rem; }
+.fila-resumo div { background: #fff; border: 1px solid #e6e1d6; border-radius: 12px; padding: .5rem .85rem; text-align: center; min-width: 82px; }
+.fila-resumo strong { display: block; font-family: 'Fraunces', serif; font-size: 1.35rem; font-weight: 700; color: #1a3d2b; line-height: 1; }
+.fila-resumo span { font-size: .72rem; color: #8a8b82; }
+
+@media (max-width: 767px) {
+    .fila-cabecalho { align-items: stretch; }
+    .fila-resumo { width: 100%; }
+    .fila-resumo div { flex: 1; min-width: 0; }
+    .fila-cabecalho h1 { font-size: 1.4rem; }
+}
