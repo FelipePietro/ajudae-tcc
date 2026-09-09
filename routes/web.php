@@ -72,3 +72,9 @@ Route::get('/relatorios', function () {
 ROute::get('/log-acoes', function () {
     return view('log-acoes');
 });
+
+// Rota de Configurações
+
+Route::get('/configuracoes', function () {
+    return view('configuracoes');
+});
