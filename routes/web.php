@@ -54,3 +54,9 @@ Route::get('/denuncias', function () {
 Route::get('/solicitacoes-lgpd', function () {
     return view('solicitacoes-lgpd');
 });
+
+// Rota de Usuários
+
+Route::get('/usuarios', function () {
+    return view('usuarios');
+});

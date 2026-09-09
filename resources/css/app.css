@@ -1004,3 +1004,24 @@
     .fila-resumo div { flex: 1; min-width: 0; }
     .fila-cabecalho h1 { font-size: 1.4rem; }
 }
+
+/* Tabela padrão — Usuários, Log de ações, etc. */
+.admin-tabela-wrap { background: #fff; border: 1px solid #e6e1d6; border-radius: 16px; overflow: hidden; }
+.admin-tabela-scroll { overflow-x: auto; }
+.admin-tabela { width: 100%; border-collapse: collapse; font-size: .88rem; min-width: 760px; }
+.admin-tabela thead th { text-align: left; padding: .8rem 1rem; background: #f6f5f1; border-bottom: 1px solid #ecebe7; color: #6e6f68; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.admin-tabela tbody td { padding: .8rem 1rem; border-bottom: 1px solid #f0ebe3; color: #3d3d3d; vertical-align: middle; white-space: nowrap; }
+.admin-tabela tbody tr:last-child td { border-bottom: 0; }
+.admin-tabela tbody tr:hover { background: #faf9f5; }
+.tab-user { display: flex; align-items: center; gap: .7rem; }
+.tab-user-av { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: .72rem; font-weight: 700; flex-shrink: 0; background: #dcead9; color: #1a3d2b; }
+.tab-user strong { display: block; font-size: .9rem; color: #1a1a1a; }
+.tab-user small { color: #8a8b82; font-size: .78rem; }
+.tab-acoes { display: flex; gap: .35rem; }
+.tab-acoes a { width: 32px; height: 32px; border: 1px solid #e6e1d6; background: #f7f5f0; border-radius: 8px; display: grid; place-items: center; color: #5d6f65; text-decoration: none; }
+.tab-acoes a:hover { background: #eef0ea; }
+.tab-acoes a.is-perigo:hover { color: #c0392b; border-color: #f0c3c0; background: #fdf3f2; }
+.tab-acoes svg { width: 15px; height: 15px; }
+
+/* Status / severidade — pílula vermelha */
+.admin-tag-vermelho { background: #fdd9d4; color: #a13e27; }
