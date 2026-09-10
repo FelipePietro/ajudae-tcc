@@ -8,18 +8,34 @@
 </head>
 <body class="ong-body">
 <div class="ong-shell">
-    <x-admin-sidebar />
+            <x-admin-sidebar />
 
-    <main class="ong-main">
-        <div class="admin-topo">
-            <nav class="cand-breadcrumb">Dashboard <span>›</span> Painel de administração</nav>
-            <div class="admin-topo-acoes">
-                <time datetime="2025-05-27T22:31">qua., 27 de mai. — 22:31</time>
-                <x-botao-secundario href="#" texto="Ver log completo" />
-            </div>
-        </div>
+            <main class="ong-main admin-main">
+                <div class="admin-topo">
+        <x-breadcrumb-admin
+            :itens="[
+                [
+                    'label' => 'Painel de administração'
+                ]
+            ]"
+        >
+            <x-slot:acoes>
+                <div class="admin-topo-acoes">
+                    <time datetime="2025-05-27T22:31">
+                        qua., 27 de mai. · 22:31
+                    </time>
 
-        <p class="admin-alerta">17 itens pendentes de revisão: 3 upgrades para organizador, 1 ONG cadastrada, 2 denúncias ativas e 4 solicitações LGPD. 2 solicitações LGPD vencem em menos de 48h.</p>
+                    <a
+                        href="{{ route('admin.log-acoes') }}"
+                        class="btn-secundario admin-log-btn"
+                    >
+                        Ver log completo
+                    </a>
+                </div>
+            </x-slot:acoes>
+        </x-breadcrumb-admin>
+
+        <p class="admin-alerta"><strong>17</strong> <b>itens pendentes de revisão</b> — 7 eventos aguardam aprovação, 3 upgrades para organizador, 1 ONG cadastrada, 2 denúncias ativas e 4 solicitações LGPD. <span>2 solicitações LGPD vencem em menos de 48h.</span></p>
 
         <section class="admin-stats">
             <article class="admin-stat admin-stat-laranja">
@@ -50,13 +66,23 @@
         </section>
 
         <div class="admin-corpo">
-            <div>
+            <div class="admin-fila">
                 <div class="admin-tabs">
-                    <span class="is-active">Eventos <small>(7)</small></span>
-                    <span>ONGs <small>(1)</small></span>
-                    <span>Upgrades <small>(3)</small></span>
-                    <span>Denúncias <small>(2)</small></span>
-                    <span>LGPD <small>(4)</small></span>
+                    <a href="{{ route('admin.fila-eventos') }}" class="is-active">
+                        Eventos <em>7</em>
+                    </a>
+                    <a href="{{ route('admin.cadastros-ong') }}">
+                        ONGs <em>1</em>
+                    </a>
+                    <a href="{{ route('admin.upgrades-org') }}">
+                        Upgrades <em>3</em>
+                    </a>
+                    <a href="{{ route('admin.denuncias') }}">
+                        Denúncias <em>2</em>
+                    </a>
+                    <a href="{{ route('admin.solicitacoes-lgpd') }}">
+                        LGPD <em>4</em>
+                    </a>
                 </div>
 
                 <article class="admin-card">
@@ -65,8 +91,7 @@
                             <h2>Limpeza de Parques — Parque da Cantareira</h2>
                             <div class="admin-tags">
                                 <span class="admin-tag admin-tag-verde">ONG</span>
-                                <span class="admin-tag admin-tag-cinza">Verde SP</span>
-                                <span class="admin-tag admin-tag-cinza">Organizador: Carlos F.</span>
+                                <span class="admin-tag-txt">Verde SP • Organizador: Carlos F.</span>
                                 <span class="admin-tag admin-tag-ouro">Meio Ambiente</span>
                             </div>
                         </div>
@@ -105,7 +130,7 @@
                             <h2>Mutirão de Pintura Comunitária</h2>
                             <div class="admin-tags">
                                 <span class="admin-tag admin-tag-cinza">Ind.</span>
-                                <span class="admin-tag admin-tag-cinza">Carlos Ferreira</span>
+                                <span class="admin-tag-txt">· Carlos Ferreira</span>
                                 <span class="admin-tag admin-tag-cinza">Habitação</span>
                             </div>
                         </div>
@@ -167,10 +192,10 @@
                 <section class="admin-widget">
                     <h3>Acesso rápido</h3>
                     <nav class="admin-atalhos">
-                        <a href="#">Fila de eventos</a>
-                        <a href="#">Solicitações LGPD</a>
-                        <a href="#">Denúncias abertas</a>
-                        <a href="#">Upgrades de organizador</a>
+                        <a href="{{ route('admin.fila-eventos') }}">Fila de eventos</a>
+                        <a href="{{ route('admin.solicitacoes-lgpd') }}">Solicitações LGPD</a>
+                        <a href="{{ route('admin.denuncias') }}">Denúncias abertas</a>
+                        <a href="{{ route('admin.upgrades-org') }}">Upgrades de organizador</a>
                     </nav>
                 </section>
             </aside>

@@ -3145,31 +3145,68 @@ Route::get('/ong/configuracoes', function () {
 })->name('ong.configuracoes');
 
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN
-|--------------------------------------------------------------------------
-*/
+// ==============================
+// ROTAS DO PAINEL ADMINISTRATIVO
+// ==============================
 
-Route::get('/admin', function () {
+Route::prefix('admin')->name('admin.')->group(function () {
 
-    return view('admin');
+    // Painel principal
+    Route::get('/', function () {
+        return view('/admin/admin');
+    })->name('admin');
 
-})->name('admin.index');
+    // Candidatos
+    Route::get('/candidatos', function () {
+        return view('/admin/candidatos');
+    })->name('candidatos');
 
+    // Fila de eventos
+    Route::get('/fila-eventos', function () {
+        return view('/admin/fila-eventos');
+    })->name('fila-eventos');
 
-Route::get('/candidatos', function () {
+    // Cadastros de ONG
+    Route::get('/cadastros-ong', function () {
+        return view('/admin/cadastros-ong');
+    })->name('cadastros-ong');
 
-    return view('candidatos');
+    // Solicitações de upgrade para organizador
+    Route::get('/upgrades-org', function () {
+        return view('/admin/upgrades-org');
+    })->name('upgrades-org');
 
-})->name('admin.candidatos');
+    // Denúncias
+    Route::get('/denuncias', function () {
+        return view('/admin/denuncias');
+    })->name('denuncias');
 
+    // Solicitações LGPD
+    Route::get('/solicitacoes-lgpd', function () {
+        return view('/admin/solicitacoes-lgpd');
+    })->name('solicitacoes-lgpd');
 
-Route::get('/dashboard', function () {
+    // Usuários
+    Route::get('/usuarios', function () {
+        return view('/admin/usuarios');
+    })->name('usuarios');
 
-    return view('dashboard');
+    // Relatórios
+    Route::get('/relatorios', function () {
+        return view('/admin/relatorios');
+    })->name('relatorios');
 
-})->name('admin.dashboard');
+    // Log de ações
+    Route::get('/log-acoes', function () {
+        return view('/admin/log-acoes');
+    })->name('log-acoes');
+
+    // Configurações
+    Route::get('/configuracoes', function () {
+        return view('/admin/configuracoes');
+    })->name('configuracoes');
+
+});
 
 Route::get('/cadastro', function () {
 
