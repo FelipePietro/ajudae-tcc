@@ -1207,6 +1207,89 @@
     </main>
 
 
+
+    {{-- ========================================================= --}}
+    {{-- MODAL DE SUCESSO --}}
+    {{-- ========================================================= --}}
+
+    <div
+        id="modal-sucesso-evento"
+        class="fixed inset-0 z-[100] hidden
+               items-center justify-center
+               bg-black/45 px-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-sucesso-titulo"
+    >
+        <div
+            class="w-full max-w-md
+                   rounded-3xl border border-[#dedbd1]
+                   bg-white p-6
+                   text-center shadow-xl
+                   sm:p-8"
+        >
+            <div
+                class="mx-auto flex h-16 w-16
+                       items-center justify-center
+                       rounded-full bg-[#dcefe5]
+                       text-3xl font-bold
+                       text-[#174b36]"
+                aria-hidden="true"
+            >
+                ✓
+            </div>
+
+            <h2
+                id="modal-sucesso-titulo"
+                class="mt-5 font-fraunces
+                       text-2xl font-bold
+                       text-[#17392a]"
+            >
+                Evento enviado!
+            </h2>
+
+            <p
+                class="mt-3 font-poppins
+                       text-sm leading-6
+                       text-neutral-500"
+            >
+                Seu evento foi enviado para análise
+                da equipe do Ajudaê.
+            </p>
+
+            <div
+                class="mt-4 rounded-2xl
+                       border border-[#f0dfb8]
+                       bg-[#fff8e8]
+                       px-4 py-3
+                       font-poppins text-xs
+                       leading-5 text-[#805f21]"
+            >
+                Enquanto estiver em análise,
+                ele aparecerá com o status
+                <strong>"Aguardando aprovação"</strong>
+                em Meus eventos.
+            </div>
+
+            <div class="mt-6 flex flex-col gap-3">
+                <a
+                    href="{{ route('ong.eventos.index') }}"
+                    class="flex w-full
+                           items-center justify-center
+                           rounded-full
+                           bg-[#174b36]
+                           px-6 py-3
+                           font-poppins text-sm
+                           font-semibold text-white
+                           transition
+                           hover:bg-[#123b2b]"
+                >
+                    Ir para meus eventos →
+                </a>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -1496,10 +1579,53 @@
                 'form[action="{{ route('ong.eventos.store') }}"]'
             );
 
+            const modalSucesso =
+                document.getElementById('modal-sucesso-evento');
+
+            const urlMeusEventos =
+                @json(route('ong.eventos.index'));
+
+
             formularioEvento?.addEventListener('submit', function (event) {
+
+                // MOCK DA PRÉ-BANCA:
+                // impede o POST real e mostra a confirmação visual.
+                event.preventDefault();
+
                 if (!validarDatas()) {
-                    event.preventDefault();
                     campoDataFim?.reportValidity();
+                    return;
+                }
+
+                if (!formularioEvento.checkValidity()) {
+                    formularioEvento.reportValidity();
+                    return;
+                }
+
+                modalSucesso?.classList.remove('hidden');
+                modalSucesso?.classList.add('flex');
+
+                document.body.classList.add('overflow-hidden');
+            });
+
+
+            // Ao clicar fora do conteúdo do modal,
+            // redireciona automaticamente para Meus eventos.
+            modalSucesso?.addEventListener('click', function (event) {
+                if (event.target === modalSucesso) {
+                    window.location.href = urlMeusEventos;
+                }
+            });
+
+
+            // Também redireciona ao apertar ESC.
+            document.addEventListener('keydown', function (event) {
+                if (
+                    event.key === 'Escape' &&
+                    modalSucesso &&
+                    !modalSucesso.classList.contains('hidden')
+                ) {
+                    window.location.href = urlMeusEventos;
                 }
             });
 
