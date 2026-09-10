@@ -828,6 +828,145 @@
                         </div>
 
 
+                        {{-- PRÉVIA DA EDIÇÃO --}}
+                        <div
+                            class="overflow-hidden rounded-2xl
+                                   border border-[#dedbd1]
+                                   bg-white shadow-sm"
+                        >
+
+                            <div
+                                id="preview-edicao-imagem-wrapper"
+                                class="relative flex h-36 items-center
+                                       justify-center overflow-hidden
+                                       bg-[#dcefe5]
+                                       sm:h-44"
+                            >
+                                <img
+                                    id="preview-edicao-imagem"
+                                    src="{{ $evento->imagem_evento_link ?? '' }}"
+                                    alt="Prévia da edição do evento"
+                                    class="{{ !empty($evento->imagem_evento_link) ? '' : 'hidden' }} h-full w-full object-cover"
+                                >
+
+                                <span
+                                    id="preview-edicao-placeholder"
+                                    class="{{ !empty($evento->imagem_evento_link) ? 'hidden' : '' }} text-4xl sm:text-5xl"
+                                    aria-hidden="true"
+                                >
+                                    🌿
+                                </span>
+                            </div>
+
+
+                            <div class="p-4 sm:p-5">
+
+                                <p
+                                    class="font-poppins
+                                           text-xs text-neutral-500"
+                                >
+                                    Prévia da edição
+                                </p>
+
+                                <h3
+                                    id="preview-edicao-titulo"
+                                    class="mt-1 text-lg font-semibold
+                                           leading-snug text-[#17392a]"
+                                >
+                                    {{ old('nm_evento', $evento->nm_evento) }}
+                                </h3>
+
+
+                                <div
+                                    class="mt-3 flex flex-wrap gap-2
+                                           font-poppins text-[11px]"
+                                >
+                                    <span
+                                        id="preview-edicao-categoria"
+                                        class="rounded-full bg-[#eef7f2]
+                                               px-2.5 py-1 text-[#2d6a4f]"
+                                    >
+                                        Categoria
+                                    </span>
+
+                                    <span
+                                        id="preview-edicao-modalidade"
+                                        class="rounded-full bg-[#fff5dd]
+                                               px-2.5 py-1 text-[#9a6410]"
+                                    >
+                                        {{ ucfirst(old('modalidade_evento', $evento->modalidade_evento ?? 'presencial')) }}
+                                    </span>
+
+                                    <span
+                                        id="preview-edicao-vagas"
+                                        class="rounded-full bg-neutral-100
+                                               px-2.5 py-1 text-neutral-600"
+                                    >
+                                        {{ old('vagas_evento', $evento->vagas_evento) }} vagas
+                                    </span>
+                                </div>
+
+
+                                <p
+                                    id="preview-edicao-descricao"
+                                    class="mt-3
+                                           font-poppins text-xs
+                                           leading-5
+                                           text-neutral-500"
+                                >
+                                    {{ old('descricao_evento', $evento->descricao_evento) }}
+                                </p>
+
+
+                                <div
+                                    class="mt-4 space-y-2 border-t
+                                           border-[#ece9e1] pt-4
+                                           font-poppins text-xs
+                                           text-neutral-600"
+                                >
+
+                                    <p
+                                        id="preview-edicao-data"
+                                        class="flex gap-2"
+                                    >
+                                        <span aria-hidden="true">📅</span>
+                                        <span>Data e horário do evento</span>
+                                    </p>
+
+                                    <p
+                                        id="preview-edicao-local"
+                                        class="flex gap-2"
+                                    >
+                                        <span aria-hidden="true">📍</span>
+                                        <span>Local do evento</span>
+                                    </p>
+
+                                </div>
+
+
+                                <div
+                                    id="preview-edicao-habilidades-wrapper"
+                                    class="mt-4"
+                                >
+                                    <p
+                                        class="mb-2 font-poppins
+                                               text-[11px] font-medium
+                                               text-neutral-500"
+                                    >
+                                        Habilidades desejadas
+                                    </p>
+
+                                    <div
+                                        id="preview-edicao-habilidades"
+                                        class="flex flex-wrap gap-1.5"
+                                    ></div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
                         <div
                             class="rounded-2xl border
                                    border-[#edcf9f]
@@ -902,6 +1041,696 @@
         </form>
 
     </main>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const formulario =
+                document.querySelector(
+                    'form[action="{{ route('ong.eventos.atualizar', $evento->evento_id) }}"]'
+                );
+
+            const campoTitulo =
+                document.getElementById('nm_evento');
+
+            const campoCategoria =
+                document.getElementById('cat_evento_id');
+
+            const campoVagas =
+                document.getElementById('vagas_evento');
+
+            const campoModalidade =
+                document.getElementById('modalidade_evento');
+
+            const campoDescricao =
+                document.getElementById('descricao_evento');
+
+            const campoDataInicio =
+                document.getElementById('data_inicio');
+
+            const campoDataFim =
+                document.getElementById('data_fim');
+
+            const campoCep =
+                document.getElementById('cep_evento');
+
+            const campoLogradouro =
+                document.getElementById('logradouro_evento');
+
+            const campoComplemento =
+                document.getElementById('compl_evento');
+
+            const campoImagem =
+                document.querySelector('input[name="imagem_evento"]');
+
+            const camposHabilidades =
+                document.querySelectorAll(
+                    'input[name="habilidades[]"]'
+                );
+
+
+            const previewTitulo =
+                document.getElementById(
+                    'preview-edicao-titulo'
+                );
+
+            const previewCategoria =
+                document.getElementById(
+                    'preview-edicao-categoria'
+                );
+
+            const previewVagas =
+                document.getElementById(
+                    'preview-edicao-vagas'
+                );
+
+            const previewModalidade =
+                document.getElementById(
+                    'preview-edicao-modalidade'
+                );
+
+            const previewDescricao =
+                document.getElementById(
+                    'preview-edicao-descricao'
+                );
+
+            const previewData =
+                document.querySelector(
+                    '#preview-edicao-data span:last-child'
+                );
+
+            const previewLocal =
+                document.querySelector(
+                    '#preview-edicao-local span:last-child'
+                );
+
+            const previewImagem =
+                document.getElementById(
+                    'preview-edicao-imagem'
+                );
+
+            const previewPlaceholder =
+                document.getElementById(
+                    'preview-edicao-placeholder'
+                );
+
+            const previewHabilidades =
+                document.getElementById(
+                    'preview-edicao-habilidades'
+                );
+
+            const previewHabilidadesWrapper =
+                document.getElementById(
+                    'preview-edicao-habilidades-wrapper'
+                );
+
+            const modalSucesso =
+                document.getElementById(
+                    'modal-sucesso-edicao'
+                );
+
+
+            function textoOuPadrao(valor, padrao) {
+                const texto = (valor ?? '').trim();
+
+                return texto.length
+                    ? texto
+                    : padrao;
+            }
+
+
+            function formatarModalidade(valor) {
+                const opcoes = {
+                    presencial: 'Presencial',
+                    online: 'Online',
+                    hibrido: 'Híbrido'
+                };
+
+                return opcoes[valor] ?? 'Presencial';
+            }
+
+
+            function formatarData(valor) {
+                if (!valor) {
+                    return null;
+                }
+
+                const data = new Date(valor);
+
+                if (Number.isNaN(data.getTime())) {
+                    return null;
+                }
+
+                return new Intl.DateTimeFormat(
+                    'pt-BR',
+                    {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }
+                ).format(data);
+            }
+
+
+            function atualizarTitulo() {
+                previewTitulo.textContent =
+                    textoOuPadrao(
+                        campoTitulo?.value,
+                        'Evento sem título'
+                    );
+            }
+
+
+            function atualizarCategoria() {
+                if (!campoCategoria) {
+                    return;
+                }
+
+                const opcao =
+                    campoCategoria.options[
+                        campoCategoria.selectedIndex
+                    ];
+
+                previewCategoria.textContent =
+                    opcao?.textContent?.trim()
+                    || 'Categoria';
+            }
+
+
+            function atualizarVagas() {
+                const vagas =
+                    Number(campoVagas?.value);
+
+                if (!vagas || vagas < 1) {
+                    previewVagas.textContent =
+                        'Vagas a definir';
+
+                    return;
+                }
+
+                previewVagas.textContent =
+                    vagas === 1
+                        ? '1 vaga'
+                        : `${vagas} vagas`;
+            }
+
+
+            function atualizarModalidade() {
+                previewModalidade.textContent =
+                    formatarModalidade(
+                        campoModalidade?.value
+                    );
+            }
+
+
+            function atualizarDescricao() {
+                previewDescricao.textContent =
+                    textoOuPadrao(
+                        campoDescricao?.value,
+                        'Descrição do evento'
+                    );
+            }
+
+
+            function atualizarData() {
+                const inicio =
+                    formatarData(
+                        campoDataInicio?.value
+                    );
+
+                const fim =
+                    formatarData(
+                        campoDataFim?.value
+                    );
+
+                if (!inicio && !fim) {
+                    previewData.textContent =
+                        'Data e horário a definir';
+
+                    return;
+                }
+
+                if (inicio && fim) {
+                    previewData.textContent =
+                        `${inicio} → ${fim}`;
+
+                    return;
+                }
+
+                previewData.textContent =
+                    inicio ?? fim;
+            }
+
+
+            function atualizarLocal() {
+                const partes = [];
+
+                const logradouro =
+                    campoLogradouro?.value.trim();
+
+                const complemento =
+                    campoComplemento?.value.trim();
+
+                const cep =
+                    campoCep?.value.trim();
+
+                if (logradouro) {
+                    partes.push(logradouro);
+                }
+
+                if (complemento) {
+                    partes.push(complemento);
+                }
+
+                if (cep) {
+                    partes.push(`CEP ${cep}`);
+                }
+
+                previewLocal.textContent =
+                    partes.length
+                        ? partes.join(' · ')
+                        : 'Local a definir';
+            }
+
+
+            function atualizarHabilidades() {
+                if (
+                    !previewHabilidades ||
+                    !previewHabilidadesWrapper
+                ) {
+                    return;
+                }
+
+                previewHabilidades.innerHTML = '';
+
+                const selecionadas =
+                    Array.from(camposHabilidades)
+                        .filter(
+                            checkbox =>
+                                checkbox.checked
+                        );
+
+                if (!selecionadas.length) {
+                    previewHabilidadesWrapper
+                        .classList
+                        .add('hidden');
+
+                    return;
+                }
+
+                selecionadas.forEach(
+                    checkbox => {
+
+                        const label =
+                            checkbox.closest('label');
+
+                        const nome =
+                            label
+                                ?.querySelector('span')
+                                ?.textContent
+                                ?.trim();
+
+                        if (!nome) {
+                            return;
+                        }
+
+                        const tag =
+                            document.createElement('span');
+
+                        tag.className =
+                            'rounded-full border ' +
+                            'border-[#d4d0c6] ' +
+                            'bg-[#f7f5ef] px-2.5 py-1 ' +
+                            'font-poppins text-[10px] ' +
+                            'text-neutral-600';
+
+                        tag.textContent = nome;
+
+                        previewHabilidades
+                            .appendChild(tag);
+                    }
+                );
+
+                previewHabilidadesWrapper
+                    .classList
+                    .remove('hidden');
+            }
+
+
+            function atualizarImagem() {
+                const arquivo =
+                    campoImagem?.files?.[0];
+
+                if (!arquivo) {
+                    return;
+                }
+
+                if (
+                    !arquivo.type.startsWith('image/')
+                ) {
+                    return;
+                }
+
+                const leitor =
+                    new FileReader();
+
+                leitor.onload =
+                    function (event) {
+
+                        previewImagem.src =
+                            event.target.result;
+
+                        previewImagem
+                            .classList
+                            .remove('hidden');
+
+                        previewPlaceholder
+                            .classList
+                            .add('hidden');
+                    };
+
+                leitor.readAsDataURL(arquivo);
+            }
+
+
+            function validarDatas() {
+                if (
+                    !campoDataInicio ||
+                    !campoDataFim
+                ) {
+                    return true;
+                }
+
+                const inicio =
+                    campoDataInicio.value;
+
+                const fim =
+                    campoDataFim.value;
+
+                campoDataFim.min =
+                    inicio || '';
+
+                campoDataFim
+                    .setCustomValidity('');
+
+                if (
+                    inicio &&
+                    fim &&
+                    fim < inicio
+                ) {
+                    campoDataFim
+                        .setCustomValidity(
+                            'A data de término não pode ser anterior à data de início.'
+                        );
+
+                    return false;
+                }
+
+                return true;
+            }
+
+
+            function atualizarTudo() {
+                atualizarTitulo();
+                atualizarCategoria();
+                atualizarVagas();
+                atualizarModalidade();
+                atualizarDescricao();
+                validarDatas();
+                atualizarData();
+                atualizarLocal();
+                atualizarHabilidades();
+            }
+
+
+            campoTitulo?.addEventListener(
+                'input',
+                atualizarTitulo
+            );
+
+            campoCategoria?.addEventListener(
+                'change',
+                atualizarCategoria
+            );
+
+            campoVagas?.addEventListener(
+                'input',
+                atualizarVagas
+            );
+
+            campoModalidade?.addEventListener(
+                'change',
+                atualizarModalidade
+            );
+
+            campoDescricao?.addEventListener(
+                'input',
+                atualizarDescricao
+            );
+
+            campoDataInicio?.addEventListener(
+                'change',
+                function () {
+
+                    validarDatas();
+
+                    if (
+                        campoDataFim?.value &&
+                        campoDataInicio?.value &&
+                        campoDataFim.value <
+                        campoDataInicio.value
+                    ) {
+                        campoDataFim.value = '';
+
+                        campoDataFim
+                            .setCustomValidity('');
+                    }
+
+                    atualizarData();
+                }
+            );
+
+            campoDataFim?.addEventListener(
+                'change',
+                function () {
+
+                    validarDatas();
+                    atualizarData();
+
+                    if (
+                        !campoDataFim
+                            .checkValidity()
+                    ) {
+                        campoDataFim
+                            .reportValidity();
+                    }
+                }
+            );
+
+            campoCep?.addEventListener(
+                'input',
+                atualizarLocal
+            );
+
+            campoLogradouro?.addEventListener(
+                'input',
+                atualizarLocal
+            );
+
+            campoComplemento?.addEventListener(
+                'input',
+                atualizarLocal
+            );
+
+            campoImagem?.addEventListener(
+                'change',
+                atualizarImagem
+            );
+
+            camposHabilidades.forEach(
+                checkbox => {
+
+                    checkbox.addEventListener(
+                        'change',
+                        atualizarHabilidades
+                    );
+                }
+            );
+
+
+            /*
+             * MOCK DA PRÉ-BANCA:
+             * impede o PUT real e mostra o modal.
+             */
+            formulario?.addEventListener(
+                'submit',
+                function (event) {
+
+                    event.preventDefault();
+
+                    if (!validarDatas()) {
+                        campoDataFim
+                            ?.reportValidity();
+
+                        return;
+                    }
+
+                    if (
+                        !formulario
+                            .checkValidity()
+                    ) {
+                        formulario
+                            .reportValidity();
+
+                        return;
+                    }
+
+                    modalSucesso
+                        ?.classList
+                        .remove('hidden');
+
+                    modalSucesso
+                        ?.classList
+                        .add('flex');
+
+                    document.body
+                        .classList
+                        .add('overflow-hidden');
+                }
+            );
+
+
+            /*
+             * Clique fora leva para Meus eventos.
+             */
+            modalSucesso?.addEventListener(
+                'click',
+                function (event) {
+
+                    if (
+                        event.target ===
+                        modalSucesso
+                    ) {
+                        window.location.href =
+                            @json(
+                                route(
+                                    'ong.eventos.index'
+                                )
+                            );
+                    }
+                }
+            );
+
+
+            /*
+             * ESC também leva para Meus eventos.
+             */
+            document.addEventListener(
+                'keydown',
+                function (event) {
+
+                    if (
+                        event.key === 'Escape' &&
+                        modalSucesso &&
+                        !modalSucesso
+                            .classList
+                            .contains('hidden')
+                    ) {
+                        window.location.href =
+                            @json(
+                                route(
+                                    'ong.eventos.index'
+                                )
+                            );
+                    }
+                }
+            );
+
+
+            atualizarTudo();
+        });
+    </script>
+
+
+    {{-- MODAL DE SUCESSO --}}
+    <div
+        id="modal-sucesso-edicao"
+        class="fixed inset-0 z-[100] hidden
+               items-center justify-center
+               bg-black/45 px-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-sucesso-edicao-titulo"
+    >
+        <div
+            class="w-full max-w-md
+                   rounded-3xl border border-[#dedbd1]
+                   bg-white p-6
+                   text-center shadow-xl
+                   sm:p-8"
+        >
+            <div
+                class="mx-auto flex h-16 w-16
+                       items-center justify-center
+                       rounded-full bg-[#dcefe5]
+                       text-3xl font-bold
+                       text-[#174b36]"
+                aria-hidden="true"
+            >
+                ✓
+            </div>
+
+            <h2
+                id="modal-sucesso-edicao-titulo"
+                class="mt-5 font-fraunces
+                       text-2xl font-bold
+                       text-[#17392a]"
+            >
+                Alterações salvas!
+            </h2>
+
+            <p
+                class="mt-3 font-poppins
+                       text-sm leading-6
+                       text-neutral-500"
+            >
+                As alterações do evento foram enviadas com sucesso.
+            </p>
+
+            <div
+                class="mt-4 rounded-2xl
+                       border border-[#f0dfb8]
+                       bg-[#fff8e8]
+                       px-4 py-3
+                       font-poppins text-xs
+                       leading-5 text-[#805f21]"
+            >
+                Dependendo das mudanças realizadas, o evento poderá
+                voltar para análise antes de aparecer novamente no feed.
+            </div>
+
+            <div class="mt-6">
+                <a
+                    href="{{ route('ong.eventos.index') }}"
+                    class="flex w-full
+                           items-center justify-center
+                           rounded-full
+                           bg-[#174b36]
+                           px-6 py-3
+                           font-poppins text-sm
+                           font-semibold text-white
+                           transition
+                           hover:bg-[#123b2b]"
+                >
+                    Ir para meus eventos →
+                </a>
+            </div>
+        </div>
+    </div>
+
 
 </body>
 </html>
