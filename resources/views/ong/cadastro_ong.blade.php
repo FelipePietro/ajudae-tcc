@@ -151,7 +151,7 @@
         <input type="checkbox" name="aceite_termo_responsabilidade" value="1" {{ old('aceite_termo_responsabilidade') ? 'checked' : '' }}>
         <span class="slider"></span>
       </label>
-      <div>Aceito o <a href="#">Termo de Responsabilidade da ONG</a> — declaro que tenho autoridade legal para representar esta organização e que a ONG é responsável pelos eventos publicados sob seu nome</div>
+      <div>Aceito o <a href="{{ route('termos') }}">Termo de Responsabilidade da ONG</a> — declaro que tenho autoridade legal para representar esta organização e que a ONG é responsável pelos eventos publicados sob seu nome</div>
     </div>
     @error('aceite_termo_responsabilidade')
       <span class="field-note" style="color:#b4483c;">{{ $message }}</span>
@@ -162,7 +162,7 @@
         <input type="checkbox" name="aceite_privacidade" value="1" {{ old('aceite_privacidade') ? 'checked' : '' }}>
         <span class="slider"></span>
       </label>
-      <div>Li e concordo com a <a href="#">Política de Privacidade</a> e as regras de moderação. Estou ciente de que o cadastro ficará pendente até a verificação pelo administrador</div>
+      <div>Li e concordo com a <a href="{{ route('privacidade') }}">Política de Privacidade</a> e as regras de moderação. Estou ciente de que o cadastro ficará pendente até a verificação pelo administrador</div>
     </div>
     @error('aceite_privacidade')
       <span class="field-note" style="color:#b4483c;">{{ $message }}</span>
