@@ -515,6 +515,7 @@
                                             id="data_fim"
                                             name="data_fim"
                                             required
+                                            min=""
                                             class="w-full min-w-0
                                                    rounded-xl border
                                                    border-[#d8d4ca]
@@ -848,14 +849,28 @@
                                    bg-white shadow-sm"
                         >
 
+                            {{-- Imagem da prévia --}}
                             <div
-                                class="flex h-28 items-center
-                                       justify-center
+                                id="preview-imagem-wrapper"
+                                class="relative flex h-36 items-center
+                                       justify-center overflow-hidden
                                        bg-[#dcefe5]
-                                       text-4xl
-                                       sm:h-32 sm:text-5xl"
+                                       sm:h-44"
                             >
-                                🌿
+                                <img
+                                    id="preview-imagem"
+                                    src=""
+                                    alt="Prévia da imagem do evento"
+                                    class="hidden h-full w-full object-cover"
+                                >
+
+                                <span
+                                    id="preview-imagem-placeholder"
+                                    class="text-4xl sm:text-5xl"
+                                    aria-hidden="true"
+                                >
+                                    🌿
+                                </span>
                             </div>
 
 
@@ -869,20 +884,98 @@
                                 </p>
 
                                 <h3
-                                    class="mt-1 font-semibold"
+                                    id="preview-titulo"
+                                    class="mt-1 text-lg font-semibold
+                                           leading-snug text-[#17392a]"
                                 >
                                     Prévia do evento
                                 </h3>
 
+
+                                <div
+                                    class="mt-3 flex flex-wrap gap-2
+                                           font-poppins text-[11px]"
+                                >
+                                    <span
+                                        id="preview-categoria"
+                                        class="rounded-full bg-[#eef7f2]
+                                               px-2.5 py-1 text-[#2d6a4f]"
+                                    >
+                                        Categoria
+                                    </span>
+
+                                    <span
+                                        id="preview-modalidade"
+                                        class="rounded-full bg-[#fff5dd]
+                                               px-2.5 py-1 text-[#9a6410]"
+                                    >
+                                        Presencial
+                                    </span>
+
+                                    <span
+                                        id="preview-vagas"
+                                        class="rounded-full bg-neutral-100
+                                               px-2.5 py-1 text-neutral-600"
+                                    >
+                                        30 vagas
+                                    </span>
+                                </div>
+
+
                                 <p
+                                    id="preview-descricao"
                                     class="mt-3
                                            font-poppins text-xs
                                            leading-5
                                            text-neutral-500"
                                 >
-                                    O resumo do evento
-                                    aparecerá aqui.
+                                    O resumo do evento aparecerá aqui.
                                 </p>
+
+
+                                <div
+                                    class="mt-4 space-y-2 border-t
+                                           border-[#ece9e1] pt-4
+                                           font-poppins text-xs
+                                           text-neutral-600"
+                                >
+
+                                    <p
+                                        id="preview-data"
+                                        class="flex gap-2"
+                                    >
+                                        <span aria-hidden="true">📅</span>
+                                        <span>Data e horário a definir</span>
+                                    </p>
+
+                                    <p
+                                        id="preview-local"
+                                        class="flex gap-2"
+                                    >
+                                        <span aria-hidden="true">📍</span>
+                                        <span>Local a definir</span>
+                                    </p>
+
+                                </div>
+
+
+                                <div
+                                    id="preview-habilidades-wrapper"
+                                    class="mt-4 hidden"
+                                >
+                                    <p
+                                        class="mb-2 font-poppins
+                                               text-[11px] font-medium
+                                               text-neutral-500"
+                                    >
+                                        Habilidades desejadas
+                                    </p>
+
+                                    <div
+                                        id="preview-habilidades"
+                                        class="flex flex-wrap gap-1.5"
+                                    ></div>
+                                </div>
 
                             </div>
 
@@ -1112,6 +1205,307 @@
         </form>
 
     </main>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const campoTitulo = document.getElementById('nm_evento');
+            const campoCategoria = document.getElementById('cat_evento_id');
+            const campoVagas = document.getElementById('vagas_evento');
+            const campoModalidade = document.getElementById('modalidade_evento');
+            const campoDescricao = document.getElementById('descricao_evento');
+            const campoDataInicio = document.getElementById('data_inicio');
+            const campoDataFim = document.getElementById('data_fim');
+            const campoCep = document.getElementById('cep_evento');
+            const campoLogradouro = document.getElementById('logradouro_evento');
+            const campoComplemento = document.getElementById('compl_evento');
+            const campoImagem = document.querySelector('input[name="imagem_evento"]');
+            const camposHabilidades = document.querySelectorAll('input[name="habilidades[]"]');
+
+            const previewTitulo = document.getElementById('preview-titulo');
+            const previewCategoria = document.getElementById('preview-categoria');
+            const previewVagas = document.getElementById('preview-vagas');
+            const previewModalidade = document.getElementById('preview-modalidade');
+            const previewDescricao = document.getElementById('preview-descricao');
+            const previewData = document.querySelector('#preview-data span:last-child');
+            const previewLocal = document.querySelector('#preview-local span:last-child');
+            const previewImagem = document.getElementById('preview-imagem');
+            const previewImagemPlaceholder = document.getElementById('preview-imagem-placeholder');
+            const previewHabilidadesWrapper = document.getElementById('preview-habilidades-wrapper');
+            const previewHabilidades = document.getElementById('preview-habilidades');
+
+            function textoOuPadrao(valor, padrao) {
+                const texto = (valor ?? '').trim();
+                return texto.length ? texto : padrao;
+            }
+
+            function formatarModalidade(valor) {
+                const modalidades = {
+                    presencial: 'Presencial',
+                    online: 'Online',
+                    hibrido: 'Híbrido'
+                };
+
+                return modalidades[valor] ?? 'Presencial';
+            }
+
+            function formatarData(valor) {
+                if (!valor) return null;
+
+                const data = new Date(valor);
+
+                if (Number.isNaN(data.getTime())) {
+                    return null;
+                }
+
+                return new Intl.DateTimeFormat('pt-BR', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).format(data);
+            }
+
+            function atualizarTitulo() {
+                previewTitulo.textContent = textoOuPadrao(
+                    campoTitulo?.value,
+                    'Prévia do evento'
+                );
+            }
+
+            function atualizarCategoria() {
+                if (!campoCategoria) return;
+
+                const opcaoSelecionada =
+                    campoCategoria.options[campoCategoria.selectedIndex];
+
+                const texto =
+                    opcaoSelecionada &&
+                    opcaoSelecionada.value
+                        ? opcaoSelecionada.textContent.trim()
+                        : 'Categoria';
+
+                previewCategoria.textContent = texto;
+            }
+
+            function atualizarVagas() {
+                const valor = Number(campoVagas?.value);
+
+                if (!valor || valor < 1) {
+                    previewVagas.textContent = 'Vagas a definir';
+                    return;
+                }
+
+                previewVagas.textContent =
+                    valor === 1
+                        ? '1 vaga'
+                        : `${valor} vagas`;
+            }
+
+            function atualizarModalidade() {
+                previewModalidade.textContent =
+                    formatarModalidade(campoModalidade?.value);
+            }
+
+            function atualizarDescricao() {
+                previewDescricao.textContent = textoOuPadrao(
+                    campoDescricao?.value,
+                    'O resumo do evento aparecerá aqui.'
+                );
+            }
+
+            function atualizarData() {
+                const inicio = formatarData(campoDataInicio?.value);
+                const fim = formatarData(campoDataFim?.value);
+
+                if (!inicio && !fim) {
+                    previewData.textContent = 'Data e horário a definir';
+                    return;
+                }
+
+                if (inicio && fim) {
+                    previewData.textContent = `${inicio} → ${fim}`;
+                    return;
+                }
+
+                previewData.textContent = inicio ?? fim;
+            }
+
+            function atualizarLocal() {
+                const partes = [];
+
+                const logradouro = campoLogradouro?.value.trim();
+                const complemento = campoComplemento?.value.trim();
+                const cep = campoCep?.value.trim();
+
+                if (logradouro) partes.push(logradouro);
+                if (complemento) partes.push(complemento);
+                if (cep) partes.push(`CEP ${cep}`);
+
+                previewLocal.textContent =
+                    partes.length
+                        ? partes.join(' · ')
+                        : 'Local a definir';
+            }
+
+            function atualizarHabilidades() {
+                if (!previewHabilidades || !previewHabilidadesWrapper) {
+                    return;
+                }
+
+                previewHabilidades.innerHTML = '';
+
+                const selecionadas = Array.from(camposHabilidades)
+                    .filter((checkbox) => checkbox.checked);
+
+                if (!selecionadas.length) {
+                    previewHabilidadesWrapper.classList.add('hidden');
+                    return;
+                }
+
+                selecionadas.forEach((checkbox) => {
+                    const label = checkbox.closest('label');
+                    const nome = label
+                        ?.querySelector('span')
+                        ?.textContent
+                        ?.trim();
+
+                    if (!nome) return;
+
+                    const tag = document.createElement('span');
+
+                    tag.className =
+                        'rounded-full border border-[#d4d0c6] ' +
+                        'bg-[#f7f5ef] px-2.5 py-1 ' +
+                        'font-poppins text-[10px] text-neutral-600';
+
+                    tag.textContent = nome;
+
+                    previewHabilidades.appendChild(tag);
+                });
+
+                previewHabilidadesWrapper.classList.remove('hidden');
+            }
+
+            function atualizarImagem() {
+                const arquivo = campoImagem?.files?.[0];
+
+                if (!arquivo) {
+                    previewImagem.src = '';
+                    previewImagem.classList.add('hidden');
+                    previewImagemPlaceholder.classList.remove('hidden');
+                    return;
+                }
+
+                if (!arquivo.type.startsWith('image/')) {
+                    return;
+                }
+
+                const leitor = new FileReader();
+
+                leitor.onload = function (event) {
+                    previewImagem.src = event.target.result;
+                    previewImagem.classList.remove('hidden');
+                    previewImagemPlaceholder.classList.add('hidden');
+                };
+
+                leitor.readAsDataURL(arquivo);
+            }
+
+            function validarDatas() {
+                if (!campoDataInicio || !campoDataFim) {
+                    return true;
+                }
+
+                const inicio = campoDataInicio.value;
+                const fim = campoDataFim.value;
+
+                // O navegador passa a bloquear datas de término anteriores ao início.
+                campoDataFim.min = inicio || '';
+
+                // Remove mensagens antigas antes de validar novamente.
+                campoDataFim.setCustomValidity('');
+
+                if (inicio && fim && fim < inicio) {
+                    campoDataFim.setCustomValidity(
+                        'A data de término não pode ser anterior à data de início.'
+                    );
+
+                    return false;
+                }
+
+                return true;
+            }
+
+            function atualizarPreviewCompleta() {
+                atualizarTitulo();
+                atualizarCategoria();
+                atualizarVagas();
+                atualizarModalidade();
+                atualizarDescricao();
+                validarDatas();
+                atualizarData();
+                atualizarLocal();
+                atualizarHabilidades();
+            }
+
+            campoTitulo?.addEventListener('input', atualizarTitulo);
+            campoCategoria?.addEventListener('change', atualizarCategoria);
+            campoVagas?.addEventListener('input', atualizarVagas);
+            campoModalidade?.addEventListener('change', atualizarModalidade);
+            campoDescricao?.addEventListener('input', atualizarDescricao);
+
+            campoDataInicio?.addEventListener('change', function () {
+                validarDatas();
+
+                // Se já houver uma data final inválida, limpa o campo.
+                if (
+                    campoDataFim?.value &&
+                    campoDataInicio?.value &&
+                    campoDataFim.value < campoDataInicio.value
+                ) {
+                    campoDataFim.value = '';
+                    campoDataFim.setCustomValidity('');
+                }
+
+                atualizarData();
+            });
+
+            campoDataFim?.addEventListener('change', function () {
+                validarDatas();
+                atualizarData();
+
+                if (!campoDataFim.checkValidity()) {
+                    campoDataFim.reportValidity();
+                }
+            });
+
+            campoCep?.addEventListener('input', atualizarLocal);
+            campoLogradouro?.addEventListener('input', atualizarLocal);
+            campoComplemento?.addEventListener('input', atualizarLocal);
+
+            campoImagem?.addEventListener('change', atualizarImagem);
+
+            camposHabilidades.forEach((checkbox) => {
+                checkbox.addEventListener('change', atualizarHabilidades);
+            });
+
+            const formularioEvento = document.querySelector(
+                'form[action="{{ route('ong.eventos.store') }}"]'
+            );
+
+            formularioEvento?.addEventListener('submit', function (event) {
+                if (!validarDatas()) {
+                    event.preventDefault();
+                    campoDataFim?.reportValidity();
+                }
+            });
+
+            atualizarPreviewCompleta();
+        });
+    </script>
 
 </body>
 
