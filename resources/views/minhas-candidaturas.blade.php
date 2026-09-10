@@ -362,42 +362,303 @@
         </div>
     </main>
 
+
+    {{-- MODAL DE CONFIRMAÇÃO DE DESISTÊNCIA --}}
+    <div
+        id="modal-desistencia"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/45 px-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-desistencia-titulo"
+    >
+        <div
+            class="w-full max-w-[500px] rounded-3xl border border-[#dedbd1] bg-white p-6 shadow-xl sm:p-7"
+            data-modal-conteudo
+        >
+            <div class="flex items-start gap-4">
+                <div
+                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#fff0cf] text-xl"
+                    aria-hidden="true"
+                >
+                    ⚠️
+                </div>
+
+                <div class="min-w-0">
+                    <h2
+                        id="modal-desistencia-titulo"
+                        class="font-fraunces text-2xl font-bold text-[#17392a]"
+                    >
+                        Confirmar desistência?
+                    </h2>
+
+                    <p
+                        id="modal-desistencia-evento"
+                        class="mt-1 font-poppins text-sm text-neutral-500"
+                    >
+                        Você está prestes a desistir desta candidatura.
+                    </p>
+                </div>
+            </div>
+
+            <div
+                class="mt-5 rounded-2xl border border-[#ead7a7] bg-[#fff9e9] p-4"
+            >
+                <p class="font-poppins text-sm font-semibold text-[#72551d]">
+                    Atenção ao prazo de 24 horas
+                </p>
+
+                <div
+                    class="mt-3 space-y-2 font-poppins text-xs leading-5 text-[#6d624e]"
+                >
+                    <p>
+                        <strong>24 horas ou mais antes do evento:</strong>
+                        você pode desistir sem penalidade.
+                    </p>
+
+                    <p>
+                        <strong>Menos de 24 horas antes do evento:</strong>
+                        a desistência é considerada fora do prazo e poderá gerar
+                        penalidade de confiabilidade/XP conforme as regras da plataforma.
+                    </p>
+
+                    <p>
+                        Na primeira ocorrência fora do prazo, aplica-se a regra de
+                        recuperação prevista pela plataforma. Reincidências podem
+                        gerar penalidades maiores.
+                    </p>
+                </div>
+            </div>
+
+            <p
+                class="mt-4 font-poppins text-xs leading-5 text-neutral-500"
+            >
+                Depois de confirmar, você retornará para a página
+                <strong>Minhas candidaturas</strong>.
+            </p>
+
+            <div
+                class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"
+            >
+                <button
+                    type="button"
+                    id="cancelar-desistencia"
+                    class="rounded-full border border-[#c9c4b8] bg-white px-5 py-3 font-poppins text-sm text-neutral-700 transition hover:bg-neutral-50"
+                >
+                    Voltar
+                </button>
+
+                <button
+                    type="button"
+                    id="confirmar-desistencia"
+                    class="rounded-full bg-[#a13e27] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#87331f]"
+                >
+                    Confirmar desistência
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <x-footer />
 
     <script>
         (function () {
             const tabsWrapper = document.querySelector('[data-mc-tabs]');
-            if (!tabsWrapper) return;
 
-            const abas = tabsWrapper.querySelectorAll('[data-aba]');
-            const secoes = document.querySelectorAll('[data-secao]');
+            if (tabsWrapper) {
+                const abas = tabsWrapper.querySelectorAll('[data-aba]');
+                const secoes = document.querySelectorAll('[data-secao]');
 
-            function ativarAba(status) {
+                function ativarAba(status) {
+                    abas.forEach(function (aba) {
+                        aba.classList.toggle(
+                            'ativa',
+                            aba.dataset.aba === status
+                        );
+                    });
+
+                    secoes.forEach(function (secao) {
+                        secao.classList.toggle(
+                            'hidden',
+                            secao.dataset.secao !== status
+                        );
+                    });
+                }
+
                 abas.forEach(function (aba) {
-                    aba.classList.toggle('ativa', aba.dataset.aba === status);
-                });
-                secoes.forEach(function (secao) {
-                    secao.classList.toggle('hidden', secao.dataset.secao !== status);
+                    aba.addEventListener('click', function () {
+                        ativarAba(aba.dataset.aba);
+                    });
                 });
             }
 
-            abas.forEach(function (aba) {
-                aba.addEventListener('click', function () {
-                    ativarAba(aba.dataset.aba);
+            document
+                .querySelectorAll('[data-toggle-extra]')
+                .forEach(function (botao) {
+                    const secao = botao.closest('[data-secao]');
+                    const extra = secao
+                        ? secao.querySelector('[data-extra]')
+                        : null;
+
+                    if (!extra) {
+                        return;
+                    }
+
+                    botao.addEventListener('click', function () {
+                        const estaEscondido =
+                            extra.classList.toggle('hidden');
+
+                        botao.textContent = estaEscondido
+                            ? botao.dataset.labelMais
+                            : botao.dataset.labelMenos;
+                    });
                 });
+
+
+            /*
+             * Corrige os links gerados pelo componente:
+             * /evento/1 -> /eventos/1
+             */
+            document.querySelectorAll('a[href]').forEach(function (link) {
+                const href = link.getAttribute('href');
+
+                if (!href) {
+                    return;
+                }
+
+                if (href === '/evento') {
+                    link.setAttribute('href', '/eventos');
+                } else if (href.indexOf('/evento/') === 0) {
+                    link.setAttribute(
+                        'href',
+                        href.replace('/evento/', '/eventos/')
+                    );
+                }
             });
 
-            document.querySelectorAll('[data-toggle-extra]').forEach(function (botao) {
-                const secao = botao.closest('[data-secao]');
-                const extra = secao ? secao.querySelector('[data-extra]') : null;
-                if (!extra) return;
 
-                botao.addEventListener('click', function () {
-                    const estaEscondido = extra.classList.toggle('hidden');
-                    botao.textContent = estaEscondido
-                        ? botao.dataset.labelMais
-                        : botao.dataset.labelMenos;
+            /*
+             * Modal de desistência
+             */
+            const modal =
+                document.getElementById('modal-desistencia');
+
+            const modalConteudo =
+                modal
+                    ? modal.querySelector('[data-modal-conteudo]')
+                    : null;
+
+            const cancelar =
+                document.getElementById('cancelar-desistencia');
+
+            const confirmar =
+                document.getElementById('confirmar-desistencia');
+
+            const textoEvento =
+                document.getElementById('modal-desistencia-evento');
+
+
+            function abrirModal(botao) {
+                if (!modal) {
+                    return;
+                }
+
+                const card =
+                    botao.closest(
+                        '.card-cand, .card-candidatura, article'
+                    );
+
+                const tituloElemento =
+                    card
+                        ? card.querySelector(
+                            'h2, h3, .card-cand-titulo'
+                        )
+                        : null;
+
+                const titulo =
+                    tituloElemento
+                        ? tituloElemento.textContent.trim()
+                        : '';
+
+                if (textoEvento) {
+                    textoEvento.textContent = titulo
+                        ? 'Você está prestes a desistir da candidatura para "' +
+                          titulo +
+                          '".'
+                        : 'Você está prestes a desistir desta candidatura.';
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
+            }
+
+
+            function fecharModal() {
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+
+            document.addEventListener('click', function (event) {
+                const botao = event.target.closest('a, button');
+
+                if (!botao) {
+                    return;
+                }
+
+                const texto =
+                    (botao.textContent || '')
+                        .trim()
+                        .toLowerCase();
+
+                if (
+                    texto === 'desistir' ||
+                    texto.includes('desistir da candidatura')
+                ) {
+                    event.preventDefault();
+                    abrirModal(botao);
+                }
+            });
+
+
+            if (cancelar) {
+                cancelar.addEventListener(
+                    'click',
+                    fecharModal
+                );
+            }
+
+
+            if (confirmar) {
+                confirmar.addEventListener('click', function () {
+                    window.location.href = '/minhas-candidaturas';
                 });
+            }
+
+
+            if (modal) {
+                modal.addEventListener('click', function (event) {
+                    if (event.target === modal) {
+                        fecharModal();
+                    }
+                });
+            }
+
+
+            document.addEventListener('keydown', function (event) {
+                if (
+                    event.key === 'Escape' &&
+                    modal &&
+                    !modal.classList.contains('hidden')
+                ) {
+                    fecharModal();
+                }
             });
         })();
     </script>
