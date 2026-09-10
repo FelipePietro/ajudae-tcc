@@ -177,10 +177,10 @@
                 <section class="admin-widget">
                     <h3>Acesso rápido</h3>
                     <nav class="admin-atalhos">
-                        <a href="#">Fila de eventos</a>
-                        <a href="#">Solicitações LGPD</a>
-                        <a href="#">Denúncias abertas</a>
-                        <a href="#">Upgrades de organizador</a>
+                        <a href="fila-eventos">Fila de eventos</a>
+                        <a href="solicitacoes-lgpd">Solicitações LGPD</a>
+                        <a href="denuncias">Denúncias abertas</a>
+                        <a href="upgrades-org">Upgrades de organizador</a>
                     </nav>
                 </section>
             </aside>
