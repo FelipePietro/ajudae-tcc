@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Cadastro em análise | Ajudaê</title>
+    <title>Cadastro em análise | Ajudae</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -20,7 +20,7 @@
                 href="{{ route('inicio') }}"
                 class="font-fraunces text-[22px] font-bold no-underline">
 
-                <span class="text-[#183c2b]">Ajud</span><span class="text-[#e8920a]">aê</span>
+                <span class="text-[#183c2b]">Ajud</span><span class="text-[#e8920a]">ae</span>
 
             </a>
 

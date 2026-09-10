@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Editar evento | Ajudaê</title>
+    <title>Editar evento | Ajudae</title>
 
     @vite([
         'resources/css/app.css',

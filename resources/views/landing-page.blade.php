@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Ajudaê | Voluntariado com propósito</title>
+    <title>Ajudae | Voluntariado com propósito</title>
 
     @vite([
         'resources/css/app.css',
@@ -583,7 +583,7 @@
 
 
         {{-- ============================================================= --}}
-        {{-- POR QUE AJUDAÊ --}}
+        {{-- POR QUE AJUDAE --}}
         {{-- ============================================================= --}}
 
         <section class="bg-white px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
@@ -598,7 +598,7 @@
                                tracking-[0.15em]
                                text-[#d78c1e]"
                     >
-                        Por que Ajudaê?
+                        Por que Ajudae?
                     </span>
 
 
@@ -1054,7 +1054,7 @@
                                leading-5
                                text-white/40"
                     >
-                        © 2026 Ajudaê — Projeto TCC.
+                        © 2026 Ajudae — Projeto TCC.
                         DS. Para fins acadêmicos.
                     </p>
 

@@ -3101,7 +3101,7 @@ Route::get('/ong/notificacoes', function () {
 
             'mensagem' =>
                 'O cadastro do <strong>Instituto Esperança</strong>
-                foi analisado e aprovado pela equipe Ajudaê.
+                foi analisado e aprovado pela equipe Ajudae.
                 Sua organização já pode publicar eventos.',
 
             'tempo' => '2 dias atrás',
@@ -3157,7 +3157,7 @@ Route::get('/ong/notificacoes', function () {
             'icone' => '📢',
             'cor_icone' => 'bg-[#eee8f7] text-[#644b7d]',
 
-            'titulo' => 'Novidade no Ajudaê',
+            'titulo' => 'Novidade no Ajudae',
 
             'mensagem' =>
                 'Agora as ONGs podem acompanhar candidaturas,
@@ -3166,7 +3166,7 @@ Route::get('/ong/notificacoes', function () {
 
             'tempo' => '5 dias atrás',
 
-            'tag' => 'Ajudaê',
+            'tag' => 'Ajudae',
             'cor_tag' => 'bg-[#eee8f7] text-[#644b7d]',
 
             'acoes' => [],
@@ -3436,7 +3436,7 @@ Route::post('/cadastro', function (Request $request) {
 
 Route::get('/termos', function () {
     $secoes = [
-        ['id' => 'sobre', 'numero' => 1, 'titulo' => 'Sobre o Ajudaê'],
+        ['id' => 'sobre', 'numero' => 1, 'titulo' => 'Sobre o Ajudae'],
         ['id' => 'usuarios', 'numero' => 2, 'titulo' => 'Tipos de usuários'],
         ['id' => 'idade', 'numero' => 3, 'titulo' => 'Requisito de idade'],
         ['id' => 'cadastro', 'numero' => 4, 'titulo' => 'Cadastro e informações'],

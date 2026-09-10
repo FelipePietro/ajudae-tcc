@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Meu perfil - Ajudaê</title>
+    <title>Meu perfil - Ajudae</title>
 
     @vite([
         'resources/css/app.css',
@@ -766,7 +766,7 @@
                                         "
                                     >
                                         Seu perfil está ativo e pode
-                                        organizar eventos no Ajudaê.
+                                        organizar eventos no Ajudae.
                                     </p>
 
                                 </div>

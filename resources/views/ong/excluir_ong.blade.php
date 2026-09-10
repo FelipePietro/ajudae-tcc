@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excluir conta da ONG | Ajudaê</title>
+    <title>Excluir conta da ONG | Ajudae</title>
 
     @vite([
         'resources/css/app.css',
@@ -51,7 +51,7 @@
                     </h1>
 
                     <p class="mt-3 max-w-2xl font-poppins text-sm leading-6 text-[#777269]">
-                        Esta ação inicia o processo de exclusão da organização no Ajudaê.
+                        Esta ação inicia o processo de exclusão da organização no Ajudae.
                         Confira as condições antes de continuar.
                     </p>
                 </div>

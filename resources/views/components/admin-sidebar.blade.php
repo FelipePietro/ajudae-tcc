@@ -8,7 +8,7 @@
 
     <a href="{{ route('admin.admin') }}" class="ong-sidebar-brand">
         <span class="ong-sidebar-nome">
-            <span class="brand-aju-white">Ajud</span><span class="brand-dae">aê</span>
+            <span class="brand-aju-white">Ajud</span><span class="brand-dae">ae</span>
         </span>
     </a>
 

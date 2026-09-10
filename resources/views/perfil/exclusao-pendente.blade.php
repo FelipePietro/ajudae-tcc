@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Exclusão pendente | Ajudaê</title>
+    <title>Exclusão pendente | Ajudae</title>
 
     @vite([
         'resources/css/app.css',

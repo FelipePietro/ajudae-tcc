@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Exclusão da ONG em andamento | Ajudaê</title>
+    <title>Exclusão da ONG em andamento | Ajudae</title>
 
     @vite([
         'resources/css/app.css',

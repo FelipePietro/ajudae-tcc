@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de voluntário | Ajudaê</title>
+    <title>Cadastro de voluntário | Ajudae</title>
 
     @vite([
         'resources/css/app.css',
@@ -492,8 +492,8 @@
                         </div>
 
                         <div class="mt-4 max-h-[360px] overflow-y-auto rounded-xl border border-[#DDD8CD] bg-white p-5 font-poppins text-xs leading-6 text-[#4D4C45]">
-                            <h3 class="font-outfit text-sm font-bold text-[#24372C]">1. Sobre o Ajudaê</h3>
-                            <p class="mt-1">O Ajudaê aproxima pessoas interessadas em voluntariado de organizações e responsáveis por ações sociais.</p>
+                            <h3 class="font-outfit text-sm font-bold text-[#24372C]">1. Sobre o Ajudae</h3>
+                            <p class="mt-1">O Ajudae aproxima pessoas interessadas em voluntariado de organizações e responsáveis por ações sociais.</p>
 
                             <h3 class="mt-5 font-outfit text-sm font-bold text-[#24372C]">2. Dados e perfil</h3>
                             <p class="mt-1">O usuário declara que as informações fornecidas são verdadeiras e concorda com seu uso para segurança, organização de atividades e funcionamento da plataforma.</p>

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Entrar | Ajudaê</title>
+    <title>Entrar | Ajudae</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -19,7 +19,7 @@
 
             <a href="{{ route('inicio') }}"
                class="font-fraunces text-[22px] font-bold no-underline">
-                <span class="text-[#183c2b]">Ajud</span><span class="text-[#e8920a]">aê</span>
+                <span class="text-[#183c2b]">Ajud</span><span class="text-[#e8920a]">ae</span>
             </a>
 
         </header>
@@ -48,7 +48,7 @@
                 <div class="bg-[#173f2d] px-8 py-9 text-white">
 
                     <div class="font-fraunces text-[23px] font-bold">
-                        <span>Ajud</span><span class="text-[#e8920a]">aê</span>
+                        <span>Ajud</span><span class="text-[#e8920a]">ae</span>
                     </div>
 
                     <h1

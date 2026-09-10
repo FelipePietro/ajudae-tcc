@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Meu Perfil | Ajudaê</title>
+    <title>Meu Perfil | Ajudae</title>
 
     @vite([
         'resources/css/app.css',
@@ -1023,10 +1023,10 @@
                             await navigator.share({
 
                                 title:
-                                    'Perfil de {{ $nome_user }} no Ajudaê',
+                                    'Perfil de {{ $nome_user }} no Ajudae',
 
                                 text:
-                                    'Conheça meu perfil de voluntariado no Ajudaê.',
+                                    'Conheça meu perfil de voluntariado no Ajudae.',
 
                                 url: url
 

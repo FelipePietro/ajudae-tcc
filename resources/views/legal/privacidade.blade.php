@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Política de Privacidade | Ajudaê</title>
+    <title>Política de Privacidade | Ajudae</title>
 
     @vite([
         'resources/css/app.css',
@@ -53,7 +53,7 @@
             <article class="min-w-0">
                 <header class="rounded-2xl border border-[#DED9CE] bg-white p-6 shadow-sm sm:p-8">
                     <p class="font-poppins text-xs font-semibold uppercase tracking-[0.15em] text-[#D99110]">
-                        Ajudaê
+                        Ajudae
                     </p>
 
                     <h1 class="mt-2 font-fraunces text-3xl font-bold text-[#173F2D] sm:text-4xl">
@@ -61,7 +61,7 @@
                     </h1>
 
                     <p class="mt-4 max-w-3xl font-poppins text-sm leading-7 text-[#66625B]">
-                        Esta Política explica como o Ajudaê coleta, utiliza, armazena,
+                        Esta Política explica como o Ajudae coleta, utiliza, armazena,
                         compartilha e protege dados pessoais dos usuários, além de apresentar
                         os direitos dos titulares e os canais de contato disponíveis.
                     </p>
@@ -105,18 +105,18 @@
 
                         <div class="mt-4 space-y-4 font-poppins text-sm leading-7 text-[#55534D]">
                             <p>
-                                Para fins desta Política, o Ajudaê é a plataforma responsável
+                                Para fins desta Política, o Ajudae é a plataforma responsável
                                 pelas decisões relacionadas ao tratamento de dados pessoais
                                 realizados diretamente em seu ambiente digital.
                             </p>
 
                             <p>
-                                Enquanto o Ajudaê permanecer como projeto acadêmico, sua identificação
+                                Enquanto o Ajudae permanecer como projeto acadêmico, sua identificação
                                 institucional poderá ser apresentada como:
                             </p>
 
                             <div class="rounded-xl bg-[#F7F5F0] p-4">
-                                <strong class="block text-[#2B3D32]">Ajudaê</strong>
+                                <strong class="block text-[#2B3D32]">Ajudae</strong>
                                 <span class="block">Projeto acadêmico — Técnico em Desenvolvimento de Sistemas</span>
                                 <span class="block">Etec de Guarulhos</span>
                                 <span class="block">E-mail: [definir e-mail oficial]</span>
@@ -257,7 +257,7 @@
                             </p>
 
                             <p>
-                                O Ajudaê deverá limitar esse compartilhamento ao mínimo necessário para a finalidade
+                                O Ajudae deverá limitar esse compartilhamento ao mínimo necessário para a finalidade
                                 correspondente. Dados como CPF, RG e endereço completo não devem ser disponibilizados
                                 de forma indiscriminada a qualquer usuário da plataforma.
                             </p>
@@ -269,7 +269,7 @@
                             </p>
 
                             <p>
-                                O Ajudaê poderá ainda compartilhar informações quando necessário para cumprir
+                                O Ajudae poderá ainda compartilhar informações quando necessário para cumprir
                                 obrigação legal, ordem judicial ou solicitação válida de autoridade competente.
                             </p>
                         </div>
@@ -288,7 +288,7 @@
                             </p>
 
                             <p>
-                                É vedado utilizar dados obtidos no Ajudaê para venda, publicidade não autorizada,
+                                É vedado utilizar dados obtidos no Ajudae para venda, publicidade não autorizada,
                                 prospecção externa indevida, discriminação ou qualquer finalidade incompatível
                                 com a atividade divulgada.
                             </p>
@@ -310,7 +310,7 @@
 
                                 <div class="mt-4 space-y-4 font-poppins text-sm leading-7 text-[#55534D]">
                                     <p>
-                                        O Ajudaê é destinado exclusivamente a pessoas com
+                                        O Ajudae é destinado exclusivamente a pessoas com
                                         <strong>18 anos ou mais</strong>.
                                     </p>
 
@@ -332,7 +332,7 @@
 
                         <div class="mt-4 space-y-4 font-poppins text-sm leading-7 text-[#55534D]">
                             <p>
-                                O Ajudaê poderá armazenar dados em servidores, bancos de dados e serviços de
+                                O Ajudae poderá armazenar dados em servidores, bancos de dados e serviços de
                                 infraestrutura utilizados para operar a plataforma.
                             </p>
 
@@ -362,7 +362,7 @@
                             </p>
 
                             <p>
-                                O usuário poderá solicitar a exclusão de sua conta. O Ajudaê poderá utilizar
+                                O usuário poderá solicitar a exclusão de sua conta. O Ajudae poderá utilizar
                                 período de processamento antes da exclusão definitiva, especialmente quando
                                 houver atividades em andamento ou necessidade de preservação temporária de registros.
                             </p>
@@ -408,7 +408,7 @@
 
                         <div class="mt-4 space-y-4 font-poppins text-sm leading-7 text-[#55534D]">
                             <p>
-                                O titular poderá entrar em contato pelos canais oficiais do Ajudaê para realizar
+                                O titular poderá entrar em contato pelos canais oficiais do Ajudae para realizar
                                 solicitações relacionadas aos seus dados pessoais.
                             </p>
 
@@ -420,7 +420,7 @@
                             </div>
 
                             <p>
-                                Para proteger a conta e os dados do próprio titular, o Ajudaê poderá solicitar
+                                Para proteger a conta e os dados do próprio titular, o Ajudae poderá solicitar
                                 informações necessárias para confirmar a identidade antes de atender determinadas
                                 solicitações.
                             </p>
@@ -434,7 +434,7 @@
 
                         <div class="mt-4 space-y-4 font-poppins text-sm leading-7 text-[#55534D]">
                             <p>
-                                O Ajudaê poderá utilizar cookies ou tecnologias semelhantes quando necessários
+                                O Ajudae poderá utilizar cookies ou tecnologias semelhantes quando necessários
                                 para autenticação, manutenção de sessão, segurança e funcionamento da plataforma.
                             </p>
 
@@ -473,11 +473,11 @@
                         <div class="mt-4 space-y-4 font-poppins text-sm leading-7 text-[#55534D]">
                             <p>
                                 Dúvidas, solicitações ou questões relacionadas à privacidade podem ser encaminhadas
-                                pelos canais oficiais disponibilizados pelo Ajudaê.
+                                pelos canais oficiais disponibilizados pelo Ajudae.
                             </p>
 
                             <div class="rounded-xl bg-[#F7F5F0] p-4">
-                                <strong class="block text-[#2B3D32]">Ajudaê</strong>
+                                <strong class="block text-[#2B3D32]">Ajudae</strong>
                                 <span class="block">Projeto acadêmico — Técnico em Desenvolvimento de Sistemas</span>
                                 <span class="block">Etec de Guarulhos</span>
                                 <span class="block">E-mail: [definir e-mail oficial]</span>
@@ -495,7 +495,7 @@
                         </h2>
 
                         <p class="mt-4 max-w-3xl font-poppins text-sm leading-7 text-white/75">
-                            Ao utilizar o Ajudaê, o usuário declara ter tido acesso a esta Política
+                            Ao utilizar o Ajudae, o usuário declara ter tido acesso a esta Política
                             e estar ciente das práticas de tratamento de dados descritas neste documento.
                         </p>
                     </section>
@@ -507,7 +507,7 @@
 
     <footer class="mt-10 bg-[#173F2D] px-4 py-8 text-white">
         <div class="mx-auto flex max-w-6xl flex-col gap-4 font-poppins text-xs text-white/70 sm:flex-row sm:items-center sm:justify-between">
-            <span>© 2026 Ajudaê</span>
+            <span>© 2026 Ajudae</span>
 
             <div class="flex flex-wrap gap-4">
                 <a href="{{ route('termos') }}" class="transition hover:text-white">

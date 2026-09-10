@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Criar evento | Ajudaê</title>
+    <title>Criar evento | Ajudae</title>
 
     @vite([
         'resources/css/app.css',
@@ -1254,7 +1254,7 @@
                        text-neutral-500"
             >
                 Seu evento foi enviado para análise
-                da equipe do Ajudaê.
+                da equipe do Ajudae.
             </p>
 
             <div

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Candidatura — Ajudaê</title>
+    <title>Candidatura — Ajudae</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -12,7 +12,7 @@
     {{-- NAVBAR --}}
     <nav class="flex items-center justify-between px-6 h-16 bg-[#f5f5f0] border-b border-gray-200">
         <a href="/" class="font-bold text-xl no-underline font-serif">
-            <span class="text-[#1A3D2B]">Ajud</span><span class="text-[#e6a817]">aê</span>
+            <span class="text-[#1A3D2B]">Ajud</span><span class="text-[#e6a817]">ae</span>
         </a>
         <a href="/evento/{{ $id_evento }}" class="text-sm text-[#1a3a2a] no-underline">
             &lt; Voltar ao evento

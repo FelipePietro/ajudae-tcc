@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Preferências do Perfil | Ajudaê</title>
+    <title>Preferências do Perfil | Ajudae</title>
 
     @vite([
         'resources/css/app.css',

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Excluir conta | Ajudaê</title>
+    <title>Excluir conta | Ajudae</title>
 
     @vite([
         'resources/css/app.css',
@@ -61,7 +61,7 @@
                     <p
                         class="mx-auto mt-3 max-w-[540px] break-words font-poppins text-sm leading-6 text-[#817c70]"
                     >
-                        Você está prestes a solicitar a exclusão permanente da sua conta no Ajudaê.
+                        Você está prestes a solicitar a exclusão permanente da sua conta no Ajudae.
                         Leia atentamente as informações abaixo antes de continuar.
                     </p>
 

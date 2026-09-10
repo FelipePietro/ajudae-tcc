@@ -98,7 +98,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minhas Candidaturas — Ajudaê</title>
+    <title>Minhas Candidaturas — Ajudae</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -107,7 +107,7 @@
     {{-- NAVBAR --}}
     <nav class="navbar">
         <a href="/feed" class="navbar-brand">
-            <span class="brand-aju">Ajud</span><span class="brand-dae">aê</span>
+            <span class="brand-aju">Ajud</span><span class="brand-dae">ae</span>
         </a>
         <a href="/feed" class="navbar-centro">
             <span class="hidden sm:inline">← Feed de eventos</span>

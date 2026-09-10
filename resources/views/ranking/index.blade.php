@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Ranking | Ajudaê</title>
+    <title>Ranking | Ajudae</title>
 
     @vite([
         'resources/css/app.css',

@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Painel da ONG - Ajudaê</title>
+    <title>Painel da ONG - Ajudae</title>
 
     @vite([
         'resources/css/app.css',

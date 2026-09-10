@@ -49,7 +49,7 @@
                 class="text-2xl font-semibold tracking-tight"
                 style="font-family: 'Fraunces', serif;"
             >
-                Ajud<span class="text-[#e3a62f]">aê</span>
+                Ajud<span class="text-[#e3a62f]">ae</span>
             </a>
 
 
@@ -209,7 +209,7 @@
                             class="text-[28px] font-semibold tracking-tight"
                             style="font-family: 'Fraunces', serif;"
                         >
-                            Ajud<span class="text-[#e3a62f]">aê</span>
+                            Ajud<span class="text-[#e3a62f]">ae</span>
                         </a>
 
 
