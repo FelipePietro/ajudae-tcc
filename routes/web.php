@@ -2796,6 +2796,56 @@ Route::put('/ong/perfil/{id}', function (
 
 })->name('ong.perfil.atualizar');
 
+/*
+|--------------------------------------------------------------------------
+| EXCLUSÃO DE CONTA — ONG (MOCK FRONT-END)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/ong/perfil/excluir', function () {
+
+    $ong = [
+        'id' => 1,
+        'ong_id' => 1,
+        'razao_social' => 'Instituto Esperança Social',
+        'nome_fantasia' => 'Esperança Social',
+        'cnpj' => '11.222.333/0001-81',
+    ];
+
+    /*
+     * MOCK:
+     * altere para 1, 2, etc. para demonstrar
+     * o bloqueio quando houver eventos ativos.
+     */
+    $eventosAtivos = 0;
+
+    return view('/ong/excluir_ong', [
+        'ong' => $ong,
+        'eventosAtivos' => $eventosAtivos,
+    ]);
+
+})->name('ong.perfil.excluir');
+
+
+Route::get('/ong/perfil/exclusao-pendente', function () {
+
+    $ong = [
+        'id' => 1,
+        'ong_id' => 1,
+        'razao_social' => 'Instituto Esperança Social',
+        'nome_fantasia' => 'Esperança Social',
+        'exclusao_pendente' => true,
+
+        'deletar_em' => now()
+            ->addDays(7)
+            ->toISOString(),
+    ];
+
+    return view('/ong/exclusao-pendente', [
+        'ong' => $ong,
+    ]);
+
+})->name('ong.perfil.exclusao-pendente');
 
 /*
 |--------------------------------------------------------------------------

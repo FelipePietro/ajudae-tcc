@@ -193,6 +193,42 @@
 
   </form>
 
+    {{-- ========================================================= --}}
+    {{-- ZONA DE PERIGO --}}
+    {{-- ========================================================= --}}
+
+    <section
+      class="mt-8 rounded-2xl border border-red-200 bg-white p-[22px] sm:p-8"
+    >
+      <h2
+        class="text-[13px] font-semibold uppercase tracking-[0.04em] text-red-600 mb-5 pb-3.5 border-b border-red-100"
+      >
+        Zona de perigo
+      </h2>
+
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 class="text-base font-semibold text-[#292820]">
+            Excluir conta da ONG
+          </h3>
+
+          <p class="mt-2 max-w-xl text-[12.5px] leading-5 text-text-muted">
+            A exclusão não pode ser solicitada enquanto a organização possuir
+            eventos ativos. Após a confirmação, a conta entra em um período de
+            segurança de 7 dias antes da remoção definitiva e poderá ser
+            restaurada durante esse prazo.
+          </p>
+        </div>
+
+        <a
+          href="{{ route('ong.perfil.excluir') }}"
+          class="shrink-0 inline-flex items-center justify-center rounded-full border border-red-500 px-5 py-3 text-sm font-semibold text-red-600 no-underline transition hover:bg-red-600 hover:text-white"
+        >
+          Excluir conta da ONG
+        </a>
+      </div>
+    </section>
+
 </main>
 
 </body>
