@@ -11,14 +11,14 @@
     ])
 </head>
 
-<body class="min-h-screen bg-[#F7F5F0] text-[#272820]">
+<body class="flex min-h-screen flex-col bg-[#F7F5F0] text-[#272820]">
 
     @include('/components/navbar')
 
-    <div class="min-h-[calc(100vh-60px)] lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
+    <div class="flex-1 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:items-stretch">
 
         {{-- SIDEBAR DESKTOP --}}
-        <aside class="hidden bg-[#173F2D] text-white lg:flex lg:min-h-full lg:flex-col lg:self-stretch lg:px-7 lg:py-10">
+        <aside class="hidden bg-[#173F2D] text-white lg:flex lg:flex-col lg:self-stretch lg:px-7 lg:py-10">
             <div class="mb-9 font-fraunces text-2xl font-bold">
                 <span>Ajuda</span><span class="text-[#E9A11A]">ê</span>
             </div>
@@ -64,7 +64,7 @@
                 @endforeach
             </div>
 
-            <div class="mt-auto rounded-xl border border-white/10 bg-white/[0.07] p-4 font-poppins text-[10px] leading-5 text-white/70">
+            <div class="mt-8 rounded-xl border border-white/10 bg-white/[0.07] p-4 font-poppins text-[10px] leading-5 text-white/70">
                 <strong class="block text-white">🔒 Seus dados importam</strong>
                 As informações de identificação são utilizadas para segurança,
                 organização das atividades e confirmação de participação.
