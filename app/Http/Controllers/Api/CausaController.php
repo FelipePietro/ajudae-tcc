@@ -2,36 +2,45 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Causa;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Causa;
+use App\Support\ApiResponse;
+use Illuminate\Http\Request;
 
 class CausaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Causa::all();
+        return ApiResponse::success(Causa::orderBy('nome_causa')->paginate(min(max($request->integer('per_page', 20), 1), 100)));
     }
 
     public function store(Request $request)
     {
-        $causa = Causa::create($request->all());
+        $validated = $request->validate([
+            'nome_causa' => ['required', 'string', 'max:255'],
+            'descricao_causa' => ['required', 'string', 'max:255'],
+        ]);
+        $causa = Causa::create($validated);
 
-        return response()->json($causa, 201);
+        return ApiResponse::success($causa, 'Causa criada com sucesso.', 201);
     }
 
     public function show(string $id)
     {
-        return Causa::findOrFail($id);
+        return ApiResponse::success(Causa::findOrFail($id));
     }
 
     public function update(Request $request, string $id)
     {
         $causa = Causa::findOrFail($id);
 
-        $causa->update($request->all());
+        $validated = $request->validate([
+            'nome_causa' => ['sometimes', 'string', 'max:255'],
+            'descricao_causa' => ['sometimes', 'string', 'max:255'],
+        ]);
+        $causa->update($validated);
 
-        return $causa;
+        return ApiResponse::success($causa, 'Causa atualizada com sucesso.');
     }
 
     public function destroy(string $id)
@@ -40,8 +49,6 @@ class CausaController extends Controller
 
         $causa->delete();
 
-        return response()->json([
-            'mensagem' => 'Removido com sucesso'
-        ]);
+        return response()->noContent();
     }
 }

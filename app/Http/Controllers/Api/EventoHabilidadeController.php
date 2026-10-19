@@ -5,7 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Evento;
 use App\Models\Habilidade;
+use App\Services\EventoOperationalService;
+use App\Exceptions\ValidationConflictException;
+use App\Support\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
 
 class EventoHabilidadeController extends Controller
 {
@@ -17,19 +22,10 @@ class EventoHabilidadeController extends Controller
 
     public function index($id)
     {
-        $evento = Evento::find($id);
+        $evento = Evento::where('status_evento', 'ativo')->findOrFail($id);
 
-        if (!$evento) {
-            return response()->json([
-                'message' => 'Evento não encontrado.'
-            ], 404);
-        }
-
-        return response()->json([
-            'data' => $evento->habilidades()->get()
-        ], 200);
+        return ApiResponse::success($evento->habilidades()->get());
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -37,65 +33,36 @@ class EventoHabilidadeController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function store(Request $request, $id)
+    public function store(Request $request, $id, EventoOperationalService $operations)
     {
-        $evento = Evento::find($id);
-
-        if (!$evento) {
-            return response()->json([
-                'message' => 'Evento não encontrado.'
-            ], 404);
-        }
-
+        $evento = Evento::findOrFail($id);
+        Gate::forUser($request->user())->authorize('manage', $evento);
 
         $validated = $request->validate([
 
             'habilidade_id' => [
                 'required',
                 'integer',
-                'exists:habilidade,habilidade_id'
-            ]
+                'exists:habilidade,habilidade_id',
+            ],
 
         ]);
 
+        DB::transaction(function () use ($evento, $validated, $operations) {
+            $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
+                throw new ValidationConflictException('Evento terminal não pode alterar habilidades.');
+            }
+            if ($evento->habilidades()->where('habilidade.habilidade_id', $validated['habilidade_id'])->exists()) {
+                throw new ValidationConflictException('Esta habilidade já está associada ao evento.');
+            }
+            $evento->habilidades()->attach($validated['habilidade_id']);
+            $operations->exigirReaprovacao($evento);
+            $operations->notificarEvento($evento, 'evento.alterado', "As habilidades do evento {$evento->nm_evento} foram alteradas.");
+        });
 
-        $jaExiste = $evento
-            ->habilidades()
-            ->where(
-                'habilidade.habilidade_id',
-                $validated['habilidade_id']
-            )
-            ->exists();
-
-
-        if ($jaExiste) {
-
-            return response()->json([
-                'message' =>
-                    'Esta habilidade já está associada ao evento.'
-            ], 409);
-
-        }
-
-
-        $evento
-            ->habilidades()
-            ->attach(
-                $validated['habilidade_id']
-            );
-
-
-        return response()->json([
-
-            'message' =>
-                'Habilidade adicionada ao evento com sucesso.',
-
-            'data' =>
-                $evento->habilidades()->get()
-
-        ], 201);
+        return ApiResponse::success($evento->habilidades()->get(), 'Habilidade adicionada ao evento com sucesso.', 201);
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -103,53 +70,25 @@ class EventoHabilidadeController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function destroy(Request $request, $id, $hid)
+    public function destroy(Request $request, $id, $hid, EventoOperationalService $operations)
     {
-        $evento = Evento::find($id);
+        $evento = Evento::findOrFail($id);
+        Gate::forUser($request->user())->authorize('manage', $evento);
 
-        if (!$evento) {
+        Habilidade::findOrFail($hid);
 
-            return response()->json([
-                'message' => 'Evento não encontrado.'
-            ], 404);
-
-        }
-
-
-        $habilidade = Habilidade::find($hid);
-
-        if (!$habilidade) {
-
-            return response()->json([
-                'message' => 'Habilidade não encontrada.'
-            ], 404);
-
-        }
-
-
-        $existe = $evento
-            ->habilidades()
-            ->where(
-                'habilidade.habilidade_id',
-                $hid
-            )
-            ->exists();
-
-
-        if (!$existe) {
-
-            return response()->json([
-                'message' =>
-                    'Esta habilidade não está associada ao evento.'
-            ], 404);
-
-        }
-
-
-        $evento
-            ->habilidades()
-            ->detach($hid);
-
+        DB::transaction(function () use ($evento, $hid, $operations) {
+            $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
+                throw new ValidationConflictException('Evento terminal não pode alterar habilidades.');
+            }
+            if (! $evento->habilidades()->where('habilidade.habilidade_id', $hid)->exists()) {
+                abort(404);
+            }
+            $evento->habilidades()->detach($hid);
+            $operations->exigirReaprovacao($evento);
+            $operations->notificarEvento($evento, 'evento.alterado', "As habilidades do evento {$evento->nm_evento} foram alteradas.");
+        });
 
         return response()->noContent();
     }

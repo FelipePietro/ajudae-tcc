@@ -15,17 +15,16 @@ class Notification extends Model
     protected $fillable = [
         'status_confirmacao',
         'mensagem_notificacao',
+        'tipo_notificacao',
+        'destinatario_type',
+        'destinatario_id',
         'agenda_id',
-        'pessoa_id',
+        'evento_id',
     ];
 
-    public function pessoa()
+    public function destinatario()
     {
-        return $this->belongsTo(
-            Pessoa::class,
-            'pessoa_id',
-            'pessoa_id'
-        );
+        return $this->morphTo();
     }
 
     public function agenda()
@@ -35,5 +34,10 @@ class Notification extends Model
             'agenda_id',
             'agenda_id'
         );
+    }
+
+    public function evento()
+    {
+        return $this->belongsTo(Evento::class, 'evento_id', 'evento_id');
     }
 }

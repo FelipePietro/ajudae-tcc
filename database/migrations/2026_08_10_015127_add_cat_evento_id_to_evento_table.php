@@ -13,7 +13,8 @@ return new class extends Migration
 
             $table->foreign('cat_evento_id')
                 ->references('cat_evento_id')
-                ->on('cat_evento');
+                ->on('cat_evento')
+                ->restrictOnDelete();
         });
     }
 

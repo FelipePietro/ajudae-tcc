@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\CatEvento;
+use App\Models\Permissao;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,11 +16,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        CatEvento::firstOrCreate(['nome_categoria' => 'Assistência social']);
+        CatEvento::firstOrCreate(['nome_categoria' => 'Educação']);
+        CatEvento::firstOrCreate(['nome_categoria' => 'Meio ambiente']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        foreach ([
+            'usuarios.validar',
+            'ongs.validar',
+            'eventos.aprovar',
+            'usuarios.moderar',
+            'organizadores.validar',
+            'xp.campanhas.gerenciar',
+            'lgpd.visualizar',
+            'lgpd.responder',
+            'admin.logs.visualizar',
+            'padrinhos.validar_conclusao',
+        ] as $permissao) {
+            Permissao::firstOrCreate(['nome' => $permissao]);
+        }
     }
 }

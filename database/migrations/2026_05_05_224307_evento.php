@@ -11,11 +11,11 @@ return new class extends Migration
         Schema::create('evento', function (Blueprint $table) {
             $table->id('evento_id');
 
-            $table->string('logradouro_evento', 64);
-            $table->char('cep_evento', 8);
-            $table->string('cidade_evento', 64);
-            $table->string('bairro_evento', 64);
-            $table->char('uf_evento', 2);
+            $table->string('logradouro_evento', 64)->nullable();
+            $table->char('cep_evento', 8)->nullable();
+            $table->string('cidade_evento', 64)->nullable();
+            $table->string('bairro_evento', 64)->nullable();
+            $table->char('uf_evento', 2)->nullable();
             $table->string('compl_evento', 64)->nullable();
 
             $table->string('nm_evento', 64);
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->enum('modalidade_evento', [
                 'presencial',
                 'online',
-                'hibrido'
+                'hibrido',
             ]);
 
             $table->enum('status_evento', [
@@ -33,21 +33,33 @@ return new class extends Migration
                 'ativo',
                 'cancelado',
                 'finalizado',
-                'reprovado'
+                'reprovado',
             ])->default('aguardando a confirmação');
 
             $table->string('imagem_evento_link', 255);
+            $table->text('motivo_cancelamento')->nullable();
+            $table->timestamp('cancelado_em')->nullable();
+            $table->string('cancelado_por_tipo', 30)->nullable();
+            $table->unsignedBigInteger('cancelado_por_id')->nullable();
 
             $table->unsignedBigInteger('ong_id')->nullable();
             $table->foreign('ong_id')
                 ->references('ong_id')
-                ->on('ong');
+                ->on('ong')
+                ->restrictOnDelete();
 
             $table->unsignedBigInteger('pessoa_id')->nullable();
             $table->foreign('pessoa_id')
                 ->references('pessoa_id')
                 ->on('pessoa')
-                -> restrictOnDelete();
+                ->restrictOnDelete();
+
+            $table->unsignedBigInteger('responsavel_pessoa_id')->nullable();
+            $table->foreign('responsavel_pessoa_id')
+                ->references('pessoa_id')
+                ->on('pessoa')
+                ->restrictOnDelete();
+            $table->index(['ong_id', 'responsavel_pessoa_id']);
 
             $table->timestamps();
         });

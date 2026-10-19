@@ -22,20 +22,19 @@ return new class extends Migration
             $table->id('habilidade_pessoa_id');
 
             $table->unsignedBigInteger('habilidade_id');
-            $table->foreign('habilidade_id')->references('habilidade_id')->on('habilidade') ->cascadeOnDelete();
+            $table->foreign('habilidade_id')->references('habilidade_id')->on('habilidade')->cascadeOnDelete();
 
             $table->unsignedBigInteger('pessoa_id');
-            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa') ->cascadeOnDelete();
+            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa')->cascadeOnDelete();
 
-            $table->integer('nivel_habilidade', );
+            $table->unsignedTinyInteger('nivel_habilidade');
 
-            $table ->unique(['habilidade_id', 'pessoa_id']);
+            $table->unique(['habilidade_id', 'pessoa_id']);
         });
 
         Schema::create('evento_habilidade', function (Blueprint $table) {
 
             $table->id('evento_habilidade_id');
-
 
             $table->unsignedBigInteger('evento_id');
 
@@ -44,7 +43,6 @@ return new class extends Migration
                 ->on('evento')
                 ->cascadeOnDelete();
 
-
             $table->unsignedBigInteger('habilidade_id');
 
             $table->foreign('habilidade_id')
@@ -52,24 +50,22 @@ return new class extends Migration
                 ->on('habilidade')
                 ->cascadeOnDelete();
 
-
             $table->unique([
                 'evento_id',
-                'habilidade_id'
+                'habilidade_id',
             ]);
 
         });
     }
-
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('habilidade_pessoa');
         Schema::dropIfExists('evento_habilidade');
+        Schema::dropIfExists('habilidade_pessoa');
         Schema::dropIfExists('habilidade');
-        
+
     }
 };

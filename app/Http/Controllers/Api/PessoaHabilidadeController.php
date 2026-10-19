@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pessoa;
 use App\Models\Habilidade;
+use App\Models\Pessoa;
+use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 
 class PessoaHabilidadeController extends Controller
@@ -14,17 +15,12 @@ class PessoaHabilidadeController extends Controller
      */
     public function index($id)
     {
-        $pessoa = Pessoa::find($id);
+        $pessoa = Pessoa::query()
+            ->where('role_pessoa', 'voluntario')
+            ->where('status_validacao', 'aprovado')
+            ->findOrFail($id);
 
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
-
-        return response()->json([
-            'data' => $pessoa->habilidades()->get()
-        ], 200);
+        return ApiResponse::success($pessoa->habilidades()->get());
     }
 
     /**
@@ -32,33 +28,25 @@ class PessoaHabilidadeController extends Controller
      */
     public function store(Request $request, $id)
     {
-        $pessoa = Pessoa::find($id);
-
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
+        $pessoa = Pessoa::findOrFail($id);
 
         // A pessoa só pode alterar as próprias habilidades
         if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
-            return response()->json([
-                'message' => 'Você não tem permissão para alterar as habilidades desta pessoa.'
-            ], 403);
+            return ApiResponse::error('Você não tem permissão para alterar as habilidades desta pessoa.', null, 403);
         }
 
         $validated = $request->validate([
             'habilidade_id' => [
                 'required',
                 'integer',
-                'exists:habilidade,habilidade_id'
+                'exists:habilidade,habilidade_id',
             ],
 
             'nivel_habilidade' => [
                 'required',
                 'integer',
                 'min:1',
-                'max:5'
+                'max:5',
             ],
         ]);
 
@@ -67,22 +55,17 @@ class PessoaHabilidadeController extends Controller
             ->exists();
 
         if ($jaPossui) {
-            return response()->json([
-                'message' => 'Esta habilidade já está associada à pessoa.'
-            ], 409);
+            return ApiResponse::error('Esta habilidade já está associada à pessoa.', null, 409);
         }
 
         $pessoa->habilidades()->attach(
             $validated['habilidade_id'],
             [
-                'nivel_habilidade' => $validated['nivel_habilidade']
+                'nivel_habilidade' => $validated['nivel_habilidade'],
             ]
         );
 
-        return response()->json([
-            'message' => 'Habilidade adicionada com sucesso.',
-            'data' => $pessoa->habilidades()->get()
-        ], 201);
+        return ApiResponse::success($pessoa->habilidades()->get(), 'Habilidade adicionada com sucesso.', 201);
     }
 
     /**
@@ -90,36 +73,20 @@ class PessoaHabilidadeController extends Controller
      */
     public function destroy(Request $request, $id, $hid)
     {
-        $pessoa = Pessoa::find($id);
-
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
+        $pessoa = Pessoa::findOrFail($id);
 
         if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
-            return response()->json([
-                'message' => 'Você não tem permissão para alterar as habilidades desta pessoa.'
-            ], 403);
+            return ApiResponse::error('Você não tem permissão para alterar as habilidades desta pessoa.', null, 403);
         }
 
-        $habilidade = Habilidade::find($hid);
-
-        if (!$habilidade) {
-            return response()->json([
-                'message' => 'Habilidade não encontrada.'
-            ], 404);
-        }
+        Habilidade::findOrFail($hid);
 
         $existe = $pessoa->habilidades()
             ->where('habilidade.habilidade_id', $hid)
             ->exists();
 
-        if (!$existe) {
-            return response()->json([
-                'message' => 'Esta habilidade não está associada à pessoa.'
-            ], 404);
+        if (! $existe) {
+            return ApiResponse::error('Esta habilidade não está associada à pessoa.', null, 404);
         }
 
         $pessoa->habilidades()->detach($hid);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Evento extends Model
@@ -11,6 +12,8 @@ class Evento extends Model
     protected $table = 'evento';
 
     protected $primaryKey = 'evento_id';
+
+    protected $hidden = ['managed_image_disk', 'managed_image_path', 'managed_image_mime', 'managed_image_size'];
 
     public $timestamps = true;
 
@@ -30,15 +33,26 @@ class Evento extends Model
         'status_evento',
         'imagem_evento_link',
 
-        'ong_id',
-        'pessoa_id',
         'cat_evento_id',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'cancelado_em' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Evento $evento) {
+            $hasOng = $evento->ong_id !== null;
+            $hasPessoa = $evento->pessoa_id !== null;
+
+            if ($hasOng === $hasPessoa) {
+                throw new \DomainException('Um evento deve possuir exatamente um responsável.');
+            }
+        });
+    }
 
     public function ong(): BelongsTo
     {
@@ -56,7 +70,12 @@ class Evento extends Model
             'pessoa_id',
             'pessoa_id'
         );
-}
+    }
+
+    public function responsavelPessoa(): BelongsTo
+    {
+        return $this->belongsTo(Pessoa::class, 'responsavel_pessoa_id', 'pessoa_id');
+    }
 
     public function categoria(): BelongsTo
     {
@@ -75,5 +94,20 @@ class Evento extends Model
             'evento_id',
             'habilidade_id'
         );
+    }
+
+    public function causas(): BelongsToMany
+    {
+        return $this->belongsToMany(Causa::class, 'evento_causa', 'evento_id', 'causa_id');
+    }
+
+    public function recursos(): BelongsToMany
+    {
+        return $this->belongsToMany(Recurso::class, 'evento_recurso', 'evento_id', 'recurso_id');
+    }
+
+    public function agendas(): HasMany
+    {
+        return $this->hasMany(Agenda::class, 'evento_id', 'evento_id');
     }
 }

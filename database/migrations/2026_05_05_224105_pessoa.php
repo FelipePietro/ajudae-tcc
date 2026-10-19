@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,30 +12,44 @@ return new class extends Migration
             $table->id('pessoa_id');
             $table->string('nm_pessoa', 64);
             $table->enum('genero_pessoa', ['masculino', 'feminino', 'outro', 'prefiro não dizer']);
-            $table->char('cpf_pessoa', 11) ->unique();
+            $table->char('cpf_pessoa', 11)->unique();
             $table->date('dt_nasc');
-            $table->string('email_pessoa', 128);
+            $table->string('email_pessoa', 128)->unique();
             $table->char('tele_pessoa', 11);
             $table->char('cep_pessoa', 8);
             $table->string('logradouro_pessoa', 64);
-            $table->string('compl_pessoa', 64);
+            $table->string('compl_pessoa', 64)->nullable();
             $table->string('cidade_pessoa', 64);
             $table->string('bairro_pessoa', 64);
             $table->char('uf_pessoa', 2);
-            $table->enum('role_pessoa', ['voluntario', 'organizador', 'administrador']);
+            $table->enum('role_pessoa', ['voluntario', 'organizador', 'administrador'])->default('voluntario');
+            $table->boolean('admin_master')->default(false);
+            $table->string('status_validacao', 32)->default('aguardando_validacao');
+            $table->unsignedBigInteger('admin_analisando_id')->nullable();
+            $table->timestamp('analise_assumida_em')->nullable();
+            $table->timestamp('aprovado_em')->nullable();
+            $table->timestamp('reprovado_definitivamente_em')->nullable();
+            $table->timestamp('bloqueado_ate')->nullable();
             $table->integer('xp_pessoa')->default(0);
             $table->decimal('avaliacao_pessoa', 3, 2)->default(0);
             $table->string('rg_pessoa', 20);
-            $table->string('antecedentes_pessoa_link', 255);
-            $table->string('cnh_pessoa_link', 255);
+            $table->string('antecedentes_pessoa_link', 255)->nullable();
+            $table->string('cnh_pessoa_link', 255)->nullable();
             $table->string('login_pessoa', 64)->unique();
-            $table->char('senha_pessoa', 64);
+            $table->string('senha_pessoa', 255);
             $table->string('pfp_pessoa_link', 255);
-            $table->string('rg_pessoa_link', 255);
+            $table->string('rg_pessoa_link', 255)->nullable();
             $table->timestamps();
             $table->timestamp('deletar_em')->nullable();
             $table->boolean('exclusao_pendente')->default(false);
-            
+
+            $table->foreign('admin_analisando_id')
+                ->references('pessoa_id')
+                ->on('pessoa')
+                ->nullOnDelete();
+            $table->index(['status_validacao', 'analise_assumida_em']);
+            $table->index('bloqueado_ate');
+
         });
     }
 

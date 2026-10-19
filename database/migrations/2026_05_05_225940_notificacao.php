@@ -13,14 +13,19 @@ return new class extends Migration
     {
         Schema::create('notificacao', function (Blueprint $table) {
             $table->id('notificacao_id');
-            $table->enum('status_confirmacao', ['lido', 'não lido', 'confirmado', 'desconfirmado']);
+            $table->enum('status_confirmacao', ['lido', 'não lido'])->default('não lido');
             $table->string('mensagem_notificacao', 255);
+            $table->string('tipo_notificacao', 64)->nullable();
 
-            $table->unsignedBigInteger('agenda_id');
-            $table->foreign('agenda_id')->references('agenda_id')->on('agenda') ->cascadeOnDelete();
+            $table->string('destinatario_type');
+            $table->unsignedBigInteger('destinatario_id');
+            $table->index(['destinatario_type', 'destinatario_id']);
 
-            $table->unsignedBigInteger('pessoa_id');
-            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa') ->cascadeOnDelete();
+            $table->unsignedBigInteger('agenda_id')->nullable();
+            $table->foreign('agenda_id')->references('agenda_id')->on('agenda')->nullOnDelete();
+
+            $table->unsignedBigInteger('evento_id')->nullable();
+            $table->foreign('evento_id')->references('evento_id')->on('evento')->nullOnDelete();
 
             $table->timestamps();
         });

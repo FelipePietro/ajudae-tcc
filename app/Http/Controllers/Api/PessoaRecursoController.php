@@ -5,52 +5,40 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Pessoa;
 use App\Models\Recurso;
+use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 
 class PessoaRecursoController extends Controller
 {
     public function index($id)
     {
-        $pessoa = Pessoa::find($id);
+        $pessoa = Pessoa::query()
+            ->where('role_pessoa', 'voluntario')
+            ->where('status_validacao', 'aprovado')
+            ->findOrFail($id);
 
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
-
-        return response()->json([
-            'data' => $pessoa->recursos()->get()
-        ], 200);
+        return ApiResponse::success($pessoa->recursos()->get());
     }
 
     public function store(Request $request, $id)
     {
-        $pessoa = Pessoa::find($id);
-
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
+        $pessoa = Pessoa::findOrFail($id);
 
         if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
-            return response()->json([
-                'message' => 'Você não tem permissão para alterar os recursos desta pessoa.'
-            ], 403);
+            return ApiResponse::error('Você não tem permissão para alterar os recursos desta pessoa.', null, 403);
         }
 
         $validated = $request->validate([
             'recurso_id' => [
                 'required',
                 'integer',
-                'exists:recurso,recurso_id'
+                'exists:recurso,recurso_id',
             ],
 
             'detalhes_recurso' => [
                 'required',
                 'string',
-                'max:255'
+                'max:255',
             ],
         ]);
 
@@ -59,56 +47,35 @@ class PessoaRecursoController extends Controller
             ->exists();
 
         if ($jaPossui) {
-            return response()->json([
-                'message' => 'Este recurso já está associado à pessoa.'
-            ], 409);
+            return ApiResponse::error('Este recurso já está associado à pessoa.', null, 409);
         }
 
         $pessoa->recursos()->attach(
             $validated['recurso_id'],
             [
-                'detalhes_recurso' => $validated['detalhes_recurso']
+                'detalhes_recurso' => $validated['detalhes_recurso'],
             ]
         );
 
-        return response()->json([
-            'message' => 'Recurso adicionado com sucesso.',
-            'data' => $pessoa->recursos()->get()
-        ], 201);
+        return ApiResponse::success($pessoa->recursos()->get(), 'Recurso adicionado com sucesso.', 201);
     }
 
     public function destroy(Request $request, $id, $rid)
     {
-        $pessoa = Pessoa::find($id);
-
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
+        $pessoa = Pessoa::findOrFail($id);
 
         if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
-            return response()->json([
-                'message' => 'Você não tem permissão para alterar os recursos desta pessoa.'
-            ], 403);
+            return ApiResponse::error('Você não tem permissão para alterar os recursos desta pessoa.', null, 403);
         }
 
-        $recurso = Recurso::find($rid);
-
-        if (!$recurso) {
-            return response()->json([
-                'message' => 'Recurso não encontrado.'
-            ], 404);
-        }
+        Recurso::findOrFail($rid);
 
         $existe = $pessoa->recursos()
             ->where('recurso.recurso_id', $rid)
             ->exists();
 
-        if (!$existe) {
-            return response()->json([
-                'message' => 'Este recurso não está associado à pessoa.'
-            ], 404);
+        if (! $existe) {
+            return ApiResponse::error('Este recurso não está associado à pessoa.', null, 404);
         }
 
         $pessoa->recursos()->detach($rid);

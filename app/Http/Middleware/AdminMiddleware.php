@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Pessoa;
+use App\Support\ApiResponse;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,16 +15,22 @@ class AdminMiddleware
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle($request, Closure $next)
-{
-    $user = $request->user();
+    public function handle($request, Closure $next, ?string $permission = null)
+    {
+        $user = $request->user();
 
-    if (!$user || $user->role_pessoa !== 'administrador') {
-        return response()->json([
-            'message' => 'Acesso negado.'
-        ], 403);
+        if (! ($user instanceof Pessoa)) {
+            return ApiResponse::error('Acesso negado.', null, 403);
+        }
+
+        $authorized = $permission
+            ? $user->hasPermission($permission)
+            : $user->role_pessoa === 'administrador';
+
+        if (! $authorized) {
+            return ApiResponse::error('Acesso negado.', null, 403);
+        }
+
+        return $next($request);
     }
-
-    return $next($request);
-}
 }

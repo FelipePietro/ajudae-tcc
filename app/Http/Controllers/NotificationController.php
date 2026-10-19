@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Notification;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,41 +10,34 @@ class NotificationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $notifications = Notification::query()
-            ->orderByDesc('sq_notificacao')
-            ->get();
+        $notifications = $request->user()
+            ->notificacoes()
+            ->orderByDesc('created_at')
+            ->paginate(min(max($request->integer('per_page', 20), 1), 100));
 
-        return response()->json($notifications);
+        return ApiResponse::success($notifications);
     }
 
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
-        $notification = Notification::query()->findOrFail($id);
-
-        return response()->json($notification);
+        return ApiResponse::success($request->user()->notificacoes()->findOrFail($id));
     }
 
-    public function markAsRead(int $id): JsonResponse
+    public function markAsRead(Request $request, int $id): JsonResponse
     {
-        $notification = Notification::query()->findOrFail($id);
+        $notification = $request->user()->notificacoes()->findOrFail($id);
 
         $notification->update([
             'status_confirmacao' => 'lido',
         ]);
 
-        return response()->json([
-            'message' => 'Notificacao marcada como lida.',
-            'data' => $notification->fresh(),
-        ]);
+        return ApiResponse::success($notification->fresh(), 'Notificação marcada como lida.');
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(Request $request, int $id)
     {
-        $notification = Notification::query()->findOrFail($id);
-        $notification->delete();
+        $request->user()->notificacoes()->findOrFail($id)->delete();
 
-        return response()->json([
-            'message' => 'Notificacao removida com sucesso.',
-        ]);
+        return response()->noContent();
     }
 }

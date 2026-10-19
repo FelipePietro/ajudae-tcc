@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "php",
+  "packages": {
+    "php": "8.4"
+  },
+  "steps": {
+    "composer": {
+      "variables": {
+        "COMPOSER_NO_DEV": "1"
+      }
+    },
+    "build": {
+      "commands": [
+        "mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache",
+        "php artisan package:discover --ansi",
+        "npm run build",
+        "chmod -R a+rw storage bootstrap/cache"
+      ]
+    }
+  },
+  "deploy": {
+    "startCommand": "docker-php-entrypoint --config /Caddyfile --adapter caddyfile 2>&1"
+  }
+}

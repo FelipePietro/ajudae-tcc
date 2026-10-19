@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::table('agenda', function (Blueprint $table) {
             $table->foreign('evento_id')
                 ->references('evento_id')
-                ->on('evento');
+                ->on('evento')
+                ->restrictOnDelete();
         });
     }
 

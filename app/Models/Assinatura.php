@@ -8,15 +8,27 @@ class Assinatura extends Model
 {
     protected $table = 'assinatura';
 
-    protected $primaryKey = 'sq_assinatura';
+    protected $primaryKey = 'assinatura_id';
 
     public $timestamps = true;
 
     protected $fillable = [
-        'dispositivo',
+        'assinante_type',
+        'assinante_id',
+        'tipo_termo',
+        'versao_termo',
+        'aceito_em',
         'ip_assinatura',
-        'documento_url',
         'documento_hash',
-        'user_agent_assinatura'
+        'user_agent_assinatura',
     ];
+
+    protected $casts = [
+        'aceito_em' => 'datetime',
+    ];
+
+    public function assinante()
+    {
+        return $this->morphTo();
+    }
 }

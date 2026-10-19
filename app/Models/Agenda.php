@@ -17,6 +17,7 @@ class Agenda extends Model
         'status_ativo',
         'data_inicio',
         'data_fim',
+        'vagas_agenda',
         'evento_id'
     ];
 
@@ -24,6 +25,7 @@ class Agenda extends Model
         'status_ativo' => 'string',
         'data_inicio' => 'datetime',
         'data_fim' => 'datetime',
+        'cancelado_em' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];

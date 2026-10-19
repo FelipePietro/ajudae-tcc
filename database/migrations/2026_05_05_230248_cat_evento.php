@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('cat_evento', function (Blueprint $table) {
             $table->id('cat_evento_id');
-            $table->string('nome_categoria', 64);
+            $table->string('nome_categoria', 64)->unique();
         });
     }
 

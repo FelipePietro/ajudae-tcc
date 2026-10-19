@@ -3,49 +3,37 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pessoa;
 use App\Models\Causa;
+use App\Models\Pessoa;
+use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 
 class PessoaCausaController extends Controller
 {
     public function index($id)
     {
-        $pessoa = Pessoa::find($id);
+        $pessoa = Pessoa::query()
+            ->where('role_pessoa', 'voluntario')
+            ->where('status_validacao', 'aprovado')
+            ->findOrFail($id);
 
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
-
-        return response()->json([
-            'data' => $pessoa->causas()->get()
-        ], 200);
+        return ApiResponse::success($pessoa->causas()->get());
     }
 
     public function store(Request $request, $id)
     {
-        $pessoa = Pessoa::find($id);
-
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
+        $pessoa = Pessoa::findOrFail($id);
 
         if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
-            return response()->json([
-                'message' => 'Você não tem permissão para alterar as causas desta pessoa.'
-            ], 403);
+            return ApiResponse::error('Você não tem permissão para alterar as causas desta pessoa.', null, 403);
         }
 
         $validated = $request->validate([
             'causa_id' => [
                 'required',
                 'integer',
-                'exists:causa,causa_id'
-            ]
+                'exists:causa,causa_id',
+            ],
         ]);
 
         $jaPossui = $pessoa->causas()
@@ -53,53 +41,32 @@ class PessoaCausaController extends Controller
             ->exists();
 
         if ($jaPossui) {
-            return response()->json([
-                'message' => 'Esta causa já está associada à pessoa.'
-            ], 409);
+            return ApiResponse::error('Esta causa já está associada à pessoa.', null, 409);
         }
 
         $pessoa->causas()->attach(
             $validated['causa_id']
         );
 
-        return response()->json([
-            'message' => 'Causa adicionada com sucesso.',
-            'data' => $pessoa->causas()->get()
-        ], 201);
+        return ApiResponse::success($pessoa->causas()->get(), 'Causa adicionada com sucesso.', 201);
     }
 
     public function destroy(Request $request, $id, $cid)
     {
-        $pessoa = Pessoa::find($id);
-
-        if (!$pessoa) {
-            return response()->json([
-                'message' => 'Pessoa não encontrada.'
-            ], 404);
-        }
+        $pessoa = Pessoa::findOrFail($id);
 
         if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
-            return response()->json([
-                'message' => 'Você não tem permissão para alterar as causas desta pessoa.'
-            ], 403);
+            return ApiResponse::error('Você não tem permissão para alterar as causas desta pessoa.', null, 403);
         }
 
-        $causa = Causa::find($cid);
-
-        if (!$causa) {
-            return response()->json([
-                'message' => 'Causa não encontrada.'
-            ], 404);
-        }
+        Causa::findOrFail($cid);
 
         $existe = $pessoa->causas()
             ->where('causa.causa_id', $cid)
             ->exists();
 
-        if (!$existe) {
-            return response()->json([
-                'message' => 'Esta causa não está associada à pessoa.'
-            ], 404);
+        if (! $existe) {
+            return ApiResponse::error('Esta causa não está associada à pessoa.', null, 404);
         }
 
         $pessoa->causas()->detach($cid);

@@ -2,91 +2,42 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Pessoa;
 use App\Models\Ong;
-use App\Models\Evento;
+use App\Models\Pessoa;
 use Illuminate\Console\Command;
 
 class ExcluirContasPendentes extends Command
 {
-    protected $signature = 'app:excluir-contas-pendentes';
+    protected $signature = 'app:excluir-contas-pendentes
+        {--dry-run : Mostra apenas contagens, sem excluir contas ou arquivos}
+        {--execute : Solicita execução efetiva (suspensa até definição de retenção e LGPD)}';
 
-    protected $description = 'Exclui definitivamente contas com exclusão pendente';
+    protected $description = 'Pré-visualiza contas com exclusão solicitada e prazo vencido; exclusão efetiva suspensa';
 
     public function handle(): int
     {
-        Pessoa::where('exclusao_pendente', true)
+        if ($this->option('execute')) {
+            $this->error('Exclusão efetiva suspensa: definir retenção de aceites, notificações, LGPD e histórico antes de habilitá-la.');
+
+            return self::FAILURE;
+        }
+
+        // A ausência de --execute é deliberadamente equivalente a --dry-run.
+        // Essas contagens são candidatas, não autorização para hard-delete:
+        // cadastros normais já possuem aceite de termos e podem ter outros vínculos.
+        $pessoas = Pessoa::query()
+            ->where('exclusao_pendente', true)
             ->where('deletar_em', '<=', now())
-            ->each(function ($pessoa) {
-
-                $possuiEventosAtivos = Evento::where(
-                    'pessoa_id',
-                    $pessoa->pessoa_id
-                )
-                    ->whereNotIn('status_evento', [
-                        'finalizado',
-                        'cancelado',
-                        'reprovado'
-                    ])
-                    ->exists();
-
-                if ($possuiEventosAtivos) {
-                    $this->warn(
-                        "Pessoa {$pessoa->pessoa_id} não excluída: possui eventos ativos."
-                    );
-
-                    return;
-                }
-
-                Evento::where('pessoa_id', $pessoa->pessoa_id)
-                    ->whereIn('status_evento', [
-                        'finalizado',
-                        'cancelado',
-                        'reprovado'
-                    ])
-                    ->update([
-                        'pessoa_id' => null
-                    ]);
-
-                $pessoa->tokens()->delete();
-                $pessoa->delete();
-
-                $this->info(
-                    "Pessoa {$pessoa->pessoa_id} excluída."
-                );
-            });
-
-
-        Ong::where('exclusao_pendente', true)
+            ->where('role_pessoa', 'voluntario')
+            ->where('status_validacao', 'aguardando_validacao')
+            ->count();
+        $ongs = Ong::query()
+            ->where('exclusao_pendente', true)
             ->where('deletar_em', '<=', now())
-            ->each(function ($ong) {
+            ->where('status_ong', 'aguardando aprovação')
+            ->count();
 
-                $possuiEventosAtivos = Evento::where(
-                    'ong_id',
-                    $ong->ong_id
-                )
-                    ->whereNotIn('status_evento', [
-                        'finalizado',
-                        'cancelado',
-                        'reprovado'
-                    ])
-                    ->exists();
-
-                if ($possuiEventosAtivos) {
-                    $this->warn(
-                        "ONG {$ong->ong_id} não excluída: possui eventos ativos."
-                    );
-
-                    return;
-                }
-
-                $ong->tokens()->delete();
-                $ong->delete();
-
-                $this->info(
-                    "ONG {$ong->ong_id} excluída."
-                );
-            });
+        $this->info("Pré-visualização: {$pessoas} Pessoas e {$ongs} ONGs candidatas. Nenhuma conta, token, notificação ou arquivo foi excluído.");
 
         return self::SUCCESS;
     }

@@ -13,33 +13,20 @@ return new class extends Migration
     {
         Schema::create('assinatura', function (Blueprint $table) {
             $table->id('assinatura_id');
-            $table->string('dispositivo', 100);
-            $table->ipAddress('ip_assinatura');
+            $table->string('assinante_type');
+            $table->unsignedBigInteger('assinante_id');
+            $table->string('tipo_termo', 64);
+            $table->string('versao_termo', 32);
+            $table->timestamp('aceito_em')->useCurrent();
+            $table->ipAddress('ip_assinatura')->nullable();
             $table->timestamps();
-            $table->string('user_agent_assinatura', 255);
-            $table->string('documento_url', 255);
-            $table->char('documento_hash', 64);
-            $table->string('geoloc_assinatura', 100);
-        });
-
-        Schema::create('assinatura_pessoa', function (Blueprint $table) {
-            $table->id('assinatura_pessoa_id');
-
-            $table->unsignedBigInteger('assinatura_id');
-            $table->foreign('assinatura_id')->references('assinatura_id')->on('assinatura') ->cascadeOnDelete();
-
-            $table->unsignedBigInteger('pessoa_id');
-            $table->foreign('pessoa_id')->references('pessoa_id')->on('pessoa') ->cascadeOnDelete();
-        });
-
-        Schema::create('aassinatura_ong', function (Blueprint $table) {
-            $table->id('aassinatura_ong_id');
-
-            $table->unsignedBigInteger('assinatura_id');
-            $table->foreign('assinatura_id')->references('assinatura_id')->on('assinatura') ->cascadeOnDelete();
-
-            $table->unsignedBigInteger('ong_id');
-            $table->foreign('ong_id')->references('ong_id')->on('ong') ->cascadeOnDelete();
+            $table->string('user_agent_assinatura', 255)->nullable();
+            $table->char('documento_hash', 64)->nullable();
+            $table->index(['assinante_type', 'assinante_id']);
+            $table->unique(
+                ['assinante_type', 'assinante_id', 'tipo_termo', 'versao_termo'],
+                'assinatura_aceite_unique'
+            );
         });
     }
 
