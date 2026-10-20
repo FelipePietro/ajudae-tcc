@@ -1,8 +1,8 @@
 <?php
 
+use App\Exceptions\ValidationConflictException;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\EnsureOngApproved;
-use App\Exceptions\ValidationConflictException;
 use App\Support\ApiResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -25,6 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+
+        // Proxy addresses come from config/trustedproxy.php (also with config cache).
+        // Trust only TLS termination; forwarded IP/Host/port/prefix stay ignored.
+        $middleware->trustProxies(
+            headers: Request::HEADER_X_FORWARDED_PROTO,
+        );
 
         $middleware->alias([
             // Middleware do Sanctum
