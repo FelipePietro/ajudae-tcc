@@ -14,12 +14,13 @@
       "commands": [
         "mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache",
         "php artisan package:discover --ansi",
+        "php scripts/check-gd.php --require-php84",
         "npm run build",
         "chmod -R a+rw storage bootstrap/cache"
       ]
     }
   },
   "deploy": {
-    "startCommand": "docker-php-entrypoint --config /Caddyfile --adapter caddyfile 2>&1"
+    "startCommand": "sh -eu -c 'frankenphp php-cli /app/scripts/check-gd.php --require-php84; exec docker-php-entrypoint --config /Caddyfile --adapter caddyfile 2>&1'"
   }
 }
