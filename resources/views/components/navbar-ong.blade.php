@@ -1,5 +1,6 @@
     @props([
         'ativo' => null,
+        'webNavigation' => null,
 
         'nome' => 'Carlos Ferreira',
         'ong' => 'Instituto Esperança',
@@ -11,18 +12,35 @@
     ])
 
     @php
-        /*
-        |--------------------------------------------------------------------------
-        | ITEM ATIVO DA NAVBAR
-        |--------------------------------------------------------------------------
-        | A rota /ong/painel representa o Dashboard da ONG.
-        | Mesmo que a página não passe "ativo=dashboard", o menu fica
-        | selecionado automaticamente quando estivermos nessa rota.
-        */
-        if (request()->routeIs('ong.painel') || request()->is('ong/painel')) {
-            $ativo = 'dashboard';
+        $institutionalParams = $webNavigation ? [] : ['contexto' => 'ong'];
+        $profileParams = $webNavigation ? [] : ['area' => 'privada', 'contexto' => 'ong'];
+        $home = $webNavigation ? route('inicio') : \App\Support\NavigationContext::homeUrl();
+        $settings = 'ong.configuracoes';
+        $ativo = $webNavigation
+            ? match (request()->route()?->getName()) {
+                'ong.painel' => 'dashboard',
+                'feed' => 'explorar',
+                'ong.perfil' => 'perfil',
+                'ong.configuracoes', 'conta' => 'configuracoes',
+                'ong.privacidade' => 'privacidade',
+                'ong.eventos.index' => 'eventos',
+                'ong.eventos.criar' => 'criar-evento',
+                'ong.candidatos' => 'candidatos',
+                'ong.organizadores' => 'organizadores',
+                'ong.notificacoes' => 'notificacoes',
+                default => null,
+            }
+            : \App\Support\NavigationContext::ongActive();
+
+        if ($webNavigation) {
+            $nome = $webNavigation->name;
+            $ong = 'Conta institucional';
+            $iniciais = $webNavigation->initials;
         }
     @endphp
+    @unless($webNavigation)
+        <x-notification-context />
+    @endunless
 
     <div class="relative">
 
@@ -31,6 +49,7 @@
         {{-- ========================================================= --}}
 
         <header
+            @if($webNavigation) data-integrated-ong-header @endif
             class="
                 sticky top-0 z-40
                 flex h-16 w-full
@@ -45,7 +64,7 @@
 
             {{-- LOGO --}}
             <a
-                href="{{ route('ong.painel') }}"
+                aria-label="Ajudae — início" data-brand-home href="{{ $home }}"
                 class="text-2xl font-semibold tracking-tight"
                 style="font-family: 'Fraunces', serif;"
             >
@@ -55,9 +74,10 @@
 
             <div class="flex items-center gap-2">
 
+
                 {{-- NOTIFICAÇÕES --}}
                 <a
-                    href="{{ route('ong.notificacoes') }}"
+                    @unless($webNavigation) data-notification-entry @endunless href="{{ route('ong.notificacoes', $institutionalParams) }}"
                     class="
                         relative
                         flex h-10 w-10
@@ -88,7 +108,7 @@
                     </svg>
 
 
-                    @if($notificacoes > 0)
+                    @if(false)
 
                         <span
                             class="
@@ -111,10 +131,13 @@
                 </a>
 
 
+
+
                 {{-- ABRIR MENU --}}
                 <button
                     type="button"
                     id="btn-abrir-menu-ong"
+                    aria-controls="sidebar-ong"
                     class="
                         flex h-10 w-10
                         items-center justify-center
@@ -169,9 +192,11 @@
 
         <aside
             id="sidebar-ong"
+            aria-label="Minha organização"
+            @if($webNavigation) data-integrated-ong-sidebar @endif
             class="
                 fixed left-0 top-0 z-50
-                flex h-screen w-[280px]
+                flex h-dvh w-[min(280px,90vw)]
                 -translate-x-full
                 flex-col
                 bg-[#17392a]
@@ -205,7 +230,7 @@
 
                         {{-- LOGO --}}
                         <a
-                            href="{{ route('ong.painel') }}"
+                            aria-label="Ajudae — início" data-brand-home href="{{ $home }}"
                             class="text-[28px] font-semibold tracking-tight"
                             style="font-family: 'Fraunces', serif;"
                         >
@@ -232,7 +257,7 @@
                                     ✦
                                 </span>
 
-                                Organizador
+                                Minha organização
                             </span>
 
                         </div>
@@ -288,6 +313,7 @@
                 "
             >
 
+
                 {{-- ================================================= --}}
                 {{-- PRINCIPAL --}}
                 {{-- ================================================= --}}
@@ -300,23 +326,24 @@
                         font-semibold
                         uppercase
                         tracking-[0.18em]
-                        text-white/35
+                        {{ $webNavigation ? 'text-white/70' : 'text-white/35' }}
                     "
                 >
                     Principal
                 </p>
 
 
+                @if(! $webNavigation || $webNavigation->institutionalPanel)
                 {{-- DASHBOARD --}}
                 <a
-                    href="{{ route('ong.painel') }}"
+                    href="{{ route('ong.painel', $institutionalParams) }}" data-sidebar-item="dashboard" @if($ativo === 'dashboard') aria-current="page" @endif
                     class="
                         relative mb-1
                         flex items-center gap-3
                         rounded-xl
                         px-3 py-2.5
                         font-poppins text-sm
-                        transition
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
 
                         {{
                             $ativo === 'dashboard'
@@ -368,9 +395,70 @@
                 </a>
 
 
+                @endif
+
+                {{-- EXPLORAR EVENTOS --}}
+                <a
+                    href="{{ route('feed', $institutionalParams) }}" data-sidebar-item="explorar" @if($ativo === 'explorar') aria-current="page" @endif
+                    class="
+                        relative mb-1
+                        flex items-center gap-3
+                        rounded-xl
+                        px-3 py-2.5
+                        font-poppins text-sm
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
+
+                        {{
+                            $ativo === 'explorar'
+                                ? 'bg-white/10 font-semibold text-white'
+                                : 'text-white/65 hover:bg-white/[0.06] hover:text-white'
+                        }}
+                    "
+                >
+
+                    @if($ativo === 'explorar')
+
+                        <span
+                            class="
+                                absolute left-0 top-1/2
+                                h-6 w-[3px]
+                                -translate-y-1/2
+                                rounded-r-full
+                                bg-[#e3a62f]
+                            "
+                        ></span>
+
+                    @endif
+
+
+                    <span
+                        class="
+                            flex h-8 w-8
+                            shrink-0
+                            items-center justify-center
+                        "
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            class="h-[18px] w-[18px]"
+                        >
+                            <circle cx="12" cy="12" r="9" /><path d="m16 8-2 6-6 2 2-6 6-2Z" />
+                        </svg>
+                    </span>
+
+                    Explorar eventos
+
+                </a>
+
+
+                @if(! $webNavigation || $webNavigation->institutionalPanel)
                 {{-- MEUS EVENTOS --}}
                 <a
-                    href="{{ route('ong.eventos.index') }}"
+                    href="{{ route('ong.eventos.index', $institutionalParams) }}" data-sidebar-item="eventos" @if($ativo === 'eventos') aria-current="page" @endif
                     class="
                         relative mb-1
                         flex items-center
@@ -378,7 +466,7 @@
                         rounded-xl
                         px-3 py-2.5
                         font-poppins text-sm
-                        transition
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
 
                         {{
                             $ativo === 'eventos'
@@ -441,7 +529,7 @@
                     </span>
 
 
-                    @if($eventosPendentes > 0)
+                    @if(! $webNavigation && $eventosPendentes > 0)
 
                         <span
                             class="
@@ -466,7 +554,7 @@
 
                 {{-- CANDIDATOS --}}
                 <a
-                    href="{{ route('ong.candidatos') }}"
+                    href="{{ route('ong.candidatos', $institutionalParams) }}" data-sidebar-item="candidatos" @if($ativo === 'candidatos') aria-current="page" @endif
                     class="
                         relative mb-1
                         flex items-center
@@ -474,7 +562,7 @@
                         rounded-xl
                         px-3 py-2.5
                         font-poppins text-sm
-                        transition
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
 
                         {{
                             $ativo === 'candidatos'
@@ -541,7 +629,7 @@
                     </span>
 
 
-                    @if($candidatosPendentes > 0)
+                    @if(! $webNavigation && $candidatosPendentes > 0)
 
                         <span
                             class="
@@ -565,18 +653,102 @@
 
 
                 {{-- ================================================= --}}
+                {{-- ORGANIZADORES --}}
+                <a
+                    href="{{ route('ong.organizadores', $institutionalParams) }}" data-sidebar-item="organizadores" @if($ativo === 'organizadores') aria-current="page" @endif
+                    class="
+                        relative mb-1
+                        flex items-center
+                        justify-between gap-3
+                        rounded-xl
+                        px-3 py-2.5
+                        font-poppins text-sm
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
+
+                        {{
+                            $ativo === 'organizadores'
+                                ? 'bg-white/10 font-semibold text-white'
+                                : 'text-white/65 hover:bg-white/[0.06] hover:text-white'
+                        }}
+                    "
+                >
+
+                    @if($ativo === 'organizadores')
+
+                        <span
+                            class="
+                                absolute left-0 top-1/2
+                                h-6 w-[3px]
+                                -translate-y-1/2
+                                rounded-r-full
+                                bg-[#e3a62f]
+                            "
+                        ></span>
+
+                    @endif
+
+
+                    <span class="flex min-w-0 items-center gap-3">
+
+                        <span
+                            class="
+                                flex h-8 w-8
+                                shrink-0
+                                items-center justify-center
+                            "
+                        >
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                class="h-[18px] w-[18px]"
+                            >
+                                <path
+                                    d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                />
+
+                                <circle cx="9" cy="7" r="4" />
+
+                                <path
+                                    d="M22 21v-2a4 4 0 0 0-3-3.87"
+                                />
+
+                                <path
+                                    d="M16 3.13a4 4 0 0 1 0 7.75"
+                                />
+                            </svg>
+
+                        </span>
+
+                        <span class="truncate">
+                            Organizadores
+                        </span>
+
+                    </span>
+
+
+
+
+                </a>
+
+
+                {{-- ================================================= --}}
+
                 {{-- CRIAR EVENTO --}}
                 {{-- ================================================= --}}
 
                 <a
-                    href="{{ route('ong.eventos.criar') }}"
+                    href="{{ route('ong.eventos.criar', $institutionalParams) }}" data-sidebar-item="criar-evento" @if($ativo === 'criar-evento') aria-current="page" @endif
                     class="
                         relative mb-1
                         flex items-center gap-3
                         rounded-xl
                         px-3 py-2.5
                         font-poppins text-sm
-                        transition
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
 
                         {{
                             $ativo === 'criar-evento'
@@ -627,6 +799,9 @@
 
 
                 {{-- ================================================= --}}
+
+                @endif
+
                 {{-- CONTA --}}
                 {{-- ================================================= --}}
 
@@ -638,7 +813,7 @@
                         font-semibold
                         uppercase
                         tracking-[0.18em]
-                        text-white/35
+                        {{ $webNavigation ? 'text-white/70' : 'text-white/35' }}
                     "
                 >
                     Conta
@@ -647,14 +822,14 @@
 
                 {{-- PERFIL ONG --}}
                 <a
-                    href="{{ route('ong.perfil') }}"
+                    href="{{ route('ong.perfil', $profileParams) }}" data-sidebar-item="perfil" @if($ativo === 'perfil') aria-current="page" @endif
                     class="
                         relative mb-1
                         flex items-center gap-3
                         rounded-xl
                         px-3 py-2.5
                         font-poppins text-sm
-                        transition
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
 
                         {{
                             $ativo === 'perfil'
@@ -704,14 +879,15 @@
 
                     </span>
 
-                    Meu perfil
+                    Minha organização
 
                 </a>
 
 
+
                 {{-- NOTIFICAÇÕES --}}
                 <a
-                    href="{{ route('ong.notificacoes') }}"
+                    @unless($webNavigation) data-notification-entry @endunless href="{{ route('ong.notificacoes', $institutionalParams) }}" data-sidebar-item="notificacoes" @if($ativo === 'notificacoes') aria-current="page" @endif
                     class="
                         relative mb-1
                         flex items-center
@@ -719,7 +895,7 @@
                         rounded-xl
                         px-3 py-2.5
                         font-poppins text-sm
-                        transition
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
 
                         {{
                             $ativo === 'notificacoes'
@@ -780,7 +956,7 @@
                     </span>
 
 
-                    @if($notificacoes > 0)
+                    @if(false)
 
                         <span
                             class="
@@ -803,16 +979,18 @@
                 </a>
 
 
+
+
                 {{-- CONFIGURAÇÕES --}}
                 <a
-                    href="{{ route('ong.configuracoes') }}"
+                    href="{{ route($settings, $institutionalParams) }}" data-sidebar-item="configuracoes" @if($ativo === 'configuracoes') aria-current="page" @endif
                     class="
                         relative mb-1
                         flex items-center gap-3
                         rounded-xl
                         px-3 py-2.5
                         font-poppins text-sm
-                        transition
+                        transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e3a62f]
 
                         {{
                             $ativo === 'configuracoes'
@@ -909,6 +1087,13 @@
 
                 </a>
 
+                @if($webNavigation)
+                    <a href="{{ route('ong.privacidade') }}" @class(['ong-sidebar-link','is-active' => $ativo === 'privacidade']) @if($ativo === 'privacidade') aria-current="page" @endif>Privacidade e dados</a>
+                    <form method="POST" action="{{ route('logout') }}" class="mt-3 px-3">
+                        @csrf
+                        <x-botao-dourado as="button" type="submit" size="sm">Sair</x-botao-dourado>
+                    </form>
+                @endif
             </nav>
 
 
@@ -925,7 +1110,7 @@
             >
 
                 <a
-                    href="{{ route('ong.perfil') }}"
+                    href="{{ route('ong.perfil', $profileParams) }}"
                     class="
                         flex min-w-0
                         items-center gap-3
@@ -972,7 +1157,7 @@
                                 mt-0.5 truncate
                                 font-poppins
                                 text-[11px]
-                                text-white/45
+                                {{ $webNavigation ? 'text-white/70' : 'text-white/45' }}
                             "
                         >
                             {{ $ong }}
@@ -991,144 +1176,6 @@
         {{-- JAVASCRIPT MOBILE --}}
         {{-- ========================================================= --}}
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-
-                const sidebar =
-                    document.getElementById('sidebar-ong');
-
-                const overlay =
-                    document.getElementById('overlay-menu-ong');
-
-                const btnAbrir =
-                    document.getElementById('btn-abrir-menu-ong');
-
-                const btnFechar =
-                    document.getElementById('btn-fechar-menu-ong');
-
-
-                if (
-                    !sidebar ||
-                    !overlay ||
-                    !btnAbrir ||
-                    !btnFechar
-                ) {
-                    return;
-                }
-
-
-                function abrirMenu() {
-
-                    sidebar.classList.remove(
-                        '-translate-x-full'
-                    );
-
-                    sidebar.classList.add(
-                        'translate-x-0'
-                    );
-
-                    overlay.classList.remove(
-                        'hidden'
-                    );
-
-                    btnAbrir.setAttribute(
-                        'aria-expanded',
-                        'true'
-                    );
-
-                    document.body.classList.add(
-                        'overflow-hidden'
-                    );
-                }
-
-
-                function fecharMenu() {
-
-                    sidebar.classList.remove(
-                        'translate-x-0'
-                    );
-
-                    sidebar.classList.add(
-                        '-translate-x-full'
-                    );
-
-                    overlay.classList.add(
-                        'hidden'
-                    );
-
-                    btnAbrir.setAttribute(
-                        'aria-expanded',
-                        'false'
-                    );
-
-                    document.body.classList.remove(
-                        'overflow-hidden'
-                    );
-                }
-
-
-                btnAbrir.addEventListener(
-                    'click',
-                    abrirMenu
-                );
-
-
-                btnFechar.addEventListener(
-                    'click',
-                    fecharMenu
-                );
-
-
-                overlay.addEventListener(
-                    'click',
-                    fecharMenu
-                );
-
-
-                document.addEventListener(
-                    'keydown',
-                    function (event) {
-
-                        if (event.key === 'Escape') {
-                            fecharMenu();
-                        }
-
-                    }
-                );
-
-
-                window.addEventListener(
-                    'resize',
-                    function () {
-
-                        if (window.innerWidth >= 1024) {
-
-                            overlay.classList.add(
-                                'hidden'
-                            );
-
-                            document.body.classList.remove(
-                                'overflow-hidden'
-                            );
-
-                            sidebar.classList.remove(
-                                'translate-x-0'
-                            );
-
-                            sidebar.classList.add(
-                                '-translate-x-full'
-                            );
-
-                            btnAbrir.setAttribute(
-                                'aria-expanded',
-                                'false'
-                            );
-                        }
-
-                    }
-                );
-
-            });
-        </script>
+        {{-- Menu keyboard behavior is shared in navigation-accessibility.js. --}}
 
     </div>

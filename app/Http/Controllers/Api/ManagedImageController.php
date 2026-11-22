@@ -83,7 +83,7 @@ class ManagedImageController extends Controller
         ]);
         $prepared = $images->prepare($validated['imagem']);
         $hadImage = $owner->managed_image_path !== null;
-        $updated = $images->replace($owner, $prepared['bytes'], $prepared['mime_type'], fn (Model $locked) => $this->authorizeOwner($request, $locked));
+        $updated = $images->replace($owner, $prepared['bytes'], $prepared['mime_type'], fn (Model $locked) => $this->authorizeOwner($request, $locked, true));
 
         return ApiResponse::success($this->metadata($updated, $images), 'Imagem salva.', $hadImage ? 200 : 201);
     }
@@ -91,12 +91,12 @@ class ManagedImageController extends Controller
     private function remove(Request $request, Model $owner, ManagedImageStorage $images)
     {
         $this->authorizeOwner($request, $owner);
-        $updated = $images->remove($owner, fn (Model $locked) => $this->authorizeOwner($request, $locked));
+        $updated = $images->remove($owner, fn (Model $locked) => $this->authorizeOwner($request, $locked, true));
 
         return ApiResponse::success($this->metadata($updated, $images), 'Imagem removida.');
     }
 
-    private function authorizeOwner(Request $request, Model $owner): void
+    private function authorizeOwner(Request $request, Model $owner, bool $lock = false): void
     {
         $user = $request->user();
         if ($owner instanceof Pessoa && (! $user instanceof Pessoa || $user->pessoa_id !== $owner->pessoa_id)) {
@@ -106,7 +106,7 @@ class ManagedImageController extends Controller
             abort(403);
         }
         if ($owner instanceof Evento) {
-            Gate::forUser($user)->authorize('update', $owner);
+            Gate::forUser($user)->authorize('manage', [$owner, $lock]);
             if (in_array($owner->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode ser alterado.');
             }

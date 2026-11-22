@@ -1,143 +1,68 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios — Ajudae</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="ong-body">
-<div class="ong-shell">
-            <x-admin-sidebar />
+@extends('layouts.admin')
 
-            <main class="ong-main admin-main">
-                <div class="admin-topo">
-        <x-breadcrumb-admin
-            :itens="[
-                [
-                    'label' => 'Relatórios',
-                ]
-            ]"
-        >
-            <x-slot:acoes>
-                <div class="admin-topo-acoes">
-                    <time datetime="2025-05-27T22:31">
-                        qua., 27 de mai. · 22:31
-                    </time>
-
-                    <a
-                        href="{{ route('admin.log-acoes') }}"
-                        class="btn-secundario admin-log-btn"
-                    >
-                        Ver log completo
-                    </a>
-                </div>
-            </x-slot:acoes>
-        </x-breadcrumb-admin>
-
-        <header class="fila-cabecalho">
-            <div>
-                <h1>Relatórios</h1>
-                <p>Visão geral da plataforma · últimos 30 dias</p>
-            </div>
-            <div class="fila-resumo">
-                <div><strong>87%</strong><span>Conclusão</span></div>
-                <div><strong>4,7</strong><span>Avaliação</span></div>
-            </div>
-        </header>
-
-        <div class="cand-toolbar">
-            <button type="button" class="cand-chip">7 dias</button>
-            <button type="button" class="cand-chip is-on">30 dias</button>
-            <button type="button" class="cand-chip">90 dias</button>
-            <button type="button" class="cand-chip">Ano</button>
-            <button type="button" class="cand-aprovar-lote">Exportar relatório</button>
-        </div>
-
+@section('content')
+    @php
+        $eventRows = $queues['fila-eventos'] ?? [];
+        $months = [];
+        foreach (range(0, 5) as $offset) {
+            $date = now('America/Sao_Paulo')->startOfMonth()->addMonths($offset);
+            $months[$date->format('Y-m')] = ucfirst($date->locale('pt_BR')->translatedFormat('M'));
+        }
+        $organizations = array_filter($queues['cadastros-ong'] ?? [], fn ($ong) => in_array($ong['id'], array_column($eventRows, 'ong'), true));
+    @endphp
+    <header class="fila-cabecalho">
+        <div><h1>{{ $title }}</h1><p>Visão geral dos registros acompanhados.</p></div>
+    </header>
+    @if($variant === 'falha')
+        <p role="alert" class="admin-widget">Não foi possível carregar o relatório. <a href="{{ route('admin.relatorios', ['contexto' => 'administrador']) }}">Tentar novamente</a></p>
+    @else
         <section class="rel-stats">
-            <article class="admin-stat admin-stat-laranja">
-                <strong>142</strong>
-                <p>Eventos publicados</p>
-                <small>↑ 12% no mês</small>
-            </article>
-            <article class="admin-stat admin-stat-azul">
-                <strong>1.284</strong>
-                <p>Candidaturas</p>
-                <small>↑ 8% no mês</small>
-            </article>
-            <article class="admin-stat admin-stat-amarelo">
-                <strong>2.418</strong>
-                <p>Voluntários ativos</p>
-                <small>34 novos hoje</small>
-            </article>
-            <article class="admin-stat admin-stat-claro">
-                <strong>38</strong>
-                <p>ONGs verificadas</p>
-                <small>2 este mês</small>
-            </article>
+            @foreach(['fila-eventos|publicado' => ['laranja','Eventos publicados'], 'fila-eventos|finalizado' => ['azul','Eventos finalizados'], 'candidatos|aprovado' => ['amarelo','Cadastros de Pessoa aprovados'], 'cadastros-ong|ativo' => ['claro','ONGs ativas']] as $metric => [$color, $label])
+                <article class="admin-stat admin-stat-{{ $color }}">
+                    <strong data-admin-metric="{{ $metric }}">0</strong><p>{{ $label }}</p>
+                    <small><a href="{{ route('admin.'.explode('|', $metric)[0], $params) }}">Consultar fila<span class="sr-only"> · {{ $label }}</span></a></small>
+                </article>
+            @endforeach
         </section>
-
-        <div class="rel-grid">
+        <div class="rel-grid" data-admin-report>
             <section class="admin-widget">
-                <h3>Eventos publicados por mês</h3>
+                <h3>Eventos publicados por mês de início</h3>
                 <div class="rel-bars">
-                    <div class="rel-col"><div class="rel-track"><div class="rel-bar" style="height: 55%"></div></div><small>Jan</small></div>
-                    <div class="rel-col"><div class="rel-track"><div class="rel-bar" style="height: 62%"></div></div><small>Fev</small></div>
-                    <div class="rel-col"><div class="rel-track"><div class="rel-bar" style="height: 48%"></div></div><small>Mar</small></div>
-                    <div class="rel-col"><div class="rel-track"><div class="rel-bar" style="height: 78%"></div></div><small>Abr</small></div>
-                    <div class="rel-col"><div class="rel-track"><div class="rel-bar" style="height: 92%"></div></div><small>Mai</small></div>
-                    <div class="rel-col"><div class="rel-track"><div class="rel-bar" style="height: 70%"></div></div><small>Jun</small></div>
+                    @foreach($months as $key => $month)
+                        <div class="rel-col" data-report-month="{{ $key }}">
+                            <div class="rel-track" aria-hidden="true"><div class="rel-bar"></div></div>
+                            <small>{{ $month }} <span data-report-value>0</span></small>
+                        </div>
+                    @endforeach
                 </div>
             </section>
-
             <section class="admin-widget">
                 <h3>Eventos por categoria</h3>
-                <div class="rel-hbar-item">
-                    <div class="rel-hbar-top"><b>Meio Ambiente</b><span>32%</span></div>
-                    <div class="rel-hbar"><span style="width: 32%"></span></div>
-                </div>
-                <div class="rel-hbar-item">
-                    <div class="rel-hbar-top"><b>Educação</b><span>26%</span></div>
-                    <div class="rel-hbar"><span style="width: 26%"></span></div>
-                </div>
-                <div class="rel-hbar-item">
-                    <div class="rel-hbar-top"><b>Saúde</b><span>18%</span></div>
-                    <div class="rel-hbar"><span style="width: 18%"></span></div>
-                </div>
-                <div class="rel-hbar-item">
-                    <div class="rel-hbar-top"><b>Assistência Social</b><span>14%</span></div>
-                    <div class="rel-hbar"><span style="width: 14%"></span></div>
-                </div>
-                <div class="rel-hbar-item">
-                    <div class="rel-hbar-top"><b>Cultura</b><span>10%</span></div>
-                    <div class="rel-hbar"><span style="width: 10%"></span></div>
-                </div>
+                @forelse(array_unique(array_column($eventRows, 'category')) as $category)
+                    <div class="rel-hbar-item" data-report-category="{{ $category }}">
+                        <div class="rel-hbar-top"><b>{{ $category }}</b><span data-report-value></span></div>
+                        <div class="rel-hbar" aria-hidden="true"><span></span></div>
+                    </div>
+                @empty
+                    <p>Nenhum Evento disponível.</p>
+                @endforelse
             </section>
         </div>
-
         <section class="admin-widget">
-            <h3>Top ONGs por eventos</h3>
-            <div class="admin-tabela-scroll">
+            <h3>ONGs por Eventos acompanhados</h3>
+            <div class="admin-tabela-scroll" tabindex="0" role="region" aria-label="Eventos de ONG">
                 <table class="admin-tabela">
-                    <thead>
-                        <tr>
-                            <th>ONG</th>
-                            <th>Eventos</th>
-                            <th>Voluntários</th>
-                            <th>Avaliação</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th scope="col">ONG</th><th scope="col">Eventos</th><th scope="col">Publicados</th><th scope="col">Finalizados</th></tr></thead>
                     <tbody>
-                        <tr><td>Verde SP</td><td>28</td><td>412</td><td>4,9 / 5,0</td></tr>
-                        <tr><td>Mãos Solidárias</td><td>21</td><td>350</td><td>4,8 / 5,0</td></tr>
-                        <tr><td>Ação Verde</td><td>17</td><td>289</td><td>4,7 / 5,0</td></tr>
-                        <tr><td>Instituto Semear</td><td>14</td><td>203</td><td>4,6 / 5,0</td></tr>
-                        <tr><td>Pet Amigo</td><td>11</td><td>156</td><td>4,5 / 5,0</td></tr>
+                        @forelse($organizations as $ong)
+                            <tr data-report-ong="{{ $ong['id'] }}"><td><a href="{{ route('admin.cadastros-ong', $params + ['registro' => $ong['id']]) }}">{{ $ong['title'] }}</a></td><td data-report-all>0</td><td data-report-published>0</td><td data-report-finished>0</td></tr>
+                        @empty
+                            <tr><td colspan="4">Nenhuma organização com Evento acompanhado.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </section>
-    </main>
-</div>
-</body>
-</html>
+    @endif
+    @include('admin.partials.data')
+@endsection

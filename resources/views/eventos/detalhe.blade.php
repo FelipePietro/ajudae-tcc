@@ -1,3 +1,6 @@
+@if(isset($publicEvent))
+@include('auth.public-event')
+@else
 <!DOCTYPE html>
 
 <html lang="pt-BR">
@@ -18,14 +21,15 @@
 </head>
 
 
-<body class="bg-[#f7f5ef] text-[#25251f]">
+<body data-events-page class="bg-[#f7f5ef] text-[#25251f]">
 
-    @include('/components/navbar-feed')
+    <x-context-navbar />
 
 
 <main
     class="mx-auto max-w-[1100px] px-6 py-6"
 >
+<x-event-state :flow="$flow" />
 
     {{-- CAPA --}}
     <div
@@ -70,7 +74,7 @@
                        bg-white/15 px-4 py-2
                        text-xs text-white backdrop-blur"
             >
-                ✅ Publicado
+                <span @if($flow['scenario'] === 'participacao') data-closure-event-badge="{{ \App\Support\VisualFiveFixtures::storageId($flow['event_id']) }}" @endif>{{ $flow['event_label'] }}</span>
             </span>
 
         </div>
@@ -89,7 +93,7 @@
     >
 
         {{-- COLUNA ESQUERDA --}}
-        <div class="space-y-6">
+        <div class="space-y-6"><div id="agendas-evento"><x-agenda-options :flow="$flow" /></div>
 
 
             {{-- ONG --}}
@@ -112,7 +116,7 @@
                     <div>
 
                         <h2 class="font-semibold">
-                            {{ $evento->ong->nm_ong ?? 'ONG organizadora' }}
+                            {{ $evento->ong?->nm_ong ?? $evento->pessoa->nm_pessoa }}
                         </h2>
 
                         <p class="text-xs text-neutral-500">
@@ -124,12 +128,13 @@
                 </div>
 
 
-                <button
-                    class="rounded-full border border-[#c9c4b8]
-                           px-5 py-2 text-xs"
-                >
+                @if($evento->ong)
+                <x-botao-secundario :href="route('ong.perfil', ['contexto'=>request()->query('contexto','pessoa'), 'ong'=>$evento->ong->ong_id, 'evento_origem'=>$evento->evento_id])" size="sm">
                     Ver perfil da ONG
-                </button>
+                </x-botao-secundario>
+                @else
+                <x-botao-secundario :href="route('perfil',['area'=>'publica','pessoa'=>$evento->pessoa->pessoa_id,'contexto'=>request()->query('contexto','pessoa'),'origem'=>'evento','evento_origem'=>$evento->evento_id])" size="sm">Ver perfil do organizador</x-botao-secundario>
+                @endif
 
             </div>
 
@@ -266,8 +271,7 @@
                        leading-5 text-neutral-600"
             >
                 Após a candidatura, o organizador revisará seu perfil
-                antes de aprovar. Você receberá uma notificação com o
-                resultado.
+                antes de aprovar. Acompanhe a situação em suas candidaturas.
             </div>
 
         </div>
@@ -308,39 +312,22 @@
                 </div>
 
 
-                <form
-                    action="{{ route(
-                        'eventos.candidatar',
-                        $agenda->agenda_id
-                    ) }}"
-                    method="POST"
-                    class="mt-6"
-                >
-
-                    @csrf
-
-                    <button
-                        type="submit"
-                        class="w-full rounded-full bg-[#174b36]
-                               px-5 py-3 font-semibold
-                               text-white hover:bg-[#123b2b]"
-                    >
-                        🙋 Quero me voluntariar
-                    </button>
-
-                </form>
+@if($flow['scenario'] === 'participacao')
+    <x-botao-secundario href="#agendas-evento" class="mt-6">Consultar Agendas</x-botao-secundario>
+@elseif($flow['eligible'])
+    <x-botao-primario href="#agendas-evento" class="mt-6">Escolher uma Agenda</x-botao-primario>
+@else
+    <x-botao-primario as="button" :href="null" type="button" disabled aria-describedby="agenda-eligibility" class="mt-6">Escolher uma Agenda</x-botao-primario>
+    <p id="agenda-eligibility" class="text-sm mt-2">Candidaturas disponíveis para Pessoas voluntárias aprovadas.</p>
+@endif
 
 
-                <button
-                    type="button"
-                    class="mt-3 w-full rounded-full border
-                           border-[#c9c4b8] px-5 py-2
-                           text-sm"
-                >
+                <x-botao-secundario as="button" :href="null" type="button" class="mt-3 w-full">
                     🔗 Compartilhar evento
-                </button>
+                </x-botao-secundario>
 
 
+                @unless($flow['scenario'] === 'participacao')
                 <div
                     class="mt-6 border-t border-[#dedbd1]
                            pt-5 text-center text-xs
@@ -348,6 +335,7 @@
                 >
                     Candidatura sujeita à aprovação do organizador.
                 </div>
+                @endunless
 
             </div>
 
@@ -366,11 +354,11 @@
                     class="mt-4 space-y-3 text-sm"
                 >
 
-                    <p>⭐ +150 XP ao concluir</p>
+                    <p>XP conforme a duração declarada da Agenda e os critérios de participação.</p>
 
-                    <p>🌱 Badge "Plantador de Sementes"</p>
+                    <p>Certificado conforme finalização e requisitos aplicáveis.</p>
 
-                    <p>📈 +1 posição no ranking</p>
+                    <p>A posição no ranking depende do histórico de participação.</p>
 
                 </div>
 
@@ -384,3 +372,5 @@
 
 </body>
 </html>
+
+@endif

@@ -1,206 +1,144 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel admin — Ajudae</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="ong-body">
-<div class="ong-shell">
-            <x-admin-sidebar />
+@extends('layouts.admin')
+@section('title', $title)
 
-            <main class="ong-main admin-main">
-                <div class="admin-topo">
-        <x-breadcrumb-admin
-            :itens="[
-                [
-                    'label' => 'Painel de administração'
-                ]
-            ]"
-        >
-            <x-slot:acoes>
-                <div class="admin-topo-acoes">
-                    <time datetime="2025-05-27T22:31">
-                        qua., 27 de mai. · 22:31
-                    </time>
-
-                    <a
-                        href="{{ route('admin.log-acoes') }}"
-                        class="btn-secundario admin-log-btn"
-                    >
-                        Ver log completo
-                    </a>
-                </div>
-            </x-slot:acoes>
-        </x-breadcrumb-admin>
-
-        <p class="admin-alerta"><strong>17</strong> <b>itens pendentes de revisão</b> — 7 eventos aguardam aprovação, 3 upgrades para organizador, 1 ONG cadastrada, 2 denúncias ativas e 4 solicitações LGPD. <span>2 solicitações LGPD vencem em menos de 48h.</span></p>
-
-        <section class="admin-stats">
-            <article class="admin-stat admin-stat-laranja">
-                <strong>3</strong>
-                <p>Upgrades para Organizador</p>
-                <small>↑ 2 novos hoje</small>
-            </article>
-            <article class="admin-stat admin-stat-azul">
-                <strong>1</strong>
-                <p>Cadastros de ONG pendentes</p>
-                <small>há 6h na fila</small>
-            </article>
-            <article class="admin-stat admin-stat-amarelo">
-                <strong>7</strong>
-                <p>Eventos para aprovação</p>
-                <small>3 enviados hoje</small>
-            </article>
-            <article class="admin-stat admin-stat-vermelho">
-                <strong>2</strong>
-                <p>Denúncias abertas</p>
-                <small>1 crítica</small>
-            </article>
-            <article class="admin-stat admin-stat-claro">
-                <strong>4</strong>
-                <p>Solicitações LGPD</p>
-                <small>2 vencem em 48h ⚠️</small>
-            </article>
+@section('content')
+    @php
+        $webDashboard = isset($integratedAdmin) ? \App\Support\WebNavigation::for(request()) : null;
+        $areas = $webDashboard ? $webDashboard->adminAreas() : $pages;
+    @endphp
+    <h1 class="sr-only">{{ $title }}</h1>
+    @php
+        $stats = ['upgrades-org'=>'laranja','cadastros-ong'=>'azul','fila-eventos'=>'amarelo','candidatos'=>'vermelho','solicitacoes-lgpd'=>'claro'];
+        $tabs = ['fila-eventos'=>'Eventos','cadastros-ong'=>'ONGs','upgrades-org'=>'Promoções','denuncias'=>'Ocorrências','solicitacoes-lgpd'=>'LGPD','candidatos'=>'Pessoas'];
+        $work = array_filter($queues['fila-eventos'] ?? [], fn ($row) => $row['status'] === 'aguardando a confirmação');
+        if ($webDashboard) {
+            $stats = $stats + array_fill_keys(array_keys($areas), 'claro');
+            $tabs = $tabs + array_map(fn ($area) => $area[0], $areas);
+        }
+    @endphp
+    @if(!$webDashboard && $variant === 'falha')
+        <p class="admin-alerta" role="alert">Não foi possível carregar as filas. <a href="{{ route('admin.admin', ['contexto' => 'administrador']) }}">Tentar novamente</a></p>
+    @else
+        @if($webDashboard)
+            <p class="admin-alerta">Consulte as áreas disponíveis para a sua conta. Os indicadores e processos em análise ainda estão indisponíveis no painel.</p>
+        @else
+        <p class="admin-alerta"><strong data-admin-total>{{ array_sum(array_map([\App\Support\VisualFourFixtures::class, 'pendingCount'], $queues)) }}</strong> <b>itens pendentes de revisão</b>
+            @if(isset($pages['fila-eventos']))
+                · <b data-admin-count="fila-eventos">{{ \App\Support\VisualFourFixtures::pendingCount($queues['fila-eventos'] ?? []) }}</b> Eventos aguardando decisão
+            @endif
+            @if(isset($pages['candidatos']))
+                · <b data-admin-count="candidatos">{{ \App\Support\VisualFourFixtures::pendingCount($queues['candidatos'] ?? []) }}</b> registros na validação de Pessoas
+            @endif
+        </p>
+        @endif
+        <section class="admin-stats" aria-label="Filas de trabalho">
+            @foreach($stats as $key => $color)
+                @continue(!isset($areas[$key]))
+                <article class="admin-stat admin-stat-{{ $color }}">
+                    @if($webDashboard)
+                        <strong aria-hidden="true">—</strong>
+                        <p>{{ $areas[$key][0] }}</p>
+                        <small><a href="{{ $webDashboard->adminAreaUrl($key) }}">Consultar área<span class="sr-only"> · {{ $areas[$key][0] }}</span></a></small>
+                    @else
+                    <strong data-admin-count="{{ $key }}">{{ \App\Support\VisualFourFixtures::pendingCount($queues[$key] ?? []) }}</strong>
+                    <p>{{ $pages[$key][0] }}</p>
+                    <small><a href="{{ route('admin.'.$key, $params) }}">Abrir fila<span class="sr-only"> de {{ $pages[$key][0] }}</span></a></small>
+                    @endif
+                </article>
+            @endforeach
         </section>
+    @endif
 
-        <div class="admin-corpo">
-            <div class="admin-fila">
-                <div class="admin-tabs">
-                    <a href="{{ route('admin.fila-eventos') }}" class="is-active">
-                        Eventos <em>7</em>
-                    </a>
-                    <a href="{{ route('admin.cadastros-ong') }}">
-                        ONGs <em>1</em>
-                    </a>
-                    <a href="{{ route('admin.upgrades-org') }}">
-                        Upgrades <em>3</em>
-                    </a>
-                    <a href="{{ route('admin.denuncias') }}">
-                        Denúncias <em>2</em>
-                    </a>
-                    <a href="{{ route('admin.solicitacoes-lgpd') }}">
-                        LGPD <em>4</em>
-                    </a>
-                </div>
-
-                <article class="admin-card">
-                    <header class="admin-card-topo">
-                        <div>
-                            <h2>Limpeza de Parques — Parque da Cantareira</h2>
-                            <div class="admin-tags">
-                                <span class="admin-tag admin-tag-verde">ONG</span>
-                                <span class="admin-tag-txt">Verde SP • Organizador: Carlos F.</span>
-                                <span class="admin-tag admin-tag-ouro">Meio Ambiente</span>
+    <div class="admin-corpo">
+        <div class="admin-fila">
+            <nav class="admin-tabs" aria-label="Filas">
+                @foreach($tabs as $key => $label)
+                    @continue(!isset($areas[$key]))
+                    <a href="{{ $webDashboard ? $webDashboard->adminAreaUrl($key) : route('admin.'.$key, $params) }}" @class(['is-active' => !$webDashboard && $loop->first])>{{ $label }} @if(!$webDashboard && $key !== 'denuncias')<em data-admin-count="{{ $key }}">{{ \App\Support\VisualFourFixtures::pendingCount($queues[$key] ?? []) }}</em>@endif</a>
+                @endforeach
+            </nav>
+            @if($webDashboard)
+                @foreach($areas as $key => $area)
+                    <section class="admin-card" id="{{ $key }}" tabindex="-1" @if($area[1]) data-admin-capability="{{ $area[1] }}" @endif>
+                        <header class="admin-card-topo"><h2>{{ $permissions[$area[1]] ?? $area[0] }}</h2></header>
+                        @if($key === 'solicitacoes-lgpd')
+                            <p class="admin-desc">A consulta de registros ainda está indisponível nesta área.</p>
+                            <x-botao-secundario :href="$webDashboard->adminAreaUrl($key)" size="sm">Acompanhar solicitações</x-botao-secundario>
+                        @else
+                            <p class="admin-desc">Os registros e as operações desta área ainda estão indisponíveis.</p>
+                        @endif
+                    </section>
+                @endforeach
+            @elseif(isset($pages['fila-eventos']) && $variant !== 'falha')
+                <p class="admin-card" data-admin-dashboard-empty @if($work) hidden @endif>Nenhum Evento aguardando decisão.</p>
+                @foreach($work as $row)
+                    <article class="admin-card" data-admin-dashboard-event="{{ $row['id'] }}">
+                        <header class="admin-card-topo">
+                            <div>
+                                <h2>{{ $row['title'] }}</h2>
+                                <div class="admin-tags">
+                                    <span class="admin-tag admin-tag-{{ $row['ong'] ? 'verde' : 'cinza' }}">{{ $row['ong'] ? 'ONG' : 'Independente' }}</span>
+                                    <span class="admin-tag-txt">{{ $row['facts']['Entidade autora'] }}</span>
+                                    <span class="admin-tag admin-tag-ouro">{{ \App\Support\VisualFourFixtures::STATUSES[\App\Support\VisualFourFixtures::displayState($row)] }}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="admin-card-links">
-                            <small>enviado há 2h</small>
-                            <x-botao-secundario href="#" texto="Ver perfil do org." />
-                        </div>
-                    </header>
-                    <dl class="admin-meta">
-                        <div>
-                            <div><dt>Data</dt><dd>15 maio 2025, 08:00–16:00</dd></div>
-                            <div><dt>Vagas</dt><dd>30</dd></div>
-                        </div>
-                        <div>
-                            <div><dt>Local</dt><dd>Rua do Horto, 1488 — Horto Florestal, SP</dd></div>
-                            <div><dt>Habilidades</dt><dd>Trabalho em equipe, Disposição física</dd></div>
-                        </div>
-                    </dl>
-                    <p class="admin-desc">Junte-se a nós para uma manhã de limpeza e preservação do parque. Traremos luvas, sacos e ferramentas. Leve protetor solar e roupa confortável.</p>
-                    <label class="admin-motivo">
-                        Motivo da recusa (obrigatório ao recusar)
-                        <textarea rows="2" placeholder="Ex: Endereço incompleto, solicite revisão do organizador..."></textarea>
-                    </label>
-                    <footer class="admin-card-acoes">
-                        <div>
-                        <x-botao-primario href="#" texto="Aprovar e publicar" />
-                        <x-botao-declined href="#" texto="Recusar com motivo" />
-                        </div>
-                        <x-botao-secundario href="#" texto="Ver evento completo" />
-                    </footer>
-                </article>
-
-                <article class="admin-card">
-                    <header class="admin-card-topo">
-                        <div>
-                            <h2>Mutirão de Pintura Comunitária</h2>
-                            <div class="admin-tags">
-                                <span class="admin-tag admin-tag-cinza">Ind.</span>
-                                <span class="admin-tag-txt">· Carlos Ferreira</span>
-                                <span class="admin-tag admin-tag-cinza">Habitação</span>
+                        </header>
+                        <dl class="admin-meta">
+                            <div>
+                                <div><dt>Início</dt><dd>{{ \Illuminate\Support\Carbon::parse($row['agendas'][0]['data_inicio'])->format('d/m/Y H:i') }}</dd></div>
+                                <div><dt>Vagas informativas</dt><dd>{{ $row['facts']['Vagas informativas do Evento'] }}</dd></div>
                             </div>
-                        </div>
-                        <div class="admin-card-links">
-                            <small>enviado há 4h</small>
-                            <x-botao-secundario href="#" texto="Ver perfil do org." />
-                        </div>
-                    </header>
-                    <dl class="admin-meta">
-                        <div>
-                            <div><dt>Data</dt><dd>20 jun. 2025, 09:00–17:00</dd></div>
-                            <div><dt>Vagas</dt><dd>20</dd></div>
-                        </div>
-                        <div>
-                            <div><dt>Local</dt><dd>Rua das Flores, 200 — Vila Madalena, SP</dd></div>
-                            <div><dt>Habilidades</dt><dd>Pintura, Trabalho em equipe</dd></div>
-                        </div>
-                    </dl>
-                    <p class="admin-desc">Vamos revitalizar a fachada do centro comunitário com tinta doada. Não é preciso experiência prévia.</p>
-                    <label class="admin-motivo">
-                        Motivo da recusa (obrigatório ao recusar)
-                        <textarea rows="2" placeholder="Ex: Endereço incompleto, solicite revisão do organizador..."></textarea>
-                    </label>
-                    <footer class="admin-card-acoes">
-                        <div>
-                            <x-botao-primario href="#" texto="Aprovar e publicar" />
-                            <x-botao-declined href="#" texto="Recusar com motivo" />
-                        </div>
-                        <x-botao-secundario href="#" texto="Ver evento completo" />
-                    </footer>
-                </article>
-            </div>
-
-            <aside>
+                            <div>
+                                <div><dt>Responsável</dt><dd>{{ $row['facts']['Responsável'] }}</dd></div>
+                                <div><dt>Agendas</dt><dd>{{ count($row['agendas']) }}</dd></div>
+                            </div>
+                        </dl>
+                        <p class="admin-desc">{{ $row['description'] }}</p>
+                        <footer class="admin-card-acoes">
+                            <x-botao-primario :href="route('admin.fila-eventos', $params + ['registro' => $row['id']])" texto="Analisar Evento" />
+                        </footer>
+                    </article>
+                @endforeach
+            @endif
+        </div>
+        <aside>
+            @if($webDashboard && isset($areas['log-acoes']))
+                <section class="admin-widget"><h3>Atividade recente</h3><p>A consulta do histórico ainda está indisponível.</p></section>
+            @elseif(isset($pages['log-acoes']) && $variant !== 'falha')
                 <section class="admin-widget">
                     <h3>Atividade recente</h3>
-                    <ul>
-                        <li><span class="admin-dot admin-dot-preto"></span><p>Evento <strong>Doação de Roupas</strong> aprovado e publicado</p><small>10min</small></li>
-                        <li><span class="admin-dot admin-dot-ouro"></span><p>Upgrade negado para <strong>Roberto Torres</strong> — XP insuficiente</p><small>1h</small></li>
-                        <li><span class="admin-dot admin-dot-azul"></span><p>ONG <strong>Ação Verde</strong> ativada após verificação</p><small>3h</small></li>
-                        <li><span class="admin-dot admin-dot-vermelho"></span><p>Evento <strong>Barraca de Saúde</strong> recusado — local inválido</p><small>5h</small></li>
-                        <li><span class="admin-dot admin-dot-preto"></span><p>Upgrade aprovado para <strong>Mariana Santos</strong></p><small>ontem</small></li>
-                        <li><span class="admin-dot admin-dot-ouro"></span><p>LGPD: exportação enviada para <strong>Ana Costa</strong></p><small>ontem</small></li>
-                    </ul>
+                    <p data-admin-no-logs>Nenhuma decisão nesta navegação.</p>
+                    <ul data-admin-log></ul>
+                    <template data-admin-log-entry>
+                        <li><span class="admin-dot admin-dot-ouro"></span><p><strong data-log-title></strong><br><span data-log-action></span></p><small><time></time></small></li>
+                    </template>
                 </section>
-
+            @endif
+            @if($webDashboard)
+                <section class="admin-widget"><h3>Plataforma hoje</h3><p>Os indicadores ainda estão indisponíveis.</p></section>
+            @elseif($variant !== 'falha')
                 <section class="admin-widget">
                     <h3>Plataforma hoje</h3>
                     <dl class="admin-hoje">
-                        <div><dt>Usuários ativos</dt><dd>2.418</dd></div>
-                        <div><dt>Novos cadastros</dt><dd>+34</dd></div>
-                        <div><dt>Eventos publicados</dt><dd>142</dd></div>
-                        <div><dt>Candidaturas hoje</dt><dd>+287</dd></div>
-                        <div><dt>ONGs verificadas</dt><dd>38</dd></div>
-                        <div class="is-alerta"><dt>Usuários suspensos</dt><dd>3</dd></div>
+                        @foreach(['candidatos|aprovado'=>'Cadastros de Pessoa aprovados','fila-eventos|publicado'=>'Eventos publicados','cadastros-ong|ativo'=>'ONGs ativas'] as $metric => $label)
+                            @continue(!isset($pages[explode('|', $metric)[0]]))
+                            <div><dt>{{ $label }}</dt><dd data-admin-metric="{{ $metric }}">0</dd></div>
+                        @endforeach
                     </dl>
                 </section>
-
-                <section class="admin-widget">
-                    <h3>Acesso rápido</h3>
-                    <nav class="admin-atalhos">
-                        <a href="{{ route('admin.fila-eventos') }}">Fila de eventos</a>
-                        <a href="{{ route('admin.solicitacoes-lgpd') }}">Solicitações LGPD</a>
-                        <a href="{{ route('admin.denuncias') }}">Denúncias abertas</a>
-                        <a href="{{ route('admin.upgrades-org') }}">Upgrades de organizador</a>
-                    </nav>
-                </section>
-            </aside>
-        </div>
-    </main>
-</div>
-</body>
-</html>
+            @endif
+            <section class="admin-widget">
+                <h3>Acesso rápido</h3>
+                <nav class="admin-atalhos" aria-label="Atalhos administrativos">
+                    @foreach($webDashboard ? array_keys($areas) : ['fila-eventos','solicitacoes-lgpd','denuncias','upgrades-org','candidatos','configuracoes'] as $key)
+                        @continue(!isset($areas[$key]))
+                        <x-botao-secundario :href="$webDashboard ? $webDashboard->adminAreaUrl($key) : route('admin.'.$key, $params)" :texto="$areas[$key][0]" size="sm" />
+                    @endforeach
+                </nav>
+            </section>
+        </aside>
+    </div>
+    @unless($webDashboard)
+        @include('admin.partials.data')
+    @endunless
+@endsection

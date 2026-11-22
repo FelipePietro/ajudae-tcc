@@ -3,6 +3,7 @@
 use App\Exceptions\ValidationConflictException;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\EnsureOngApproved;
+use App\Http\Middleware\RequireBearerAccount;
 use App\Support\ApiResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -32,6 +33,11 @@ return Application::configure(basePath: dirname(__DIR__))
             headers: Request::HEADER_X_FORWARDED_PROTO,
         );
 
+        $middleware->appendToPriorityList(
+            \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+            RequireBearerAccount::class,
+        );
+
         $middleware->alias([
             // Middleware do Sanctum
             'abilities' => CheckAbilities::class,
@@ -40,10 +46,13 @@ return Application::configure(basePath: dirname(__DIR__))
             // Middleware administrativo do projeto
             'admin' => AdminMiddleware::class,
             'ong.approved' => EnsureOngApproved::class,
+            'bearer.account' => RequireBearerAccount::class,
         ]);
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontFlash(['senha', 'senha_confirmation', 'senha_atual', 'login', 'senha_pessoa', 'senha_pessoa_confirmation', 'senha_ong', 'senha_ong_confirmation']);
+
         $exceptions->render(function (ValidationConflictException $exception, Request $request) {
             return $request->is('api/*')
                 ? ApiResponse::error($exception->getMessage(), null, 409)

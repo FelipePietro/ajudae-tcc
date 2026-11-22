@@ -18,13 +18,13 @@
 </head>
 
 
-<body
+<body data-events-page
     class="min-h-screen overflow-x-hidden
            bg-[#f7f5ef] font-outfit text-[#26251f]"
 >
 
     {{-- NAVBAR ONG --}}
-    <x-navbar-ong ativo="criar-evento" />
+    <x-context-navbar default-context="ong" />
 
 
     {{--
@@ -43,6 +43,7 @@
                lg:w-[calc(100%-230px)]"
     >
 
+
     <x-breadcrumb-ong
     :itens="[
         [
@@ -60,11 +61,13 @@
         {{-- FORMULÁRIO --}}
         {{-- ============================================================= --}}
 
-        <form
+        @if($flow['management_allowed'] ?? true)
+        <form data-event-editor onsubmit="return false;"
             action="{{ route('ong.eventos.store') }}"
             method="POST"
             enctype="multipart/form-data"
         >
+
 
             @csrf
 
@@ -75,6 +78,8 @@
                        sm:px-6 sm:py-8
                        lg:px-8"
             >
+<x-organizer-scope :flow="$flow" />
+<x-event-state :flow="$flow" :management="true" />
 
                 {{-- ===================================================== --}}
                 {{-- TÍTULO --}}
@@ -111,17 +116,7 @@
 
 
                     {{-- Salvar rascunho desktop/tablet --}}
-                    <button
-                        type="button"
-                        class="w-full shrink-0 rounded-full
-                               border border-[#c9c4b8]
-                               bg-white px-6 py-3
-                               font-poppins text-sm
-                               transition hover:bg-neutral-50
-                               sm:w-auto"
-                    >
-                        Salvar rascunho
-                    </button>
+                    <x-botao-secundario :href="route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')])" class="w-full shrink-0 sm:w-auto">Voltar aos eventos</x-botao-secundario>
 
                 </div>
 
@@ -218,7 +213,7 @@
                                     <input
                                         type="text"
                                         id="nm_evento"
-                                        name="nm_evento"
+                                        name="nm_evento" maxlength="64"
                                         value="{{ old('nm_evento') }}"
                                         required
                                         placeholder="Limpeza da Praia de Santos"
@@ -296,7 +291,7 @@
                                                    font-poppins text-sm
                                                    font-medium"
                                         >
-                                            Número de vagas *
+                                            Vagas informativas do evento *
                                         </label>
 
                                         <input
@@ -318,6 +313,7 @@
                                     </div>
 
 
+                                    <p class="text-xs text-[#817c70]">As vagas do evento são informativas. Cada Agenda tem sua capacidade independente.</p>
                                     {{-- Modalidade --}}
                                     <div
                                         class="min-w-0
@@ -380,7 +376,7 @@
 
                                     <textarea
                                         id="descricao_evento"
-                                        name="descricao_evento"
+                                        name="descricao_evento" maxlength="256"
                                         rows="5"
                                         maxlength="1000"
                                         required
@@ -464,73 +460,8 @@
                                        sm:p-6"
                             >
 
-                                {{-- Datas --}}
-                                <div
-                                    class="grid grid-cols-1 gap-4
-                                           md:grid-cols-2"
-                                >
-
-                                    <div class="min-w-0">
-
-                                        <label
-                                            for="data_inicio"
-                                            class="mb-2 block
-                                                   font-poppins text-sm
-                                                   font-medium"
-                                        >
-                                            Data e hora de início *
-                                        </label>
-
-                                        <input
-                                            type="datetime-local"
-                                            id="data_inicio"
-                                            name="data_inicio"
-                                            required
-                                            class="w-full min-w-0
-                                                   rounded-xl border
-                                                   border-[#d8d4ca]
-                                                   px-3 py-3
-                                                   font-poppins text-sm
-                                                   outline-none
-                                                   focus:border-[#174b36]
-                                                   sm:px-4"
-                                        >
-
-                                    </div>
-
-
-                                    <div class="min-w-0">
-
-                                        <label
-                                            for="data_fim"
-                                            class="mb-2 block
-                                                   font-poppins text-sm
-                                                   font-medium"
-                                        >
-                                            Data e hora de término *
-                                        </label>
-
-                                        <input
-                                            type="datetime-local"
-                                            id="data_fim"
-                                            name="data_fim"
-                                            required
-                                            min=""
-                                            class="w-full min-w-0
-                                                   rounded-xl border
-                                                   border-[#d8d4ca]
-                                                   px-3 py-3
-                                                   font-poppins text-sm
-                                                   outline-none
-                                                   focus:border-[#174b36]
-                                                   sm:px-4"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
+                                <x-agenda-editor :flow="$flow" />
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><label class="text-sm">Cidade<input name="cidade_evento" value="Guarulhos" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2" maxlength="64"></label><label class="text-sm">Bairro<input name="bairro_evento" value="Bairro Exemplo" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2" maxlength="64"></label><label class="text-sm">UF<input name="uf_evento" value="SP" maxlength="2" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2"></label></div>
                                 {{-- CEP --}}
                                 <div
                                     class="grid grid-cols-1 gap-4
@@ -551,7 +482,7 @@
                                         <input
                                             type="text"
                                             id="cep_evento"
-                                            name="cep_evento"
+                                            name="cep_evento" data-event-postcode inputmode="numeric" autocomplete="postal-code" maxlength="9" pattern="[0-9]{5}-?[0-9]{3}" aria-describedby="event-postcode-hint"
                                             maxlength="8"
                                             required
                                             placeholder="11070100"
@@ -663,8 +594,7 @@
                                                        font-poppins text-xs
                                                        text-[#38634e]"
                                             >
-                                                Mapa gerado ao
-                                                confirmar o CEP
+                                                Confira o endereço informado
                                             </p>
 
                                         </div>
@@ -804,7 +734,7 @@
                                             class="mt-2
                                                    font-poppins text-sm"
                                         >
-                                            Clique para fazer upload
+                                            Selecionar imagem
                                         </span>
 
                                         <span
@@ -880,7 +810,7 @@
                                     class="font-poppins
                                            text-xs text-neutral-500"
                                 >
-                                    Sua ONG
+                                    {{ $flow['owner_label'] }}
                                 </p>
 
                                 <h3
@@ -917,7 +847,7 @@
                                         class="rounded-full bg-neutral-100
                                                px-2.5 py-1 text-neutral-600"
                                     >
-                                        30 vagas
+                                        30 vagas informativas
                                     </span>
                                 </div>
 
@@ -1033,7 +963,7 @@
                                     <div class="min-w-0">
 
                                         <strong>
-                                            Rascunho criado
+                                            Revisão das informações
                                         </strong>
 
                                         <p
@@ -1061,7 +991,7 @@
                                     <div class="min-w-0">
 
                                         <strong>
-                                            Enviado para aprovação
+                                            Análise para aprovação
                                         </strong>
 
                                         <p
@@ -1069,7 +999,7 @@
                                                    leading-5
                                                    text-neutral-500"
                                         >
-                                            Admin recebe notificação
+                                            Administração avalia os dados
                                             para revisar
                                         </p>
 
@@ -1164,37 +1094,15 @@
                                sm:gap-3"
                     >
 
-                        <a
-                            href="{{ route('ong.eventos.index') }}"
-                            class="flex w-full items-center
-                                   justify-center
-                                   rounded-full border
-                                   border-[#c9c4b8]
-                                   bg-white px-5 py-3
-                                   font-poppins text-sm
-                                   transition
-                                   hover:bg-neutral-50
-                                   sm:w-auto"
-                        >
+                        <x-botao-secundario :href="route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')])" class="w-full sm:w-auto">
                             Cancelar
-                        </a>
+                        </x-botao-secundario>
 
 
 
-                        <button
-                            type="submit"
-                            class="w-full rounded-full
-                                   bg-[#174b36]
-                                   px-6 py-3
-                                   font-poppins text-sm
-                                   font-semibold
-                                   text-white
-                                   transition
-                                   hover:bg-[#123b2b]
-                                   sm:w-auto"
-                        >
+                        <x-botao-primario as="button" :href="null" type="submit" class="w-full sm:w-auto">
                             Enviar para aprovação →
-                        </button>
+                        </x-botao-primario>
 
                     </div>
 
@@ -1203,6 +1111,9 @@
             </div>
 
         </form>
+        @else
+        <div class="px-4 py-6"><x-organizer-scope :flow="$flow" /></div>
+        @endif
 
     </main>
 
@@ -1212,15 +1123,7 @@
     {{-- MODAL DE SUCESSO --}}
     {{-- ========================================================= --}}
 
-    <div
-        id="modal-sucesso-evento"
-        class="fixed inset-0 z-[100] hidden
-               items-center justify-center
-               bg-black/45 px-4"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-sucesso-titulo"
-    >
+    <dialog id="modal-sucesso-evento" class="ajudae-dialog ajudae-dialog--compact ajudae-dialog--legacy" role="dialog" aria-modal="true" aria-labelledby="modal-sucesso-titulo"><x-dialog-close />
         <div
             class="w-full max-w-md
                    rounded-3xl border border-[#dedbd1]
@@ -1244,18 +1147,13 @@
                 class="mt-5 font-fraunces
                        text-2xl font-bold
                        text-[#17392a]"
-            >
-                Evento enviado!
-            </h2>
+            >Revisão do evento</h2>
 
             <p
                 class="mt-3 font-poppins
                        text-sm leading-6
                        text-neutral-500"
-            >
-                Seu evento foi enviado para análise
-                da equipe do Ajudae.
-            </p>
+            >Confira as informações. Nenhum evento ou alteração foi enviado por esta página.</p>
 
             <div
                 class="mt-4 rounded-2xl
@@ -1272,23 +1170,12 @@
             </div>
 
             <div class="mt-6 flex flex-col gap-3">
-                <a
-                    href="{{ route('ong.eventos.index') }}"
-                    class="flex w-full
-                           items-center justify-center
-                           rounded-full
-                           bg-[#174b36]
-                           px-6 py-3
-                           font-poppins text-sm
-                           font-semibold text-white
-                           transition
-                           hover:bg-[#123b2b]"
-                >
+                <x-botao-primario :href="route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')])" class="w-full">
                     Ir para meus eventos →
-                </a>
+                </x-botao-primario>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -1377,14 +1264,14 @@
                 const valor = Number(campoVagas?.value);
 
                 if (!valor || valor < 1) {
-                    previewVagas.textContent = 'Vagas a definir';
+                    previewVagas.textContent = 'Vagas informativas a definir';
                     return;
                 }
 
                 previewVagas.textContent =
                     valor === 1
-                        ? '1 vaga'
-                        : `${valor} vagas`;
+                        ? '1 vaga informativa'
+                        : `${valor} vagas informativas`;
             }
 
             function atualizarModalidade() {
@@ -1583,7 +1470,7 @@
                 document.getElementById('modal-sucesso-evento');
 
             const urlMeusEventos =
-                @json(route('ong.eventos.index'));
+                @js(route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')]));
 
 
             formularioEvento?.addEventListener('submit', function (event) {
@@ -1602,32 +1489,12 @@
                     return;
                 }
 
-                modalSucesso?.classList.remove('hidden');
-                modalSucesso?.classList.add('flex');
+                modalSucesso?.showModal();
 
-                document.body.classList.add('overflow-hidden');
+
+
             });
 
-
-            // Ao clicar fora do conteúdo do modal,
-            // redireciona automaticamente para Meus eventos.
-            modalSucesso?.addEventListener('click', function (event) {
-                if (event.target === modalSucesso) {
-                    window.location.href = urlMeusEventos;
-                }
-            });
-
-
-            // Também redireciona ao apertar ESC.
-            document.addEventListener('keydown', function (event) {
-                if (
-                    event.key === 'Escape' &&
-                    modalSucesso &&
-                    !modalSucesso.classList.contains('hidden')
-                ) {
-                    window.location.href = urlMeusEventos;
-                }
-            });
 
             atualizarPreviewCompleta();
         });

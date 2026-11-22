@@ -48,8 +48,9 @@ class EventoHabilidadeController extends Controller
 
         ]);
 
-        DB::transaction(function () use ($evento, $validated, $operations) {
+        DB::transaction(function () use ($evento, $validated, $operations, $request) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode alterar habilidades.');
             }
@@ -77,8 +78,9 @@ class EventoHabilidadeController extends Controller
 
         Habilidade::findOrFail($hid);
 
-        DB::transaction(function () use ($evento, $hid, $operations) {
+        DB::transaction(function () use ($evento, $hid, $operations, $request) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode alterar habilidades.');
             }

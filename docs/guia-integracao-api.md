@@ -82,3 +82,7 @@ Upload e remoção exigem titular/gestor autorizado. O arquivo deve ser JPEG, PN
 6. Verificar código público de certificado e baixar PDF apenas como autorizado; confirmar que não há PDF persistido no bucket.
 
 Este checklist não autoriza limpar banco, disparar expurgo ou enviar dados reais à homologação.
+
+## Bloco Visual 4 — Administração
+
+O [guia de Administração e matriz RN001–RN034](bloco-visual-4-integracao-2026-11-14.md) mapeia a interface local para os contratos V1 e registra divergências de autorização, leitura e auditoria.

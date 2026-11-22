@@ -14,9 +14,11 @@ use App\Services\ConfiabilidadeService;
 use App\Services\AvaliacaoService;
 use App\Services\MatchService;
 use App\Exceptions\ValidationConflictException;
+use App\Support\AccountAccess;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -45,6 +47,9 @@ class InscricaoController extends Controller
         $inscricao = DB::transaction(function () use ($agenda, $pessoa, $operations) {
             $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
             $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
+            $candidate = Pessoa::whereKey($pessoa->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless($candidate->isApprovedVolunteer() && AccountAccess::canOperate($candidate)
+                && (int) $candidate->auth_version === (int) $pessoa->auth_version, 403);
             if ($evento->status_evento !== 'ativo' || ! $agenda->isAtivo()) {
                 throw new ValidationConflictException('O evento ou a agenda não está disponível para candidaturas.');
             }
@@ -223,7 +228,9 @@ class InscricaoController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($inscricao, $target, $transitions, $operations) {
+        DB::transaction(function () use ($inscricao, $target, $transitions, $operations, $request) {
+            $evento = Evento::whereKey($inscricao->agenda->evento_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('operate', [$evento, true]);
             $agenda = Agenda::whereKey($inscricao->agenda_id)->lockForUpdate()->firstOrFail();
             $locked = Inscricao::whereKey($inscricao->getKey())->lockForUpdate()->firstOrFail();
             if ($agenda->status_ativo !== 'ativo'
@@ -266,8 +273,10 @@ class InscricaoController extends Controller
             'observacao' => ['prohibited'],
         ]);
 
-        $inscricao = DB::transaction(function () use ($inscricao, $validated) {
-            $agenda = Agenda::with('evento')->whereKey($inscricao->agenda_id)->lockForUpdate()->firstOrFail();
+        $inscricao = DB::transaction(function () use ($inscricao, $validated, $request) {
+            $evento = Evento::whereKey($inscricao->agenda->evento_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('operate', [$evento, true]);
+            $agenda = Agenda::whereKey($inscricao->agenda_id)->lockForUpdate()->firstOrFail();
             $locked = Inscricao::whereKey($inscricao->getKey())->lockForUpdate()->firstOrFail();
             if ($agenda->status_ativo !== 'ativo'
                 || in_array($agenda->evento->status_evento, ['cancelado', 'finalizado'], true)) {

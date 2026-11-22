@@ -7,12 +7,16 @@
 
     @vite([
         'resources/css/app.css',
-        'resources/js/app.js'
+        config('identity.enabled') ? 'resources/js/identity.js' : 'resources/js/app.js'
     ])
 </head>
 <body class="min-h-screen bg-[#F7F5F0] text-[#24271F]">
 
-    @include('/components/navbar')
+    @if(config('identity.enabled'))
+        <x-context-navbar />
+    @else
+        @include('/components/navbar')
+    @endif
 
     <main class="px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <div class="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[250px_minmax(0,1fr)]">

@@ -125,6 +125,7 @@ class PessoaValidationService
                 'analise_assumida_em' => null,
             ])->save();
 
+            app(AccountCredentials::class)->revoke($pessoa);
             $this->registrarHistorico($pessoa, $admin, $anterior, 'reprovado_definitivamente', $motivo, null, null, now());
             $this->registrarAdminLog($pessoa, $admin, 'pessoa.validacao_reprovada_definitivamente', $motivo);
 

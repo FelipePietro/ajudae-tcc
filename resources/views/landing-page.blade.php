@@ -14,20 +14,32 @@
 
     @vite([
         'resources/css/app.css',
-        'resources/js/app.js'
+        config('identity.enabled') ? 'resources/js/identity.js' : 'resources/js/app.js'
     ])
 
 </head>
 
 
 <body
-    class="overflow-x-hidden
+    class="landing-page overflow-x-hidden
            bg-[#f8f6f0]
            font-outfit
            text-[#292820]"
 >
 
     @include('/components/navbar')
+
+    @php
+        $integratedLanding = config('identity.enabled');
+        $landingNavigation = $integratedLanding ? \App\Support\WebNavigation::for(request()) : null;
+        $signedIn = $landingNavigation && ($landingNavigation->profile || $landingNavigation->restricted);
+        $personEntry = $signedIn ? route($landingNavigation->destination()) : ($integratedLanding ? route('cadastro.pessoa') : '/cadastro');
+        $ongEntry = $signedIn ? route('feed') : ($integratedLanding ? route('ong.cadastrar.form') : '/cadastro/ong');
+        $personLabel = $signedIn
+            ? ($landingNavigation->links()[$landingNavigation->destination()] ?? 'Minha conta')
+            : 'Cadastrar-se como Pessoa';
+        $ongLabel = $signedIn ? 'Explorar eventos' : 'Cadastrar ONG';
+    @endphp
 
 
     {{-- ============================================================= --}}
@@ -37,9 +49,10 @@
     <main>
 
         <section
+            @if($integratedLanding && ! $signedIn) data-integrated-landing-hero @endif
             class="relative overflow-hidden
                    bg-[#f8f6f0]
-                   pt-[68px]"
+                   {{ $signedIn ? '' : 'pt-[68px]' }}"
         >
 
             {{-- FUNDO --}}
@@ -81,7 +94,7 @@
                                text-xs font-semibold
                                text-[#c47813]"
                     >
-                        ✦ Gamificação social · Verificado e seguro
+                        ✦ Voluntariado e reconhecimento
                     </span>
 
 
@@ -129,7 +142,7 @@
                     >
 
                         <a
-                            href="/cadastro"
+                            href="{{ $personEntry }}"
                             class="flex items-center justify-center
                                    rounded-full
                                    bg-[#174b36]
@@ -140,12 +153,12 @@
                                    transition
                                    hover:bg-[#103b2a]"
                         >
-                            Começar agora — é grátis
+                            {{ $integratedLanding ? $personLabel : 'Começar agora — é grátis' }}
                         </a>
 
 
                         <a
-                            href="/cadastro/ong"
+                            href="{{ $ongEntry }}"
                             class="flex items-center justify-center
                                    rounded-full
                                    border border-[#174b36]
@@ -157,7 +170,7 @@
                                    transition
                                    hover:bg-white"
                         >
-                            Cadastrar minha ONG
+                            {{ $integratedLanding ? $ongLabel : 'Cadastrar minha ONG' }}
                         </a>
 
                     </div>
@@ -226,7 +239,7 @@
                             class="font-poppins
                                    text-xs text-[#777268]"
                         >
-                            +2.400 voluntários já na plataforma
+                            Pessoas unidas por boas causas
                         </span>
 
                     </div>
@@ -285,7 +298,7 @@
                                        font-medium
                                        text-white"
                             >
-                                Ajudae.app · Feed de eventos
+                                {{ $integratedLanding ? 'Exemplo ilustrativo do feed' : 'Ajudae.app · Feed de eventos' }}
                             </span>
 
                         </div>
@@ -324,7 +337,7 @@
                                                    text-xs
                                                    font-semibold"
                                         >
-                                            Nível 3 — Aprendiz · 450 / 600 XP
+                                            Iniciante · 450 / 500 XP
                                         </p>
 
                                         <div
@@ -334,7 +347,7 @@
                                                    bg-[#d0e5d9]"
                                         >
                                             <div
-                                                class="h-full w-[75%]
+                                                class="h-full w-[90%]
                                                        rounded-full
                                                        bg-[#e6a11a]"
                                             ></div>
@@ -629,33 +642,33 @@
                     $recursos = [
                         [
                             '🎮',
-                            'Gamificação real',
+                            'Reconhecimento da participação',
                             'XP, níveis, badges e ranking público. Seu histórico de voluntariado vira um portfólio de impacto que organizadores e ONGs podem ver antes de aprovar sua candidatura.'
                         ],
                         [
                             '🔒',
                             'Segurança e rastreabilidade',
-                            'Todos os termos são assinados digitalmente com coleta de IP, geolocalização e timestamp imutável.'
+                            'Dados cadastrais e documentos exigem cuidado e acesso restrito durante a análise.'
                         ],
                         [
                             '🏢',
                             'ONGs verificadas',
-                            'Todo cadastro de ONG é verificado pelo administrador via CNPJ ativo. Só eventos de organizações legítimas chegam ao feed.'
+                            'Cadastros de ONG passam por análise administrativa. Eventos precisam de aprovação antes da publicação.'
                         ],
                         [
                             '🎯',
                             'Compatibilidade de perfil',
-                            'Ao se candidatar, o organizador vê sua foto, bio, habilidades, XP e histórico completo. A seleção é baseada em compatibilidade.'
+                            'Habilidades, causas e recursos ajudam a conhecer afinidades. A seleção das candidaturas é uma decisão humana.'
                         ],
                         [
                             '📜',
-                            'Certificados automáticos',
-                            'Após a confirmação de presença pelo organizador, você recebe XP, badges e um certificado de participação emitido automaticamente.'
+                            'Certificados de participação',
+                            'O certificado reúne a carga horária das Agendas válidas após a conclusão do Evento e a confirmação de presença.'
                         ],
                         [
                             '📍',
                             'Ranking por região',
-                            'Dispute posição global, por categoria de evento, por cidade e por estado. Atualizado diariamente para todos os usuários.'
+                            'Acompanhe o ranking por XP e consulte a participação por cidade.'
                         ],
                     ];
                 @endphp
@@ -724,7 +737,7 @@
         {{-- COMO FUNCIONA --}}
         {{-- ============================================================= --}}
 
-        <section class="bg-[#f8f6f0] px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
+        <section id="como-funciona" class="bg-[#f8f6f0] px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
 
             <div class="mx-auto max-w-[1200px]">
 
@@ -755,8 +768,7 @@
                                font-poppins text-sm
                                text-[#777268]"
                     >
-                        Cadastro rápido, eventos verificados,
-                        reconhecimento real.
+                        Conheça as etapas da sua jornada de voluntariado.
                     </p>
 
                 </div>
@@ -782,17 +794,17 @@
                         [
                             '1',
                             'Crie seu perfil',
-                            'Preencha seus dados, envie uma foto, assine os Termos Digitais e configure suas habilidades e interesses.'
+                            'Confira os dados do cadastro, os termos de uso e suas habilidades e interesses.'
                         ],
                         [
                             '2',
                             'Encontre e candidate-se',
-                            'Explore eventos verificados por categoria, cidade ou data. Candidate-se com uma mensagem de motivação.'
+                            'Explore os Eventos e escolha uma Agenda. A carta de apresentação é opcional.'
                         ],
                         [
                             '3',
                             'Participe e ganhe XP',
-                            'Compareça ao evento, tenha presença confirmada e receba XP, badges e certificado automaticamente.'
+                            'Participe da Agenda. A presença confirmada e o encerramento permitem acompanhar XP e elegibilidade para certificado.'
                         ]
                     ] as $index => $passo)
 
@@ -887,8 +899,8 @@
                            text-sm leading-6
                            text-white/70"
                 >
-                    Junte-se a milhares de voluntários que já estão
-                    impactando comunidades.
+                    Encontre boas causas e novas formas de
+                    contribuir com a comunidade.
                 </p>
 
 
@@ -900,7 +912,7 @@
                 >
 
                     <a
-                        href="/cadastro"
+                        href="{{ $personEntry }}"
                         class="rounded-2xl
                                border border-white/20
                                bg-white/10
@@ -918,7 +930,7 @@
                                    font-poppins
                                    text-sm font-semibold"
                         >
-                            Sou voluntário
+                            {{ $integratedLanding ? $personLabel : 'Sou voluntário' }}
                         </p>
 
                         <p
@@ -926,14 +938,14 @@
                                    font-poppins
                                    text-xs text-white/65"
                         >
-                            Quero me candidatar a eventos e acumular XP
+                            {{ $signedIn ? '' : ($integratedLanding ? 'Consulte a disponibilidade do cadastro' : 'Quero me candidatar a eventos e acumular XP') }}
                         </p>
 
                     </a>
 
 
                     <a
-                        href="/cadastro/ong"
+                        href="{{ $ongEntry }}"
                         class="rounded-2xl
                                border border-white/20
                                bg-white/10
@@ -951,7 +963,7 @@
                                    font-poppins
                                    text-sm font-semibold"
                         >
-                            Sou uma ONG
+                            {{ $integratedLanding ? $ongLabel : 'Sou uma ONG' }}
                         </p>
 
                         <p
@@ -959,7 +971,7 @@
                                    font-poppins
                                    text-xs text-white/65"
                         >
-                            Quero publicar eventos e encontrar voluntários
+                            {{ $signedIn ? '' : ($integratedLanding ? 'Consulte a disponibilidade do cadastro institucional' : 'Quero publicar eventos e encontrar voluntários') }}
                         </p>
 
                     </a>
@@ -995,7 +1007,7 @@
                     <div>
 
                         <a
-                            href="/"
+                            data-brand-home href="{{ $integratedLanding ? route('inicio') : \App\Support\NavigationContext::homeUrl() }}"
                             class="text-xl font-semibold"
                             style="font-family: 'Fraunces', serif;"
                         >
@@ -1028,12 +1040,12 @@
                             Política de Privacidade (LGPD)
                         </a>
 
-                        <a href="/cadastro/ong" class="hover:text-white">
-                            Para ONGs
+                        <a href="{{ $ongEntry }}" class="hover:text-white">
+                            {{ $integratedLanding ? $ongLabel : 'Para ONGs' }}
                         </a>
 
-                        <a href="#" class="hover:text-white">
-                            Contato
+                        <a href="{{ route('privacidade') }}#contato" class="hover:text-white">
+                            Informações de contato
                         </a>
 
                     </div>

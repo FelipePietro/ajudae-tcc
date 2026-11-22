@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Meu Perfil | Ajudae</title>
+    <title>Perfil | Ajudae</title>
 
     @vite([
         'resources/css/app.css',
@@ -18,7 +18,7 @@
     {{-- =========================
          NAVBAR
     ========================== --}}
-    @include('/components/navbar-feed')
+    <x-context-navbar surface="public-profile" />
 
 
     {{-- =========================
@@ -30,9 +30,9 @@
             $xp_proximo_nivel - $xp_user
         );
 
-        $porcentagemXp = $xp_proximo_nivel > 0
-            ? min(100, ($xp_user / $xp_proximo_nivel) * 100)
-            : 0;
+        $porcentagemXp = $titulo_proximo_nivel !== null
+            ? min(100, max(0, (($xp_user - $xp_inicio_nivel) / ($xp_proximo_nivel - $xp_inicio_nivel)) * 100))
+            : 100;
     @endphp
 
 
@@ -83,7 +83,7 @@
                             <p
                                 class="mt-1 break-words font-poppins text-sm text-neutral-500"
                             >
-                                📍 {{ $cidade_user }}, {{ $uf_user }}
+                                📍 {{ $cidade_user }}{{ $uf_user ? ', '.$uf_user : '' }}
                             </p>
 
 
@@ -121,20 +121,12 @@
                         class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap"
                     >
 
-                        <button
-                            type="button"
-                            id="btn-compartilhar"
-                            class="w-full rounded-full border border-neutral-300 px-4 py-2 text-center text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 sm:w-auto"
-                        >
+                        <x-botao-secundario as="button" :href="null" type="button"
+                            id="btn-compartilhar" class="w-full sm:w-auto">
                             Compartilhar perfil
-                        </button>
+                        </x-botao-secundario>
 
-                        <a
-                            href="/perfil/editar"
-                            class="w-full rounded-full border border-[#17392a] px-4 py-2 text-center text-sm font-medium text-[#17392a] transition hover:bg-[#17392a] hover:text-white sm:w-auto"
-                        >
-                            ✏ Editar perfil
-                        </a>
+                        @if($profileReturn ?? null)<x-botao-secundario :href="$profileReturn['href']">{{ $profileReturn['label'] }}</x-botao-secundario>@endif
 
                     </div>
 
@@ -291,7 +283,7 @@
                             <p
                                 class="mt-2 break-words font-poppins text-sm leading-6 text-neutral-700"
                             >
-                                {{ $bio_user }}
+                                {{ $bio_user ?: 'Biografia não informada.' }}
                             </p>
 
                         </div>
@@ -312,26 +304,19 @@
                                 <h2
                                     class="text-base font-semibold text-[#17392a]"
                                 >
-                                    Preferências do perfil
+                                    Habilidades públicas
                                 </h2>
 
                                 <p
                                     class="mt-1 font-poppins text-xs leading-5 text-neutral-500"
                                 >
-                                    Gerencie suas habilidades, recursos e causas de interesse.
+                                    Conheça as habilidades compartilhadas por esta Pessoa.
                                 </p>
 
                             </div>
 
 
-                            <div class="shrink-0">
 
-                                <x-botao-secundario
-                                    href="/perfil/preferencias"
-                                    texto="Alterar preferências"
-                                />
-
-                            </div>
 
                         </div>
 
@@ -374,108 +359,7 @@
                         </div>
 
 
-                        {{-- Recursos --}}
-                        <div class="mt-6">
 
-                            <h2
-                                class="text-sm font-semibold text-neutral-500"
-                            >
-                                Recursos disponíveis
-                            </h2>
-
-
-                            <div
-                                class="mt-3 flex flex-wrap gap-2"
-                            >
-
-                                @forelse ($recursos_user as $recurso)
-
-                                    <span
-                                        class="rounded-md bg-neutral-100 px-3 py-1.5 font-poppins text-xs text-neutral-700"
-                                        title="{{ $recurso['detalhes'] }}"
-                                    >
-                                        {{ $recurso['nome'] }}
-                                    </span>
-
-                                @empty
-
-                                    <p
-                                        class="font-poppins text-xs text-neutral-400"
-                                    >
-                                        Nenhum recurso cadastrado.
-                                    </p>
-
-                                @endforelse
-
-                            </div>
-
-                        </div>
-
-
-                        {{-- Causas --}}
-                        <div class="mt-6">
-
-                            <h2
-                                class="text-sm font-semibold text-neutral-500"
-                            >
-                                Categorias de interesse
-                            </h2>
-
-
-                            <div
-                                class="mt-3 flex flex-wrap gap-2"
-                            >
-
-                                @forelse ($causas_user as $causa)
-
-                                    <span
-                                        class="rounded-full bg-green-100 px-3 py-1 font-poppins text-xs font-medium text-green-700"
-                                    >
-                                        {{ $causa['icone'] }}
-                                        {{ $causa['nome'] }}
-                                    </span>
-
-                                @empty
-
-                                    <p
-                                        class="font-poppins text-xs text-neutral-400"
-                                    >
-                                        Nenhuma causa cadastrada.
-                                    </p>
-
-                                @endforelse
-
-                            </div>
-
-                        </div>
-
-
-                        {{-- Organizador --}}
-                        <div
-                            class="mt-6 rounded-lg border-l-4 border-[#e8a40c] bg-[#fff9ed] p-4"
-                        >
-
-                            <h3
-                                class="text-sm font-semibold text-black"
-                            >
-                                Quer ser Organizador?
-                            </h3>
-
-                            <p
-                                class="mt-1 font-poppins text-xs leading-5 text-neutral-600"
-                            >
-                                Aprenda como você pode criar eventos
-                                e assumir responsabilidades como organizador.
-                            </p>
-
-                            <a
-                                href="#"
-                                class="mt-3 inline-block font-poppins text-xs font-semibold text-[#bd7c00] hover:underline"
-                            >
-                                Saiba mais →
-                            </a>
-
-                        </div>
 
                     </div>
 
@@ -499,7 +383,7 @@
                             <p
                                 class="mt-2 font-poppins text-sm text-neutral-500"
                             >
-                                Suas conquistas na plataforma.
+                                Conquistas públicas na plataforma.
                             </p>
 
 
@@ -666,7 +550,7 @@
                         <h2
                             class="text-sm font-bold text-black"
                         >
-                            📊 Sua posição
+                            📊 Posição no ranking
                         </h2>
 
 
@@ -743,7 +627,7 @@
                                     <span
                                         class="min-w-0 truncate font-poppins text-xs font-semibold"
                                     >
-                                        Você
+                                        {{ $nome_user }}
                                     </span>
 
                                 </div>
@@ -782,9 +666,13 @@
                         <p
                             class="mt-4 font-poppins text-xs text-neutral-600"
                         >
-                            {{ $xpRestante }} XP para
-                            Nível {{ $nivel_user + 1 }}
-                            — {{ $titulo_proximo_nivel }}
+                            @if ($titulo_proximo_nivel !== null)
+                                {{ $xpRestante }} XP para
+                                Nível {{ $nivel_user + 1 }}
+                                — {{ $titulo_proximo_nivel }}
+                            @else
+                                Maior nível alcançado: {{ $titulo_nivel }}.
+                            @endif
                         </p>
 
 
@@ -804,8 +692,7 @@
                         <p
                             class="mt-3 font-poppins text-xs leading-5 text-neutral-500"
                         >
-                            Continue participando de eventos
-                            para atingir o próximo nível.
+                            Progresso público desta Pessoa na plataforma.
                         </p>
 
                     </div>
@@ -826,12 +713,9 @@
                                 📜 Certificados
                             </h2>
 
-                            <a
-                                href="#"
-                                class="shrink-0 font-poppins text-xs font-medium text-[#17392a] hover:underline"
-                            >
-                                Ver todos
-                            </a>
+                            <x-botao-secundario :href="route('certificados.verificar', ['contexto' => request()->query('contexto', 'visitante')])" class="shrink-0" size="sm">
+                                Verificar código
+                            </x-botao-secundario>
 
                         </div>
 
@@ -842,9 +726,8 @@
 
                             @forelse ($certificados as $certificado)
 
-                                <a
-                                    href="{{ $certificado['url'] }}"
-                                    class="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-neutral-50 px-4 py-3 transition hover:bg-neutral-100"
+                                <div
+                                    class="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-neutral-50 px-4 py-3"
                                 >
 
                                     <div class="min-w-0">
@@ -864,13 +747,7 @@
                                     </div>
 
 
-                                    <span
-                                        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-xs"
-                                    >
-                                        →
-                                    </span>
-
-                                </a>
+                                </div>
 
                             @empty
 
@@ -1023,10 +900,10 @@
                             await navigator.share({
 
                                 title:
-                                    'Perfil de {{ $nome_user }} no Ajudae',
+                                    @js('Perfil de '.$nome_user.' no Ajudae'),
 
                                 text:
-                                    'Conheça meu perfil de voluntariado no Ajudae.',
+                                    'Conheça este perfil público no Ajudae.',
 
                                 url: url
 

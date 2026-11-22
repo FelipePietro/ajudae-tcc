@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Ong;
 use App\Models\Pessoa;
 
 return [
@@ -38,6 +39,8 @@ return [
     */
 
     'guards' => [
+        'web_pessoa' => ['driver' => 'session', 'provider' => 'pessoas'],
+        'web_ong' => ['driver' => 'session', 'provider' => 'ongs'],
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
@@ -62,6 +65,8 @@ return [
     */
 
     'providers' => [
+        'pessoas' => ['driver' => 'eloquent', 'model' => Pessoa::class],
+        'ongs' => ['driver' => 'eloquent', 'model' => Ong::class],
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', Pessoa::class),

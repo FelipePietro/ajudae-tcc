@@ -9,12 +9,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Meu perfil - Ajudae</title>
+    <title>Perfil da organização - Ajudae</title>
 
     @vite([
         'resources/css/app.css',
         'resources/css/painel_ong.css',
-        'resources/css/perfil_ong.css',
         'resources/js/app.js'
     ])
 </head>
@@ -25,15 +24,7 @@
     {{-- NAVBAR ONG --}}
     {{-- ========================================================= --}}
 
-    <x-navbar-ong
-        ativo="perfil"
-        :nome="$usuario['nome'] ?? 'Carlos Ferreira'"
-        :ong="$ong['nome_fantasia'] ?? 'Instituto Esperança'"
-        :iniciais="$usuario['iniciais'] ?? 'CF'"
-        :eventos-pendentes="$eventosCount ?? 3"
-        :candidatos-pendentes="$candidatosCount ?? 12"
-        :notificacoes="$notificacoesCount ?? 4"
-    />
+    <x-context-navbar default-context="ong" surface="public-profile" />
 
 
     {{-- ========================================================= --}}
@@ -42,14 +33,15 @@
 
     <main class="ong-page-content">
 
-    <x-breadcrumb-ong
-    :itens="[
-        ['label' => 'Meu perfil']
-    ]"
-/>
+
 
         <div class="px-4 py-6 sm:px-6 lg:px-7">
 
+            @if($originEvent ?? null)
+                <x-botao-secundario :href="route('eventos.show', ['id'=>$originEvent, 'contexto'=>$originContext])" class="mb-5 max-w-full">
+                    Retornar ao evento
+                </x-botao-secundario>
+            @endif
 
             {{-- ================================================= --}}
             {{-- PERFIL --}}
@@ -150,17 +142,7 @@
                 </div>
 
 
-                {{-- AÇÕES --}}
-                <div class="org-actions">
 
-                    <a
-                        href="{{ route('ong.perfil.editar') }}"
-                        class="btn btn-primary"
-                    >
-                        Editar perfil
-                    </a>
-
-                </div>
 
             </section>
 
@@ -247,7 +229,7 @@
                                 </h2>
 
                                 <p class="panel-sub">
-                                    Informações do organizador
+                                    Informações da ONG
                                 </p>
 
                             </div>
@@ -437,12 +419,9 @@
                             </div>
 
 
-                            <a
-                                href="{{ route('ong.eventos.index') }}"
-                                class="btn btn-outline"
-                            >
-                                Ver todos
-                            </a>
+                            <x-botao-secundario :href="route('feed', ['contexto'=>request()->query('contexto','ong')])">
+                                Explorar eventos
+                            </x-botao-secundario>
 
                         </div>
 
@@ -541,19 +520,11 @@
                                             "
                                         >
 
-                                            <a
-                                                href="{{ route('eventos.show', $eventoId) }}"
-                                                class="btn btn-sm btn-outline"
-                                            >
+                                            <x-botao-secundario :href="route('eventos.show', ['id'=>$eventoId, 'contexto'=>request()->query('contexto','ong')])" size="sm">
                                                 Ver
-                                            </a>
+                                            </x-botao-secundario>
 
-                                            <a
-                                                href="{{ route('ong.eventos.editar', $eventoId) }}"
-                                                class="btn btn-sm btn-outline"
-                                            >
-                                                Editar
-                                            </a>
+
 
                                         </div>
 
@@ -583,12 +554,9 @@
                                     </p>
 
 
-                                    <a
-                                        href="{{ route('ong.eventos.criar') }}"
-                                        class="btn btn-primary mt-4"
-                                    >
+                                    <x-botao-primario :href="route('ong.eventos.criar')" class="mt-4">
                                         + Criar primeiro evento
-                                    </a>
+                                    </x-botao-primario>
 
                                 </div>
 
@@ -616,7 +584,7 @@
                     <section class="panel">
 
                         <h2 class="panel-title">
-                            Informações pessoais
+                            Informações da organização
                         </h2>
 
 
@@ -629,7 +597,7 @@
                                 </div>
 
                                 <div class="info-value break-all">
-                                    {{ $usuario['email'] ?? 'email@exemplo.com' }}
+                                    Informações de contato disponíveis na área da organização
                                 </div>
 
                             </div>
@@ -642,7 +610,7 @@
                                 </div>
 
                                 <div class="info-value">
-                                    {{ $usuario['telefone'] ?? 'Não informado' }}
+                                    —
                                 </div>
 
                             </div>
@@ -673,33 +641,7 @@
                     {{-- CONTA --}}
                     {{-- ================================================= --}}
 
-                    <section class="panel">
 
-                        <h2 class="panel-title">
-                            Conta
-                        </h2>
-
-
-                        <div class="quick-actions">
-
-                            <a
-                                href="{{ route('ong.perfil.editar') }}"
-                                class="btn btn-primary btn-block"
-                            >
-                                Editar perfil
-                            </a>
-
-
-                            <a
-                                href="{{ route('ong.configuracoes') }}"
-                                class="btn btn-outline btn-block"
-                            >
-                                Configurações
-                            </a>
-
-                        </div>
-
-                    </section>
 
 
 
@@ -710,7 +652,7 @@
                     <section class="panel">
 
                         <h2 class="panel-title">
-                            Status da conta
+                            Situação da organização
                         </h2>
 
 
@@ -765,7 +707,7 @@
                                             text-[#6B7269]
                                         "
                                     >
-                                        Seu perfil está ativo e pode
+                                        Esta organização está ativa e pode
                                         organizar eventos no Ajudae.
                                     </p>
 

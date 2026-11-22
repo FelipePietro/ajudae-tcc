@@ -66,6 +66,7 @@ class Pessoa extends Authenticatable
      * Campos ocultos em respostas JSON.
      */
     protected $hidden = [
+        'auth_version',
         'senha_pessoa',
         'remember_token',
         'cpf_pessoa',
@@ -86,6 +87,7 @@ class Pessoa extends Authenticatable
      * Conversão automática de tipos.
      */
     protected $casts = [
+        'auth_version' => 'integer',
         'dt_nasc' => 'date',
         'exclusao_pendente' => 'boolean',
         'deletar_em' => 'datetime',
@@ -99,6 +101,11 @@ class Pessoa extends Authenticatable
     /**
      * Informa ao Laravel qual coluna contém a senha.
      */
+    public function getAuthPasswordName(): string
+    {
+        return 'senha_pessoa';
+    }
+
     public function getAuthPassword()
     {
         return $this->senha_pessoa;

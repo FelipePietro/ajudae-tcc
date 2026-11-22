@@ -6,6 +6,7 @@ use App\Exceptions\ValidationConflictException;
 use App\Models\Acompanhamento;
 use App\Models\ConclusaoPadrinho;
 use App\Models\Pessoa;
+use App\Support\AccountAccess;
 use App\Models\SolicitacaoPadrinho;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -59,6 +60,7 @@ class PadrinhoService
             $pessoas = $this->bloquearPessoas([$afilhado->pessoa_id, $padrinhoId]);
             $afilhado = $pessoas[$afilhado->pessoa_id];
             $padrinho = $pessoas[$padrinhoId];
+            abort_unless(AccountAccess::canOperate($afilhado) && AccountAccess::canOperate($padrinho), 403);
             $this->garantirAfilhado($afilhado, true);
             $this->garantirPadrinho($padrinho);
 
@@ -91,6 +93,8 @@ class PadrinhoService
             }
 
             if ($aceitar) {
+                abort_unless(AccountAccess::canOperate($pessoas[$pedido->padrinho_id])
+                    && AccountAccess::canOperate($pessoas[$pedido->apadrinhado_id]), 403);
                 // Ao aceitar, cinco participações obtidas durante a espera não extinguem o pedido.
                 $this->garantirAfilhado($pessoas[$pedido->apadrinhado_id], false, $pedido->getKey());
                 $this->garantirPadrinho($pessoas[$pedido->padrinho_id]);

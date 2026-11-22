@@ -39,6 +39,7 @@ class Ong extends Authenticatable
     ];
 
     protected $hidden = [
+        'auth_version',
         'senha_ong',
         'cnpj_ong',
         'cpf_responsavel_ong',
@@ -54,9 +55,15 @@ class Ong extends Authenticatable
     ];
 
     protected $casts = [
+        'auth_version' => 'integer',
         'exclusao_pendente' => 'boolean',
         'deletar_em' => 'datetime',
     ];
+
+    public function getAuthPasswordName(): string
+    {
+        return 'senha_ong';
+    }
 
     public function getAuthPassword(): string
     {

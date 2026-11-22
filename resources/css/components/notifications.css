@@ -1,0 +1,26 @@
+.notification-toolbar { margin-bottom: 1.5rem; }
+.notification-filters { display:grid; grid-template-columns:2fr 1fr 1fr auto; align-items:end; gap:1rem; margin-top:1rem; }
+.notification-filters label { display:grid; gap:.4rem; font-weight:600; min-width:0; }
+.notification-filters input,.notification-filters select { background:white; color:#292820; border:1px solid #aaa99d; border-radius:.65rem; padding:.7rem; width:100%; min-width:0; font:inherit; }
+.notification-list { display:grid; gap:1rem; }
+.notification-card { border-left:4px solid #d6d6ca; overflow-wrap:anywhere; }
+.notification-card[data-unread="true"] { border-left-color:#2d6a4f; }
+.notification-card h2 { font-size:1.2rem; margin:.8rem 0 .5rem; font-weight:600; }
+.notification-card .account-actions { margin-top:1rem; }
+.notification-meta { display:flex; flex-wrap:wrap; align-items:center; gap:.7rem; font-size:.85rem; }
+.notification-meta time { margin-left:auto; color:#55594f; }
+.notification-pagination { justify-content:center; margin-top:1.5rem; }
+.notification-count { display:inline-flex; min-width:1.3rem; justify-content:center; border-radius:1rem; background:#e3a62f; color:#17392a; font-size:.75rem; padding:.05rem .3rem; margin-left:.25rem; }
+.notification-entry { white-space:nowrap; }
+.notification-filters :focus-visible,.notification-card :focus-visible { outline:3px solid #956715; outline-offset:3px; }
+@media(max-width:800px) { .notification-filters {grid-template-columns:1fr 1fr;} .notification-filters label:first-child {grid-column:1/-1;} }
+@media(max-width:420px) { .notification-filters {grid-template-columns:1fr;} .notification-filters label:first-child {grid-column:auto;} .notification-meta time {margin-left:0;} }
+
+@media(min-width:1024px){body:has(.notification-institution) .account-main {margin-left:280px;max-width:none;margin-right:1rem;} }
+
+/* B6.1.1: badge belongs to the icon, never participates in navbar flex layout. */
+.notification-count[hidden] { display:none; }
+.notification-icon { position:relative; display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; flex:0 0 22px; overflow:visible; }
+.notification-icon svg { display:block; width:22px; height:22px; flex:none; }
+.notification-icon .notification-count { position:absolute; top:0; right:0; transform:translate(50%,-50%); z-index:1; box-sizing:border-box; height:18px; min-width:18px; margin:0; padding:0 4px; display:inline-flex; align-items:center; justify-content:center; border:2px solid #f5f5f0; border-radius:999px; background:#e3a62f; color:#17392a; font-family:Arial,sans-serif; font-size:10px; font-weight:700; line-height:14px; white-space:nowrap; pointer-events:none; }
+.notification-icon .notification-count[hidden] { display:none; }

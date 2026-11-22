@@ -1,7 +1,7 @@
 <footer class="footer">
     <div class="footer-top">
         <div class="footer-brand">
-            <a href="/" class="navbar-brand">
+            <a aria-label="Ajudae — início" data-brand-home href="{{ config('identity.enabled') ? route('inicio') : \App\Support\NavigationContext::homeUrl() }}" class="navbar-brand">
                 <span class="brand-aju-white">Ajud</span><span class="brand-dae">ae</span>
             </a>
             <p>Plataforma de voluntariado gamificado</p>
@@ -10,12 +10,12 @@
         <ul class="footer-links">
             <li><a href="/termos">Termos de Uso</a></li>
             <li><a href="/privacidade">Política de Privacidade (LGPD)</a></li>
-            <li><a href="/ong">Para ONGs</a></li>
-            <li><a href="/contato">Contato</a></li>
+            <li><a href="{{ route('ong.cadastrar.form') }}">Para ONGs</a></li>
+            <li><a href="{{ route('privacidade') }}#contato">Informações de contato</a></li>
         </ul>
     </div>
 
     <div class="footer-bottom">
-        <p>© 2025 Ajudae — Projeto TCC, DS. Para fins acadêmicos. Os termos requerem revisão profissional para uso em produção real.</p>
+        <p>© {{ date('Y') }} Ajudae — Pessoas, causas e oportunidades.</p>
     </div>
 </footer>

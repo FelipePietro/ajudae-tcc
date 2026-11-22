@@ -1,4 +1,16 @@
+@php
+    $integrated = config('identity.enabled');
+    $webNavigation = $integrated ? \App\Support\WebNavigation::for(request()) : null;
+    $publicHeaderNavigation = $integrated ? null : ($navigation ?? \App\Support\NavigationContext::resolve(request()->query('contexto'), 'visitante'));
+@endphp
+@if($webNavigation?->profile || $webNavigation?->restricted)
+    @include('components.navbar-feed', ['webNavigation' => $webNavigation])
+@elseif($publicHeaderNavigation && $publicHeaderNavigation['key'] !== 'visitante')
+    @include('components.navbar-feed', ['navigation' => $publicHeaderNavigation])
+@else
 <nav
+    aria-label="Navegação principal"
+    @if($integrated) data-integrated-public-navbar @endif
     class="fixed left-0 top-0 z-50
            w-full border-b border-[#e7e2d8]
            bg-[#f8f6f0]/95 backdrop-blur"
@@ -11,7 +23,7 @@
 
         {{-- LOGO --}}
         <a
-            href="/"
+            aria-label="Ajudae — início" data-brand-home href="{{ $integrated ? route('inicio') : \App\Support\NavigationContext::homeUrl() }}"
             class="text-[26px] font-semibold leading-none text-[#17392a]"
             style="font-family: 'Fraunces', serif;"
         >
@@ -27,10 +39,10 @@
         >
 
             <a
-                href="/"
+                href="{{ $integrated ? route('feed') : '/feed?contexto=visitante' }}"
                 class="transition hover:text-[#17392a]"
             >
-                Início
+                Explorar eventos
             </a>
 
             <a
@@ -73,6 +85,7 @@
                    transition hover:bg-[#eeece5]
                    md:hidden"
             aria-label="Abrir menu"
+            aria-controls="menu-publico-mobile"
             aria-expanded="false"
         >
             <svg
@@ -109,12 +122,12 @@
         >
 
             <a
-                href="/"
+                href="{{ $integrated ? route('feed') : '/feed?contexto=visitante' }}"
                 class="rounded-xl px-4 py-3
                        text-[#4d4a42]
                        hover:bg-[#eeece5]"
             >
-                Início
+                Explorar eventos
             </a>
 
             <a
@@ -155,48 +168,5 @@
 </nav>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        const botao =
-            document.getElementById('btn-menu-publico');
-
-        const menu =
-            document.getElementById('menu-publico-mobile');
-
-        if (!botao || !menu) {
-            return;
-        }
-
-        botao.addEventListener('click', function () {
-
-            menu.classList.toggle('hidden');
-
-            const aberto =
-                !menu.classList.contains('hidden');
-
-            botao.setAttribute(
-                'aria-expanded',
-                aberto ? 'true' : 'false'
-            );
-
-        });
-
-
-        window.addEventListener('resize', function () {
-
-            if (window.innerWidth >= 768) {
-
-                menu.classList.add('hidden');
-
-                botao.setAttribute(
-                    'aria-expanded',
-                    'false'
-                );
-
-            }
-
-        });
-
-    });
-</script>
+{{-- Menu keyboard behavior is shared in navigation-accessibility.js. --}}
+@endif

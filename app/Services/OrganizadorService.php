@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Exceptions\ValidationConflictException;
 use App\Models\Acompanhamento;
+use App\Models\AdminLog;
 use App\Models\Evento;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Models\SolicitacaoOrganizador;
 use App\Models\VinculoOngOrganizador;
+use App\Support\AccountAccess;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 
@@ -27,6 +29,7 @@ class OrganizadorService
     {
         return DB::transaction(function () use ($pessoa, $justificativa) {
             $pessoa = Pessoa::whereKey($pessoa->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless(AccountAccess::canOperate($pessoa), 403);
             $this->garantirElegivel($pessoa);
 
             return SolicitacaoOrganizador::create([
@@ -165,14 +168,14 @@ class OrganizadorService
     public function convidar(Ong $ong, Pessoa $pessoa): VinculoOngOrganizador
     {
         return DB::transaction(function () use ($ong, $pessoa) {
-            $ong = Ong::whereKey($ong->getKey())->lockForUpdate()->firstOrFail();
             $pessoa = Pessoa::whereKey($pessoa->getKey())->lockForUpdate()->firstOrFail();
+            $ong = Ong::whereKey($ong->getKey())->lockForUpdate()->firstOrFail();
 
-            if ($ong->status_ong !== 'ativo') {
+            if (! AccountAccess::activeOng($ong)) {
                 throw new AuthorizationException('A ONG precisa estar ativa.');
             }
 
-            if ($pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado') {
+            if (! AccountAccess::canOperate($pessoa) || $pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado') {
                 throw new ValidationConflictException('Somente organizadores aprovados podem ser convidados.');
             }
 
@@ -212,7 +215,7 @@ class OrganizadorService
 
             if ($aceitar) {
                 $ong = Ong::whereKey($vinculo->ong_id)->lockForUpdate()->firstOrFail();
-                if ($pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado' || $ong->status_ong !== 'ativo') {
+                if (! AccountAccess::canOperate($pessoa) || $pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado' || ! AccountAccess::activeOng($ong)) {
                     throw new ValidationConflictException('O convite não pode ser aceito no estado atual.');
                 }
 
@@ -225,7 +228,7 @@ class OrganizadorService
 
                 if (Evento::where('pessoa_id', $pessoa->pessoa_id)
                     ->whereNull('ong_id')
-                    ->whereNotIn('status_evento', ['finalizado', 'cancelado'])
+                    ->whereNotIn('status_evento', ['finalizado', 'cancelado', 'reprovado'])
                     ->exists()) {
                     throw new ValidationConflictException('O organizador possui evento independente não terminal.');
                 }
@@ -243,6 +246,8 @@ class OrganizadorService
     public function encerrarVinculo(VinculoOngOrganizador $vinculo, Pessoa|Ong $ator): VinculoOngOrganizador
     {
         return DB::transaction(function () use ($vinculo, $ator) {
+            $pessoa = Pessoa::whereKey($vinculo->pessoa_id)->lockForUpdate()->firstOrFail();
+            $ong = Ong::whereKey($vinculo->ong_id)->lockForUpdate()->firstOrFail();
             $vinculo = VinculoOngOrganizador::whereKey($vinculo->getKey())->lockForUpdate()->firstOrFail();
 
             $autorizado = $ator instanceof Ong
@@ -253,13 +258,17 @@ class OrganizadorService
                 throw new AuthorizationException('Este vínculo não pertence ao usuário autenticado.');
             }
 
+            $current = $ator instanceof Ong ? $ong : $pessoa;
+            abort_unless(AccountAccess::activeOng($ong) && AccountAccess::canOperate($current)
+                && (int) $current->auth_version === (int) $ator->auth_version, 403);
+
             if ($vinculo->status !== 'ativo') {
                 throw new ValidationConflictException('O vínculo não está ativo.');
             }
 
             $possuiEventoNaoTerminal = Evento::where('ong_id', $vinculo->ong_id)
                 ->where('responsavel_pessoa_id', $vinculo->pessoa_id)
-                ->whereNotIn('status_evento', ['finalizado', 'cancelado'])
+                ->whereNotIn('status_evento', ['finalizado', 'cancelado', 'reprovado'])
                 ->exists();
 
             if ($possuiEventoNaoTerminal) {
@@ -270,9 +279,16 @@ class OrganizadorService
                 'status' => 'encerrado',
                 'encerrado_em' => now(),
             ]);
+            AdminLog::create([
+                'pessoa_id' => $ator instanceof Pessoa ? $ator->getKey() : null,
+                'acao' => 'organizador.vinculo_encerrado',
+                'recurso_type' => $vinculo->getMorphClass(),
+                'recurso_id' => $vinculo->getKey(),
+                'detalhes' => ['ong_id' => $vinculo->ong_id, 'de' => 'ativo', 'para' => 'encerrado'],
+            ]);
 
             return $vinculo->refresh();
-        });
+        }, 3);
     }
 
     public function atribuirResponsavel(Evento $evento, Ong $ong, ?Pessoa $pessoa, EventoOperationalService $operations): Evento
@@ -280,7 +296,9 @@ class OrganizadorService
         return DB::transaction(function () use ($evento, $ong, $pessoa, $operations) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
 
-            if ($evento->ong_id !== $ong->ong_id) {
+            $currentOng = Ong::whereKey($ong->getKey())->lockForUpdate()->firstOrFail();
+            if (! AccountAccess::activeOng($currentOng) || (int) $currentOng->auth_version !== (int) $ong->auth_version
+                || $evento->ong_id !== $currentOng->ong_id) {
                 throw new AuthorizationException('A ONG não é proprietária deste evento.');
             }
 
@@ -297,20 +315,28 @@ class OrganizadorService
                 $vinculoAtivo = VinculoOngOrganizador::where('ong_id', $ong->ong_id)
                     ->where('pessoa_id', $pessoa->pessoa_id)
                     ->where('status', 'ativo')
-                    ->exists();
+                    ->lockForUpdate()
+                    ->first();
 
-                if ($pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado' || ! $vinculoAtivo) {
+                if (! AccountAccess::canOperate($pessoa) || $pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado' || ! $vinculoAtivo) {
                     throw new ValidationConflictException('O responsável deve ser organizador aprovado e vinculado à ONG.');
                 }
             }
 
             if ($evento->responsavel_pessoa_id !== $pessoa?->pessoa_id) {
+                $previous = $evento->responsavel_pessoa_id;
                 $evento->forceFill(['responsavel_pessoa_id' => $pessoa?->pessoa_id])->save();
+                AdminLog::create([
+                    'acao' => 'evento.responsavel_atualizado',
+                    'recurso_type' => $evento->getMorphClass(),
+                    'recurso_id' => $evento->getKey(),
+                    'detalhes' => ['ong_id' => $ong->getKey(), 'de' => $previous, 'para' => $pessoa?->getKey()],
+                ]);
                 $operations->exigirReaprovacao($evento);
                 $operations->notificarEvento($evento, 'evento.alterado', "O responsável do evento {$evento->nm_evento} foi alterado.");
             }
 
             return $evento->refresh();
-        });
+        }, 3);
     }
 }

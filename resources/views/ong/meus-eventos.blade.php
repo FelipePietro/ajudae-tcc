@@ -17,14 +17,14 @@
     ])
 </head>
 
-<body
+<body data-events-page
     class="min-h-screen overflow-x-hidden
            bg-[#f7f5ef]
            font-outfit
            text-[#292820]"
 >
 
-    <x-navbar-ong ativo="eventos" />
+    <x-context-navbar default-context="ong" />
 
 
     <main
@@ -33,11 +33,13 @@
                lg:w-[calc(100%-230px)]"
     >
 
+
         <x-breadcrumb-ong
             :itens="[
                 ['label' => 'Meus eventos']
             ]"
         />
+<x-event-state :flow="$flow" />
 
 
         {{-- ============================================================= --}}
@@ -78,35 +80,22 @@
                                text-sm
                                text-[#817c70]"
                     >
-                        Gerencie os eventos que você organiza
-                        como voluntário da ONG
+                        Gerencie os eventos sob sua responsabilidade
                     </p>
 
                 </div>
 
 
-                <a
-                    href="{{ route('ong.eventos.criar') }}"
-                    class="flex w-full
-                           items-center justify-center
-                           rounded-full
-                           bg-[#17392a]
-                           px-6 py-3
-                           font-poppins
-                           text-sm font-semibold
-                           text-white
-                           transition
-                           hover:bg-[#102f22]
-                           md:w-auto"
-                >
+                <x-botao-primario :href="route('ong.eventos.criar',['contexto'=>request()->query('contexto','ong'), 'jornada'=>request()->query('jornada')])" class="w-full md:w-auto">
                     + Criar evento
-                </a>
+                </x-botao-primario>
 
             </div>
 
 
             {{-- ========================================================= --}}
             {{-- CARDS DE RESUMO --}}
+<x-organizer-scope :flow="$flow" />
             {{-- ========================================================= --}}
 
             <section
@@ -351,6 +340,7 @@
                     <input
                         type="search"
                         id="busca-eventos-ong"
+                        aria-label="Buscar meus eventos"
                         placeholder="Buscar por evento ou local..."
                         class="w-full
                                rounded-xl
@@ -376,75 +366,29 @@
                            pb-1"
                 >
 
-                    <button
-                        type="button"
-                        data-status="todos"
-                        class="status-btn
-                               whitespace-nowrap
-                               rounded-full
-                               bg-[#17392a]
-                               px-5 py-2.5
-                               font-poppins
-                               text-xs
-                               font-semibold
-                               text-white"
-                    >
+
+                                    <x-botao-secundario as="button" :href="null" type="button"
+                        data-status="todos" class="status-btn" size="sm" aria-pressed="true">
                         Todos
-                    </button>
+                    </x-botao-secundario>
 
 
-                    <button
-                        type="button"
-                        data-status="publicado"
-                        class="status-btn
-                               whitespace-nowrap
-                               rounded-full
-                               border border-[#d8d4ca]
-                               bg-white
-                               px-5 py-2.5
-                               font-poppins
-                               text-xs
-                               font-semibold
-                               text-[#625e55]"
-                    >
+                    <x-botao-secundario as="button" :href="null" type="button"
+                        data-status="ativo" class="status-btn" size="sm" aria-pressed="false">
                         Publicados
-                    </button>
+                    </x-botao-secundario>
 
 
-                    <button
-                        type="button"
-                        data-status="aguardando"
-                        class="status-btn
-                               whitespace-nowrap
-                               rounded-full
-                               border border-[#d8d4ca]
-                               bg-white
-                               px-5 py-2.5
-                               font-poppins
-                               text-xs
-                               font-semibold
-                               text-[#625e55]"
-                    >
+                    <x-botao-secundario as="button" :href="null" type="button"
+                        data-status="aguardando a confirmação" class="status-btn" size="sm" aria-pressed="false">
                         Aguardando
-                    </button>
+                    </x-botao-secundario>
 
 
-                    <button
-                        type="button"
-                        data-status="rascunho"
-                        class="status-btn
-                               whitespace-nowrap
-                               rounded-full
-                               border border-[#d8d4ca]
-                               bg-white
-                               px-5 py-2.5
-                               font-poppins
-                               text-xs
-                               font-semibold
-                               text-[#625e55]"
-                    >
-                        Rascunhos
-                    </button>
+                    <x-botao-secundario as="button" :href="null" type="button"
+                        data-status="reprovado" class="status-btn" size="sm" aria-pressed="false">
+                        Recusados
+                    </x-botao-secundario>
 
                 </div>
 
@@ -610,10 +554,11 @@
                                     </div>
 
 
-                                    {{-- STATUS --}}
-                                    @if($evento['status_evento'] === 'publicado')
+{{-- STATUS --}}
+                                    @if($evento['status_evento'] === 'ativo')
 
                                         <span
+                                            data-closure-event-badge="{{ \App\Support\VisualFiveFixtures::storageId($evento['evento_id']) }}"
                                             class="w-fit shrink-0
                                                    rounded-full
                                                    bg-[#dff2e6]
@@ -626,7 +571,7 @@
                                             ◉ Publicado
                                         </span>
 
-                                    @elseif($evento['status_evento'] === 'aguardando')
+                                    @elseif($evento['status_evento'] === 'aguardando a confirmação')
 
                                         <span
                                             class="w-fit shrink-0
@@ -641,7 +586,7 @@
                                             ⓘ Aguardando aprovação
                                         </span>
 
-                                    @elseif($evento['status_evento'] === 'rascunho')
+                                    @elseif($evento['status_evento'] === 'reprovado')
 
                                         <span
                                             class="w-fit shrink-0
@@ -653,7 +598,7 @@
                                                    font-semibold
                                                    text-[#716d65]"
                                         >
-                                            ◷ Rascunho
+                                            Recusado
                                         </span>
 
                                     @else
@@ -666,9 +611,7 @@
                                                    font-poppins
                                                    text-[10px]"
                                         >
-                                            {{ ucfirst(
-                                                $evento['status_evento']
-                                            ) }}
+                                            {{ $evento['status_label'] }}
                                         </span>
 
                                     @endif
@@ -676,26 +619,8 @@
                                 </div>
 
 
-                                {{-- DESCRIÇÃO --}}
-                                <p
-                                    class="mt-3
-                                           font-poppins
-                                           text-sm
-                                           leading-6
-                                           text-[#625e55]"
-                                >
-                                    {{ $evento['descricao_resumida'] }}
-                                </p>
-
-
-                                {{-- LINHA --}}
-                                <div
-                                    class="my-4
-                                           h-px
-                                           bg-[#ebe7de]"
-                                ></div>
-
-
+<p class="text-sm text-[#817c70] mt-3">{{ count($evento['agendas_mock']) }} Agendas · {{ collect($evento['agendas_mock'])->sum('vagas_agenda') }} vagas somadas nas Agendas</p>
+<details class="event-flow my-4 rounded-xl border border-[#dedbd1] p-4" data-event-disclosure><summary class="cursor-pointer font-semibold">Detalhes do evento e Agendas</summary><div class="mt-3 space-y-3"><p>{{ $evento['ong_id'] ? 'Evento institucional · '.$flow['management_scope']['label'] : 'Evento independente · '.$flow['management_scope']['person'] }} · {{ $evento['descricao_resumida'] }}</p>@foreach($evento['agendas_mock'] as $item)<p>Agenda {{ $loop->iteration }} · {{ \Carbon\Carbon::parse($item['data_inicio'])->format('d/m/Y H:i') }}–{{ \Carbon\Carbon::parse($item['data_fim'])->format('H:i') }} · {{ $item['vagas_agenda'] }} vagas · {{ $item['ocupadas'] }} ocupadas</p>@endforeach<p class="text-sm text-[#817c70]">Capacidades independentes por Agenda. A soma não representa pessoas únicas.</p></div></details>
                                 {{-- RODAPÉ DO EVENTO --}}
                                 <div
                                     class="flex flex-col gap-4
@@ -725,7 +650,7 @@
                                                        font-semibold
                                                        text-white"
                                             >
-                                                {{ $evento['responsavel']['iniciais'] }}
+                                                {{ $evento['responsavel']['iniciais'] ?? 'ONG' }}
                                             </div>
 
 
@@ -736,7 +661,7 @@
                                                            text-xs
                                                            font-semibold"
                                                 >
-                                                    {{ $evento['responsavel']['nome'] }}
+                                                    {{ $evento['responsavel']['nome'] ?? $flow['management_scope']['label'] }}
                                                 </p>
 
                                                 <p
@@ -744,7 +669,7 @@
                                                            text-[10px]
                                                            text-[#999388]"
                                                 >
-                                                    Organizador
+                                                    {{ $evento['responsavel'] ? 'Organizador' : 'Responsabilidade institucional' }}
                                                 </p>
 
                                             </div>
@@ -798,49 +723,26 @@
                                         class="grid grid-cols-2 gap-2
                                                sm:flex"
                                     >
-
-                                        <a
-                                            href="{{ route(
-                                                'eventos.show',
-                                                $evento['evento_id']
-                                            ) }}"
-                                            class="flex items-center
-                                                   justify-center
-                                                   rounded-full
-                                                   border border-[#17392a]
-                                                   px-4 py-2
-                                                   font-poppins
-                                                   text-xs
-                                                   font-medium
-                                                   text-[#17392a]
-                                                   transition
-                                                   hover:bg-[#17392a]
-                                                   hover:text-white"
-                                        >
-                                            ◉ Ver
-                                        </a>
+<x-botao-secundario :href="route('ong.candidatos', ['evento'=>$evento['evento_id'], 'cenario'=>$evento['scenario'], 'contexto'=>request()->query('contexto','ong'), 'jornada'=>request()->query('jornada')])" size="sm">Candidaturas por Agenda</x-botao-secundario>
+@if($presenceUrl = \App\Support\VisualFiveFixtures::managerUrl($evento['evento_id']))
+    <x-botao-secundario :href="$presenceUrl" size="sm">Presença e encerramento</x-botao-secundario>
+@endif
 
 
-                                        <a
-                                            href="{{ route(
+                                        <x-botao-primario :href="route(
+                                                $evento['status_evento'] === 'ativo' ? 'eventos.show' : 'ong.eventos.editar',
+                                                ['id'=>$evento['evento_id'], 'cenario'=>$evento['scenario'], 'contexto'=>request()->query('contexto','ong'), 'jornada'=>request()->query('jornada')]
+                                            )" size="sm">
+                                            {{ $evento['status_evento'] === 'ativo' ? '◉ Ver' : 'Revisar situação' }}
+                                        </x-botao-primario>
+
+
+                                        <x-botao-primario :href="route(
                                                 'ong.eventos.editar',
-                                                $evento['evento_id']
-                                            ) }}"
-                                            class="flex items-center
-                                                   justify-center
-                                                   rounded-full
-                                                   border border-[#17392a]
-                                                   px-4 py-2
-                                                   font-poppins
-                                                   text-xs
-                                                   font-medium
-                                                   text-[#17392a]
-                                                   transition
-                                                   hover:bg-[#17392a]
-                                                   hover:text-white"
-                                        >
+                                                ['id'=>$evento['evento_id'], 'cenario'=>$evento['scenario'], 'contexto'=>request()->query('contexto','ong'), 'jornada'=>request()->query('jornada')]
+                                            )" size="sm">
                                             ✎ Editar
-                                        </a>
+                                        </x-botao-primario>
 
                                     </div>
 

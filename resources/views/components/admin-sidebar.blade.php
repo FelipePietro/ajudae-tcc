@@ -1,170 +1,59 @@
-<input type="checkbox" id="admin-menu" class="ong-menu-check">
+@props(['pages' => null, 'params' => [], 'queues' => [], 'webNavigation' => null])
 
-<label for="admin-menu" class="ong-menu-btn">☰</label>
+@php
+    $pages = $webNavigation
+        ? ['admin' => ['Painel admin', null, '▦']] + $webNavigation->adminAreas()
+        : ($pages ?? \App\Support\VisualFourFixtures::PAGES);
+@endphp
+@unless($webNavigation)
+    <x-notification-context />
+@endunless
+<input type="checkbox" id="admin-menu" class="ong-menu-check" aria-label="Menu da administração" aria-controls="admin-sidebar">
+<label for="admin-menu" class="ong-menu-btn" aria-hidden="true">☰</label>
+<label for="admin-menu" class="ong-menu-bg" aria-hidden="true"></label>
 
-<label for="admin-menu" class="ong-menu-bg"></label>
-
-<aside class="ong-sidebar admin-sidebar">
-
-    <a href="{{ route('admin.admin') }}" class="ong-sidebar-brand">
-        <span class="ong-sidebar-nome">
-            <span class="brand-aju-white">Ajud</span><span class="brand-dae">ae</span>
-        </span>
+<aside class="ong-sidebar admin-sidebar" id="admin-sidebar" aria-label="Administração">
+    <button type="button" class="nav-drawer-close" data-admin-menu-close aria-label="Fechar menu">Fechar menu ×</button>
+    <a aria-label="Ajudae — início" data-brand-home href="{{ $webNavigation ? route('inicio') : ($params ? route('admin.admin', $params) : \App\Support\NavigationContext::homeUrl()) }}" class="ong-sidebar-brand">
+        <span class="ong-sidebar-nome"><span class="brand-aju-white">Ajud</span><span class="brand-dae">ae</span></span>
     </a>
-
+    <a @class(['ong-sidebar-link','is-active'=>request()->routeIs('notificacoes')]) @if(request()->routeIs('notificacoes')) aria-current="page" @endif @unless($webNavigation) data-notification-entry @endunless href="{{ route('notificacoes', $webNavigation ? [] : ['contexto'=>'administrador', ...request()->only('visao')]) }}">Notificações</a>
     <hr class="admin-sidebar-rule">
+    <span class="ong-sidebar-org">Administrador</span>
 
-    <span class="ong-sidebar-org">
-        <svg class="admin-org-ico" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-                fill="currentColor"
-                d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.07 7.07 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.8a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.55-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.7 8.48a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.82 14.16a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.39 1.04.7 1.63.94l.36 2.54c.05.24.26.42.5.42h3.8c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.55 1.63-.94l2.39.96c.24.1.51 0 .64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"
-            />
-        </svg>
+    @foreach(['Moderação' => ['admin','fila-eventos','cadastros-ong','upgrades-org','candidatos','denuncias','solicitacoes-lgpd','responder-lgpd'], 'Plataforma' => ['usuarios','relatorios','log-acoes','configuracoes','campanhas-xp']] as $group => $items)
+        @continue(!array_intersect($items, array_keys($pages)))
+        <p class="ong-sidebar-label">{{ $group }}</p>
+        <nav class="ong-sidebar-nav" aria-label="{{ $group }}">
+            @foreach($items as $item)
+                @continue(!isset($pages[$item]))
+                @php($active = request()->routeIs('admin.'.$item))
+                <a href="{{ $webNavigation ? $webNavigation->adminAreaUrl($item) : route('admin.'.$item, $params) }}" @class(['ong-sidebar-link', 'is-active' => $active]) @if($active) aria-current="page" @endif>
+                    <span class="ong-sidebar-ico" aria-hidden="true">{{ $pages[$item][2] }}</span>
+                    {{ $item === 'admin' ? 'Painel admin' : $pages[$item][0] }}
+                    @if(! $webNavigation && isset($queues[$item]) && !in_array($item, ['denuncias']))
+                        <span class="ong-badge" data-admin-count="{{ $item }}" @if(!\App\Support\VisualFourFixtures::pendingCount($queues[$item])) hidden @endif>{{ \App\Support\VisualFourFixtures::pendingCount($queues[$item]) }}</span>
+                    @endif
+                </a>
+            @endforeach
+        </nav>
+    @endforeach
 
-        Administrador
-    </span>
-
-    <p class="ong-sidebar-label">
-        Moderação
-    </p>
-
-    <nav class="ong-sidebar-nav">
-
-        <a
-            href="{{ route('admin.admin') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.admin')
-            ])
-        >
-            <span class="ong-sidebar-ico">▦</span>
-            Painel admin
-        </a>
-
-        <a
-            href="{{ route('admin.fila-eventos') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.fila-eventos')
-            ])
-        >
-            <span class="ong-sidebar-ico">📋</span>
-            Fila de eventos
-            <span class="ong-badge">7</span>
-        </a>
-
-        <a
-            href="{{ route('admin.cadastros-ong') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.cadastros-ong')
-            ])
-        >
-            <span class="ong-sidebar-ico">🏢</span>
-            Cadastros ONG
-            <span class="ong-badge">1</span>
-        </a>
-
-        <a
-            href="{{ route('admin.upgrades-org') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.upgrades-org')
-            ])
-        >
-            <span class="ong-sidebar-ico">⬆️</span>
-            Upgrades org.
-            <span class="ong-badge">3</span>
-        </a>
-
-        <a
-            href="{{ route('admin.denuncias') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.denuncias')
-            ])
-        >
-            <span class="ong-sidebar-ico">🚩</span>
-            Denúncias
-            <span class="ong-badge ong-badge-red">2</span>
-        </a>
-
-        <a
-            href="{{ route('admin.solicitacoes-lgpd') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.solicitacoes-lgpd')
-            ])
-        >
-            <span class="ong-sidebar-ico">🔒</span>
-            Solicit. LGPD
-            <span class="ong-badge">4</span>
-        </a>
-
-    </nav>
-
-    <p class="ong-sidebar-label">
-        Plataforma
-    </p>
-
-    <nav class="ong-sidebar-nav">
-
-        <a
-            href="{{ route('admin.usuarios') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.usuarios')
-            ])
-        >
-            <span class="ong-sidebar-ico">👥</span>
-            Usuários
-        </a>
-
-        <a
-            href="{{ route('admin.relatorios') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.relatorios')
-            ])
-        >
-            <span class="ong-sidebar-ico">📊</span>
-            Relatórios
-        </a>
-
-        <a
-            href="{{ route('admin.log-acoes') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.log-acoes')
-            ])
-        >
-            <span class="ong-sidebar-ico">📜</span>
-            Log de ações
-        </a>
-
-        <a
-            href="{{ route('admin.configuracoes') }}"
-            @class([
-                'ong-sidebar-link',
-                'is-active' => request()->routeIs('admin.configuracoes')
-            ])
-        >
-            <span class="ong-sidebar-ico">⚙️</span>
-            Configurações
-        </a>
-
-    </nav>
-
+    @if($webNavigation)
+        <p class="ong-sidebar-label">Conta</p>
+        <nav class="ong-sidebar-nav" aria-label="Conta">
+            @foreach($webNavigation->links() as $route => $label)
+                @continue(str_starts_with($route, 'admin.'))
+                <a href="{{ route($route) }}" class="ong-sidebar-link">{{ $label }}</a>
+            @endforeach
+            <form action="{{ route('logout') }}" method="POST" class="px-4 py-2">
+                @csrf
+                <x-botao-dourado as="button" type="submit" size="sm">Sair</x-botao-dourado>
+            </form>
+        </nav>
+    @endif
     <div class="ong-sidebar-user">
-        <span class="ong-avatar">
-            AD
-        </span>
-
-        <div>
-            <strong>Admin</strong>
-            <small>Superadministrador</small>
-        </div>
+        <span class="ong-avatar" aria-hidden="true">AD</span>
+        <div><strong>Administração</strong><small>{{ $webNavigation ? $webNavigation->name : match($params['visao'] ?? '') {'revisao' => 'Revisão', 'privacidade' => 'Consulta LGPD', default => 'Acesso integral'} }}</small></div>
     </div>
-
 </aside>

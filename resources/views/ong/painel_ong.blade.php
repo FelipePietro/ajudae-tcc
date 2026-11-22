@@ -1,3 +1,6 @@
+@php
+    $integrated = isset($institutionalEntry);
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -14,12 +17,16 @@
     @vite([
         'resources/css/app.css',
         'resources/css/painel_ong.css',
-        'resources/js/app.js'
+        $integrated ? 'resources/js/identity.js' : 'resources/js/app.js'
     ])
 </head>
 
 <body class="min-h-screen bg-[#F7F6F2]">
 
+    @if($integrated)
+        <a class="account-skip" href="#dashboard-main">Ir para o conteúdo</a>
+        <x-navbar-ong :web-navigation="\App\Support\WebNavigation::for(request())" />
+    @else
     <x-navbar-ong
         ativo="ong"
         :nome="$nomeUsuario ?? 'Carlos Ferreira'"
@@ -29,12 +36,16 @@
         :candidatos-pendentes="$candidatosCount ?? 12"
         :notificacoes="$notificacoesCount ?? 4"
     />
+    @endif
 
     {{-- ========================================================= --}}
     {{-- CONTEÚDO PRINCIPAL --}}
     {{-- ========================================================= --}}
 
-    <main class="ong-page-content">
+    <main id="dashboard-main" tabindex="-1" class="ong-page-content">
+        @if($integrated)
+            <x-breadcrumb-ong :raiz-href="route('ong.painel')" raiz-label="Dashboard" :itens="[['label' => 'Painel da ONG']]" />
+        @endif
 
         <div class="px-4 py-6 sm:px-6 lg:px-7">
 
@@ -47,24 +58,28 @@
 
                 <div class="org-identity">
 
-                    <div class="org-logo">
-                        {{ $ong['icone'] ?? '🌱' }}
+                    <div class="org-logo text-white" aria-hidden="true">
+                        {{ $integrated ? $institutionalEntry['initials'] : ($ong['icone'] ?? '🌱') }}
                     </div>
 
                     <div>
 
-                        <h1 class="org-name">
-                            {{ $ong['nome'] ?? 'Instituto Esperança Social' }}
+                        <h1 class="org-name break-words">
+                            {{ $integrated ? $institutionalEntry['name'] : ($ong['nome'] ?? 'Instituto Esperança Social') }}
                         </h1>
 
                         <p class="org-sub">
 
+                            @if($integrated)
+                                {{ $institutionalEntry['place'] }}
+                            @else
                             {{ $ong['nome_fantasia'] ?? 'Esperança Social' }}
 
                             ·
 
                             {{ $ong['cidade'] ?? 'São Paulo' }},
                             {{ $ong['estado'] ?? 'SP' }}
+                            @endif
 
                         </p>
 
@@ -80,6 +95,11 @@
                             @endif
 
 
+                            @if($integrated)
+                                @if($institutionalEntry['cnpj'])
+                                    <span class="tag tag-cnpj">CNPJ {{ $institutionalEntry['cnpj'] }}</span>
+                                @endif
+                            @else
                             <span class="tag tag-cnpj">
 
                                 CNPJ
@@ -102,6 +122,7 @@
                                 </span>
 
                             @endif
+                            @endif
 
                         </div>
 
@@ -111,20 +132,20 @@
 
 
                 <div class="org-actions">
+                    @if($integrated)
+                        <x-botao-secundario :href="route('ong.perfil')">Minha organização</x-botao-secundario>
+                        <x-botao-primario :href="route('ong.eventos.criar')">+ Criar evento</x-botao-primario>
+                    @else
+                    <x-botao-secundario :href="route('ong.perfil', ['ong'=>1, 'contexto'=>'ong'])">Ver perfil da ONG</x-botao-secundario>
 
-                    <a
-                        href="{{ route('ong.perfil.editar') }}"
-                        class="btn btn-outline"
-                    >
+                    <x-botao-secundario :href="route('ong.perfil.editar')">
                         Editar perfil
-                    </a>
+                    </x-botao-secundario>
 
-                    <a
-                        href="{{ route('ong.eventos.criar') }}"
-                        class="btn btn-primary"
-                    >
+                    <x-botao-primario :href="route('ong.eventos.criar')">
                         + Criar evento
-                    </a>
+                    </x-botao-primario>
+                    @endif
 
                 </div>
 
@@ -135,12 +156,13 @@
             {{-- ESTATÍSTICAS --}}
             {{-- ================================================= --}}
 
-            <section class="stats-grid">
+            @if($integrated)<p id="painel-indicadores" class="mb-2 text-sm text-[#56594f]">Indicadores operacionais ainda indisponíveis.</p>@endif
+            <section class="stats-grid" aria-label="Indicadores da organização" @if($integrated) aria-describedby="painel-indicadores" @endif>
 
                 <div class="stat-card">
 
                     <div class="stat-value stat-dark">
-                        {{ $stats['eventos_ativos'] ?? count($eventos ?? []) }}
+                        {{ $integrated ? '—' : ($stats['eventos_ativos'] ?? count($eventos ?? [])) }}
                     </div>
 
                     <div class="stat-label">
@@ -153,11 +175,11 @@
                 <div class="stat-card">
 
                     <div class="stat-value stat-orange">
-                        {{ $stats['funcionarios'] ?? count($funcionarios ?? []) }}
+                        {{ $integrated ? '—' : (collect($organizerWork['links'])->where('status','ativo')->count()) }}
                     </div>
 
                     <div class="stat-label">
-                        Funcionários
+                        Organizadores
                     </div>
 
                 </div>
@@ -166,7 +188,7 @@
                 <div class="stat-card">
 
                     <div class="stat-value stat-blue">
-                        {{ $stats['total_voluntarios'] ?? 128 }}
+                        {{ $integrated ? '—' : ($stats['total_voluntarios'] ?? 128) }}
                     </div>
 
                     <div class="stat-label">
@@ -179,7 +201,7 @@
                 <div class="stat-card">
 
                     <div class="stat-value stat-dark">
-                        {{ $stats['eventos_realizados'] ?? 32 }}
+                        {{ $integrated ? '—' : ($stats['eventos_realizados'] ?? 32) }}
                     </div>
 
                     <div class="stat-label">
@@ -193,12 +215,12 @@
 
                     <div class="stat-value stat-green">
 
-                        {{ number_format(
+                        {{ $integrated ? '—' : (number_format(
                             $stats['horas_doadas'] ?? 2580,
                             0,
                             ',',
                             '.'
-                        ) }}
+                        )) }}
 
                     </div>
 
@@ -228,7 +250,7 @@
                     {{-- EVENTOS --}}
                     {{-- ========================================= --}}
 
-                    <section class="panel">
+                    <section class="panel" id="eventos-ong" tabindex="-1">
 
                         <div class="panel-header">
 
@@ -238,6 +260,7 @@
                                     Eventos da ONG
                                 </h2>
 
+                                @unless($integrated)
                                 <p class="panel-sub">
 
                                     {{
@@ -265,21 +288,23 @@
                                     aguardando aprovação
 
                                 </p>
+                                @endunless
 
                             </div>
 
-
-                            <a
-                                href="{{ route('ong.eventos.criar') }}"
-                                class="btn btn-primary"
-                            >
+                            @unless($integrated)
+                            <x-botao-primario :href="route('ong.eventos.criar')">
                                 + Criar evento
-                            </a>
+                            </x-botao-primario>
+                            @endunless
 
                         </div>
 
 
 
+                        @if($integrated)
+                            <p class="mt-4 text-sm text-[#56594f]">A consulta e a gestão de Eventos ainda estão indisponíveis.</p>
+                        @else
                         {{-- ===================================== --}}
                         {{-- DESKTOP / TABLET --}}
                         {{-- ===================================== --}}
@@ -472,36 +497,18 @@
 
                                                 <div class="actions-cell">
 
-                                                    <a
-                                                        href="{{
-                                                            route(
+                                                    <x-botao-secundario :href="route(
                                                                 'eventos.show',
-                                                                $eventoId
-                                                            )
-                                                        }}"
-                                                        class="
-                                                            btn
-                                                            btn-sm
-                                                            btn-outline
-                                                        "
-                                                    >
+                                                                ['id'=>$eventoId, 'contexto'=>'ong']
+                                                            )" size="sm">
                                                         Ver
-                                                    </a>
+                                                    </x-botao-secundario>
 
 
-                                                    <a
-                                                        href="{{
-                                                            route(
+                                                    <x-botao-secundario :href="route(
                                                                 'ong.eventos.editar',
                                                                 $eventoId
-                                                            )
-                                                        }}"
-                                                        class="
-                                                            btn
-                                                            btn-sm
-                                                            btn-outline
-                                                        "
-                                                    >
+                                                            )" size="sm">
 
                                                         {{
                                                             $temResponsavel
@@ -509,7 +516,7 @@
                                                                 : 'Atribuir'
                                                         }}
 
-                                                    </a>
+                                                    </x-botao-secundario>
 
                                                 </div>
 
@@ -723,38 +730,18 @@
                                         "
                                     >
 
-                                        <a
-                                            href="{{
-                                                route(
+                                        <x-botao-secundario :href="route(
                                                     'eventos.show',
-                                                    $eventoId
-                                                )
-                                            }}"
-                                            class="
-                                                btn
-                                                btn-outline
-                                                flex-1
-                                                text-center
-                                            "
-                                        >
+                                                    ['id'=>$eventoId, 'contexto'=>'ong']
+                                                )" class="flex-1">
                                             Ver
-                                        </a>
+                                        </x-botao-secundario>
 
 
-                                        <a
-                                            href="{{
-                                                route(
+                                        <x-botao-secundario :href="route(
                                                     'ong.eventos.editar',
                                                     $eventoId
-                                                )
-                                            }}"
-                                            class="
-                                                btn
-                                                btn-outline
-                                                flex-1
-                                                text-center
-                                            "
-                                        >
+                                                )" class="flex-1">
 
                                             {{
                                                 $temResponsavel
@@ -762,7 +749,7 @@
                                                     : 'Atribuir'
                                             }}
 
-                                        </a>
+                                        </x-botao-secundario>
 
                                     </div>
 
@@ -785,6 +772,7 @@
 
                         </div>
 
+                        @endif
                     </section>
 
 
@@ -793,200 +781,11 @@
                     {{-- FUNCIONÁRIOS --}}
                     {{-- ========================================= --}}
 
-                    <section class="panel">
-
-                        <div class="panel-header">
-
-                            <div>
-
-                                <h2 class="panel-title">
-                                    Funcionários da ONG
-                                </h2>
-
-                                <p class="panel-sub">
-
-                                    {{
-                                        collect($funcionarios ?? [])
-                                            ->where(
-                                                'status',
-                                                'accepted'
-                                            )
-                                            ->count()
-                                    }}
-
-                                    ativos
-
-                                    ·
-
-                                    {{
-                                        collect($funcionarios ?? [])
-                                            ->where(
-                                                'status',
-                                                'pending'
-                                            )
-                                            ->count()
-                                    }}
-
-                                    convite(s) pendente(s)
-
-                                </p>
-
-                            </div>
-
-
-                            <button
-                                type="button"
-                                class="btn btn-outline"
-                            >
-                                Convidar organizador
-                            </button>
-
-                        </div>
-
-
-                        <ul class="staff-list">
-
-                            @forelse($funcionarios ?? [] as $funcionario)
-
-                                <li class="staff-row">
-
-                                    <div class="staff-identity">
-
-                                        <div
-                                            class="
-                                                avatar
-                                                avatar-{{
-                                                    $funcionario['cor']
-                                                    ?? 'green'
-                                                }}
-                                            "
-                                        >
-
-                                            {{
-                                                $funcionario['iniciais']
-                                                ?? '??'
-                                            }}
-
-                                        </div>
-
-
-                                        <div>
-
-                                            <div class="staff-name">
-
-                                                {{
-                                                    $funcionario['nome']
-                                                    ?? 'Sem nome'
-                                                }}
-
-                                            </div>
-
-
-                                            <div class="staff-meta">
-
-                                                {{
-                                                    $funcionario['meta']
-                                                    ?? ''
-                                                }}
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <div class="staff-actions">
-
-                                        @if(
-                                            ($funcionario['status'] ?? '')
-                                            === 'accepted'
-                                        )
-
-                                            <span
-                                                class="
-                                                    pill
-                                                    pill-accepted
-                                                "
-                                            >
-                                                Aceito
-                                            </span>
-
-
-                                            <button
-                                                type="button"
-                                                class="
-                                                    btn
-                                                    btn-sm
-                                                    btn-danger
-                                                "
-                                            >
-                                                Remover
-                                            </button>
-
-                                        @else
-
-                                            <span
-                                                class="
-                                                    pill
-                                                    pill-pending
-                                                "
-                                            >
-                                                Pendente
-                                            </span>
-
-
-                                            <button
-                                                type="button"
-                                                class="
-                                                    btn
-                                                    btn-sm
-                                                    btn-outline
-                                                "
-                                            >
-                                                Remover
-                                            </button>
-
-                                        @endif
-
-                                    </div>
-
-                                </li>
-
-                            @empty
-
-                                <li
-                                    class="
-                                        py-8
-                                        text-center
-                                        text-sm
-                                        text-gray-500
-                                    "
-                                >
-                                    Nenhum funcionário cadastrado ainda.
-                                </li>
-
-                            @endforelse
-
-                        </ul>
-
-
-                        <div class="notice">
-
-                            <span class="notice-icon">
-                                ⚠
-                            </span>
-
-                            <span>
-                                A remoção de um funcionário é bloqueada
-                                se ele estiver designado como responsável
-                                em um evento ativo. Faça a substituição
-                                primeiro.
-                            </span>
-
-                        </div>
-
-                    </section>
+                    @if($integrated)
+                        @include('auth.institutional-panel')
+                    @else
+                    <section class="panel"><div class="panel-header"><div><h2 class="panel-title">Organizadores vinculados</h2><p class="panel-sub">{{ collect($organizerWork['links'])->where('status','ativo')->count() }} ativos · {{ collect($organizerWork['links'])->where('status','convite_pendente')->count() }} convite(s) pendente(s)</p></div><x-botao-primario :href="route('ong.organizadores',['contexto'=>'ong'])" size="sm">Gerenciar organizadores</x-botao-primario></div><ul class="ff-list">@foreach($organizerWork['links'] as $link)<li class="ff-item"><div><p class="font-semibold">{{ collect($organizerWork['people'])->firstWhere('pessoa_id',$link['pessoa_id'])['nm_pessoa'] }}</p><p class="text-sm mt-2">{{ ['ativo'=>'Vínculo ativo','convite_pendente'=>'Convite pendente','recusado'=>'Convite recusado','encerrado'=>'Vínculo encerrado'][$link['status']] }}</p></div></li>@endforeach</ul></section>
+                    @endif
 
                 </div>
 
@@ -1011,6 +810,20 @@
 
 
                         <ul class="info-list">
+                        @if($integrated)
+                            @foreach([
+                                ['🏛', 'Nome da organização', $institutionalEntry['name']],
+                                ['🪪', 'CNPJ', $institutionalEntry['cnpj']],
+                                ['📍', 'Cidade / Estado', $institutionalEntry['place']],
+                                ['🌐', 'Site', $institutionalEntry['site']],
+                                ['✉', 'Contato institucional', $institutionalEntry['email']],
+                            ] as [$icon, $label, $value])
+                                <li><span class="info-icon" aria-hidden="true">{{ $icon }}</span><div>
+                                    <div class="info-label">{{ $label }}</div>
+                                    <div class="info-value break-all">{{ $value ?: 'Não informado' }}</div>
+                                </div></li>
+                            @endforeach
+                        @else
 
                             <li>
 
@@ -1146,6 +959,7 @@
 
                             </li>
 
+                        @endif
                         </ul>
 
                     </section>
@@ -1164,6 +978,9 @@
 
 
                         <ul class="activity-list">
+                        @if($integrated)
+                            <li class="py-4 text-sm text-[#56594f]">O histórico de atividades ainda está indisponível.</li>
+                        @else
 
                             @forelse($atividades ?? [] as $atividade)
 
@@ -1218,6 +1035,7 @@
 
                             @endforelse
 
+                        @endif
                         </ul>
 
                     </section>
@@ -1236,29 +1054,26 @@
 
 
                         <div class="quick-actions">
+                            @if($integrated)
+                                <x-botao-secundario :href="route('ong.perfil')">Minha organização</x-botao-secundario>
+                                <x-botao-secundario :href="route('feed')">Explorar eventos</x-botao-secundario>
+                                <x-botao-secundario :href="route('ong.eventos.index')">Ver todos os eventos</x-botao-secundario>
+                            @else
 
-                            <a
-                                href="{{ route('ong.eventos.criar') }}"
-                                class="btn btn-primary btn-block"
-                            >
+                            <x-botao-primario :href="route('ong.eventos.criar')">
                                 + Criar novo evento
-                            </a>
+                            </x-botao-primario>
 
 
-                            <a
-                                href="{{ route('ong.candidatos') }}"
-                                class="btn btn-outline btn-block"
-                            >
+                            <x-botao-secundario :href="route('ong.candidatos')">
                                 Ver candidatos
-                            </a>
+                            </x-botao-secundario>
 
 
-                            <a
-                                href="{{ route('ong.eventos.index') }}"
-                                class="btn btn-outline btn-block"
-                            >
+                            <x-botao-secundario :href="route('ong.eventos.index')">
                                 Ver todos os eventos
-                            </a>
+                            </x-botao-secundario>
+                            @endif
 
                         </div>
 

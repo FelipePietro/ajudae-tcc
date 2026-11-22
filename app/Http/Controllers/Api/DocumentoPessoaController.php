@@ -10,6 +10,7 @@ use App\Models\Pessoa;
 use App\Services\DocumentoStorage;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -79,17 +80,7 @@ class DocumentoPessoaController extends Controller
     public function download(Request $request, DocumentoPessoa $documento, DocumentoStorage $documents)
     {
         $user = $request->user();
-        $authorized = $user instanceof Pessoa && (
-            $user->pessoa_id === $documento->pessoa_id
-            || ($user->role_pessoa === 'administrador' && (
-                $user->hasPermission('usuarios.validar')
-                || $user->hasPermission('lgpd.visualizar')
-            ))
-        );
-
-        if (! $authorized) {
-            return ApiResponse::error('Acesso negado.', null, 403);
-        }
+        Gate::forUser($user)->authorize('download', $documento);
 
         if (! $documents->safePath($documento->storage_path)) {
             $this->auditarDownload($user, $documento, 'arquivo_ausente');

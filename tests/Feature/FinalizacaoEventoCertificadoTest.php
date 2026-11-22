@@ -11,6 +11,7 @@ use App\Models\Inscricao;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Models\VinculoOngOrganizador;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -84,12 +85,13 @@ class FinalizacaoEventoCertificadoTest extends TestCase
     {
         $ong = $this->ong();
         $organizador = $this->pessoa('organizador');
+        $independente = $this->pessoa('organizador');
         VinculoOngOrganizador::create([
             'ong_id' => $ong->ong_id, 'pessoa_id' => $organizador->pessoa_id,
             'status' => 'ativo', 'convidado_em' => now(), 'respondido_em' => now(),
         ]);
         foreach ([[$ong, null, $ong, 'ong'], [$ong, $organizador, $organizador, 'pessoa'],
-            [$organizador, null, $organizador, 'pessoa']] as [$owner, $responsavel, $ator, $ability]) {
+            [$independente, null, $independente, 'pessoa']] as [$owner, $responsavel, $ator, $ability]) {
             $evento = $this->evento($owner, $responsavel);
             $pessoa = $this->pessoa();
             $this->participar($this->agenda($evento), $pessoa);
@@ -162,7 +164,11 @@ class FinalizacaoEventoCertificadoTest extends TestCase
             $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertForbidden();
         }
         Sanctum::actingAs($ong, ['ong']);
+        $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertForbidden();
+        $this->assertSame('ativo', $evento->fresh()->status_evento);
+        Sanctum::actingAs($responsavel, ['pessoa']);
         $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertOk();
+        Sanctum::actingAs($ong, ['ong']);
         $this->patchJson("/api/v1/eventos/{$evento->evento_id}", ['nm_evento' => 'Alterado'])->assertStatus(409);
         $this->assertSame('Mutirão', $evento->fresh()->nm_evento);
     }
@@ -236,7 +242,7 @@ class FinalizacaoEventoCertificadoTest extends TestCase
         $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertOk();
         Sanctum::actingAs($pessoa, ['pessoa']);
         $this->postJson("/api/v1/eventos/{$evento->evento_id}/certificado")->assertOk();
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
         Certificado::create([
             'evento_id' => $evento->evento_id, 'pessoa_id' => $pessoa->pessoa_id,
             'codigo_verificacao' => 'AJD-OUTROCODIGO', 'total_minutos' => 30,
@@ -276,6 +282,7 @@ class FinalizacaoEventoCertificadoTest extends TestCase
     private function pessoa(string $role = 'voluntario'): Pessoa
     {
         $id = $this->sequence++;
+
         return $this->createPessoa($role, [
             'cpf_pessoa' => str_pad((string) $id, 11, '0', STR_PAD_LEFT),
             'email_pessoa' => "cert{$id}@example.com", 'login_pessoa' => "cert{$id}",
@@ -285,6 +292,7 @@ class FinalizacaoEventoCertificadoTest extends TestCase
     private function ong(): Ong
     {
         $id = $this->sequence++;
+
         return $this->createOng('ativo', [
             'cnpj_ong' => str_pad((string) $id, 14, '0', STR_PAD_LEFT),
             'cpf_responsavel_ong' => str_pad((string) ($id + 1000), 11, '0', STR_PAD_LEFT),
@@ -306,12 +314,14 @@ class FinalizacaoEventoCertificadoTest extends TestCase
             'pessoa_id' => $owner instanceof Pessoa ? $owner->pessoa_id : null,
             'responsavel_pessoa_id' => $responsavel?->pessoa_id ?? ($owner instanceof Pessoa ? $owner->pessoa_id : null),
         ])->save();
+
         return $evento;
     }
 
     private function agenda(Evento $evento, string $status = 'finalizado', int $minutos = 60): Agenda
     {
         $inicio = Carbon::parse('2026-10-10 10:00:00');
+
         return Agenda::create([
             'evento_id' => $evento->evento_id, 'status_ativo' => $status,
             'data_inicio' => $inicio, 'data_fim' => $inicio->copy()->addMinutes($minutos),

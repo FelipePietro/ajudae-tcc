@@ -1,0 +1,94 @@
+/* Administrative extensions use the existing sidebar, cards and controls. */
+.admin-review [hidden],
+.admin-sidebar [hidden] { display: none !important; }
+.admin-review [data-admin-feedback]:empty { display: none; }
+.admin-review [data-admin-feedback], .admin-review [data-admin-block] { color: #17392a; font-weight: 600; margin-block: .65rem; }
+.admin-review [data-admin-block] { color: #793b16; }
+.admin-review .admin-review-filters, .admin-review-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; }
+.admin-review-filters { margin-block: 1rem; }
+.admin-review-filters label { min-width: 0; flex: 1 1 14rem; }
+.admin-review-filters input, .admin-review-filters select, .admin-review dialog textarea { display: block; width: 100%; margin-top: .25rem; }
+.admin-review .admin-review-queue { display: grid; gap: .75rem; background: transparent; border: 0; }
+.admin-review .admin-card, .admin-review .admin-widget { background: #fff; border: 1px solid #e7e5df; border-radius: .8rem; }
+.admin-review .admin-card summary { width: fit-content; cursor: pointer; color: #17392a; font-weight: 650; }
+.admin-review .admin-card summary:focus-visible, .admin-review .cfg-input:focus-visible { outline: 2px solid #ae651a; outline-offset: 2px; }
+.admin-review .admin-review-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: .75rem; margin-block: .75rem; }
+.admin-review-facts dt, .admin-review .admin-card h3, .admin-review .admin-widget h2 { font-weight: 700; }
+.admin-review-facts dd, .admin-review .admin-card { overflow-wrap: anywhere; }
+.admin-review-list { display: grid; gap: .35rem; padding-left: 1.2rem; list-style: disc; margin-block: .65rem; }
+.admin-review a:not([data-button-component]):not(.ong-sidebar-link) { text-decoration: underline; text-underline-offset: 2px; }
+.admin-review dialog form { display: grid; gap: 1rem; margin-top: 1rem; }
+.admin-review dialog [type="submit"] { justify-self: start; }
+.admin-review dialog h2 { font-weight: 700; }
+.admin-review .admin-card-acoes { flex-direction: row; justify-content: flex-start; align-items: center; }
+.admin-review .admin-card-acoes > * { max-width: 100%; white-space: normal; }
+.admin-review .admin-card button:disabled { opacity: .52; cursor: not-allowed; }
+
+
+@media (max-width: 600px) {
+    .admin-review .admin-card-acoes { display: grid; justify-content: stretch; }
+    .admin-review .admin-card-acoes > * { width: 100%; }
+}
+
+
+@media (max-width: 1023px) {
+    .ong-main.admin-review { padding-top: 64px; }
+    .admin-review .admin-breadcrumb-bar {
+        position: fixed;
+        inset: 0 0 auto;
+        margin-inline: 0;
+        z-index: 30;
+        min-height: 64px;
+        padding-left: max(4rem, calc(var(--admin-pad-x) + 2.25rem));
+    }
+    #admin-menu:focus-visible + .ong-menu-btn { outline: 3px solid #df9729; outline-offset: 2px; }
+    #admin-menu:not(:checked) ~ .admin-sidebar { visibility: hidden; }
+    .admin-review :is(button, a, summary, input, select) { scroll-margin-top: 4.5rem; }
+}
+@media (min-width: 1024px) {
+    #admin-menu { display: none; }
+}
+
+.admin-review .admin-tag-azul { background: #dce9fc; color: #244675; }
+.admin-review .admin-tag-cinza { background: #e9e9e6; color: #454a47; }
+.admin-review .fila-resumo { flex-wrap: wrap; }
+.admin-review .fila-resumo > div { min-width: 0; }
+.admin-multi-filters { margin-block: 1rem; display: grid; gap: .9rem; }
+.admin-filter-search { max-width: 30rem; display: grid; gap: .25rem; font-weight: 600; }
+.admin-multi-filters legend { font-weight: 700; margin-bottom: .4rem; }
+.admin-filter-options { display: flex; flex-wrap: wrap; gap: .35rem .65rem; }
+.admin-filter-options label { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .55rem; border: 1px solid #ddd9ce; border-radius: .55rem; cursor: pointer; }
+.admin-filter-options label:has(:checked) { border-color: #215c38; background: #e7f3ec; color: #17392a; }
+.admin-filter-options input { accent-color: #215c38; }
+.admin-filter-options input:focus-visible { outline: 2px solid #ae651a; outline-offset: 2px; }
+.admin-documents { display: grid; gap: .55rem; margin-block: .85rem; }
+.admin-document { padding: .75rem; border: 1px solid #e0ded5; border-radius: .65rem; }
+.admin-document-title { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem .65rem; margin-bottom: .6rem; }
+.admin-document .admin-review-actions { align-items: center; gap: .4rem; }
+.admin-document .admin-review-actions > button { max-width: 100%; white-space: normal; }
+.admin-decision-heading { border-top: 1px solid #e0ded5; padding-top: .8rem; margin-top: .8rem; }
+dialog.ajudae-dialog.admin-document-dialog { width: min(43rem, calc(100vw - 2rem)); }
+.admin-document-dialog .admin-document-viewport { margin-block: .7rem; max-height: min(62dvh, 39rem); overflow: auto; background: #f6f4ee; border-radius: .5rem; }
+.admin-document-viewport > img { display: block; width: 100%; max-height: min(60dvh, 38rem); object-fit: contain; }
+.admin-document-viewport > iframe { width: 100%; height: min(54dvh, 36rem); display: block; }
+.admin-document-viewport > p, .admin-table-empty { padding: .85rem; }
+.admin-review .admin-corpo > *, .admin-review .admin-tabela-wrap, .admin-review .rel-grid > * { min-width: 0; }
+.admin-review .admin-tabs { flex-wrap: wrap; }
+.admin-review .admin-tabela-scroll { max-width: 100%; overflow-x: auto; }
+.admin-review .admin-tabela td p { white-space: normal; overflow-wrap: anywhere; }
+.admin-review .admin-tabela :is(td,th) { white-space: normal; }
+.admin-review .rel-col { min-width: 0; }
+.admin-review .rel-col small { display: grid; gap: .15rem; }
+.admin-review .admin-widget [data-admin-log] { margin-top: .35rem; }
+.admin-review .admin-corpo { margin-block: .8rem; }
+.admin-review .admin-stat small a { color: #555b50; }
+.admin-review .admin-breadcrumb-bar + .admin-alerta { margin-top: 1.5rem; }
+.admin-review.admin-original-layout { background: #fff; }
+.admin-review.admin-original-layout .admin-corpo .admin-card { border: 0; border-bottom: 1px solid #e7e5df; border-radius: 0; }
+.admin-review.admin-original-layout .admin-tabs a { text-decoration: none; }
+.admin-review.admin-original-layout .admin-breadcrumb-bar + .admin-alerta { margin-top: .85rem; }
+.admin-review.admin-original-layout .admin-stats { margin-top: 2rem; }
+.admin-review.admin-original-layout .admin-corpo { margin-top: 2.1rem; }
+@media (max-width: 767px) {
+    .admin-review .admin-breadcrumb-log { display: none; }
+}

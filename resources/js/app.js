@@ -1,3 +1,14 @@
+import './notifications-demo.js';
+import './dialog-accessibility.js';
+import './navigation-accessibility.js';
+import '../css/components/accessibility.css';
+import './admin-demo.js';
+import './organizer-demo.js';
+import './events-demo.js';
+import './account-demo.js';
+import './participation-demo.js';
+import './participation-certificates.js';
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const txt = (el) => el.textContent.toLowerCase();
@@ -78,3 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+import './participation-reliability.js';
+
+import './privacy-demo.js';

@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
+    <title>Certificado de participação | Ajudae</title>
     <style>
         @page { margin: 42px; }
         body { font-family: DejaVu Sans, sans-serif; color: #173042; }
@@ -17,7 +18,7 @@
 </head>
 <body>
 <div class="page">
-    <div class="brand">AJUDAÊ</div>
+    <div class="brand">AJUDAE</div>
     <h1>Certificado de participação voluntária</h1>
     <p>Certificamos que</p>
     <div class="name">{{ $certificado->nome_participante }}</div>
@@ -28,7 +29,7 @@
     <div class="meta">
         <p>Emitido em {{ $certificado->emitido_em->format('d/m/Y') }}</p>
         <p class="code">Código de verificação: {{ $certificado->codigo_verificacao }}</p>
-        <p>Autenticidade verificável pela API pública do Ajudaê mediante este código.</p>
+        <p>Consulte a autenticidade nos canais do Ajudae mediante este código.</p>
     </div>
 </div>
 </body>

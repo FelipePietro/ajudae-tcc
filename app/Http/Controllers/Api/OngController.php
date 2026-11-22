@@ -9,6 +9,9 @@ use App\Models\AdminLog;
 use App\Models\Ong;
 use App\Rules\Cnpj;
 use App\Rules\Cpf;
+use App\Services\AccountCredentials;
+use App\Services\AccountDeletion;
+use App\Support\AccountAccess;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -87,26 +90,25 @@ class OngController extends Controller
         ], 'ONG cadastrada com sucesso.', 201);
     }
 
-    public function login(Request $request)
+    public function login(Request $request, AccountCredentials $credentials)
     {
         $validated = $request->validate([
-            'login_ong' => ['required'],
-            'senha_ong' => ['required'],
+            'login_ong' => ['required', 'string'],
+            'senha_ong' => ['required', 'string'],
         ]);
 
-        $ong = Ong::where('login_ong', $validated['login_ong'])
-            ->first();
+        $result = $credentials->authenticate('ong', $validated['login_ong'], $validated['senha_ong'],
+            fn (Ong $account) => [$account, $account->createToken('ong-token', ['ong'])->plainTextToken]);
 
-        if (! $ong || ! Hash::check($validated['senha_ong'], $ong->senha_ong)) {
+        if ($result === null) {
             return ApiResponse::error('Credenciais inválidas.', null, 401);
         }
 
-        $token = $ong
-            ->createToken('ong-token', ['ong'])
-            ->plainTextToken;
+        [$account, $token] = $result;
+        $profile = $account->exclusao_pendente ? AccountAccess::deletionStatus($account) : new OngPrivateResource($account);
 
         return ApiResponse::success([
-            'ong' => new OngPrivateResource($ong),
+            'ong' => $profile,
             'token' => $token,
             'token_type' => 'Bearer',
         ], 'Login realizado com sucesso.');
@@ -121,7 +123,11 @@ class OngController extends Controller
 
     public function me(Request $request)
     {
-        return ApiResponse::success(new OngPrivateResource($request->user()));
+        $account = $request->user();
+
+        return ApiResponse::success($account->exclusao_pendente
+            ? AccountAccess::deletionStatus($account)
+            : new OngPrivateResource($account));
     }
 
     public function index()
@@ -137,7 +143,7 @@ class OngController extends Controller
         return ApiResponse::success(new OngPublicResource(Ong::findOrFail($id)));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, AccountCredentials $credentials)
     {
         $ong = Ong::findOrFail($id);
 
@@ -216,6 +222,7 @@ class OngController extends Controller
                     ->ignore($ong->ong_id, 'ong_id'),
             ],
 
+            'senha_atual' => ['required_with:senha_ong', 'nullable', 'string'],
             'senha_ong' => [
                 'sometimes',
                 'string',
@@ -224,13 +231,8 @@ class OngController extends Controller
             ],
         ]);
 
-        if (isset($validated['senha_ong'])) {
-            $validated['senha_ong'] = Hash::make(
-                $validated['senha_ong']
-            );
-        }
-
-        $ong->update($validated);
+        unset($validated['senha_atual']);
+        $ong = $credentials->update($request->user(), $validated, $request->input('senha_atual'));
 
         return ApiResponse::success(new OngPrivateResource($ong->fresh()), 'ONG atualizada com sucesso.');
     }
@@ -250,8 +252,9 @@ class OngController extends Controller
             ],
         ]);
 
-        $statusAnterior = $ong->status_ong;
-        DB::transaction(function () use ($ong, $validated, $request, $statusAnterior) {
+        DB::transaction(function () use ($ong, $validated, $request) {
+            $ong = Ong::whereKey($ong->getKey())->lockForUpdate()->firstOrFail();
+            $statusAnterior = $ong->status_ong;
             $ong->forceFill(['status_ong' => $validated['status_ong']])->save();
             AdminLog::create([
                 'pessoa_id' => $request->user()->pessoa_id,
@@ -265,48 +268,26 @@ class OngController extends Controller
         return ApiResponse::success(new OngPublicResource($ong->fresh()), 'Status da ONG atualizado com sucesso.');
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id, AccountDeletion $deletions)
     {
-        $ong = Ong::findOrFail($id);
-
-        // A ONG só pode solicitar a exclusão da própria conta
-        if ($request->user()->ong_id !== $ong->ong_id) {
-            return ApiResponse::error('Você não tem permissão para excluir esta ONG.', null, 403);
+        $account = Ong::findOrFail($id);
+        if (! $request->user()->is($account)) {
+            return ApiResponse::error('Acesso negado.', null, 403);
         }
 
-        // Evita agendar a exclusão novamente
-        if ($ong->exclusao_pendente) {
-            return ApiResponse::error('A exclusão desta ONG já está agendada.', null, 409);
-        }
+        $account = $deletions->schedule($request->user());
 
-        if ($ong->eventos()->whereNotIn('status_evento', ['finalizado', 'cancelado', 'reprovado'])->exists()) {
-            return ApiResponse::error('A ONG possui eventos ativos e não pode solicitar exclusão.', null, 409);
-        }
-
-        $ong->forceFill([
-            'exclusao_pendente' => true,
-            'deletar_em' => now()->addDays(7),
-        ])->save();
-
-        return ApiResponse::success(['deletar_em' => $ong->deletar_em], 'A exclusão da ONG foi agendada para daqui a 7 dias.');
+        return ApiResponse::success(['deletar_em' => $account->deletar_em], 'A exclusão da ONG foi agendada para daqui a 7 dias.');
     }
 
-    public function cancelarExclusao(Request $request, $id)
+    public function cancelarExclusao(Request $request, $id, AccountDeletion $deletions)
     {
-        $ong = Ong::findOrFail($id);
-
-        if ($request->user()->ong_id !== $ong->ong_id) {
-            return ApiResponse::error('Você não tem permissão para alterar esta ONG.', null, 403);
+        $account = Ong::findOrFail($id);
+        if (! $request->user()->is($account)) {
+            return ApiResponse::error('Acesso negado.', null, 403);
         }
 
-        if (! $ong->exclusao_pendente) {
-            return ApiResponse::error('Não existe exclusão agendada para esta ONG.', null, 409);
-        }
-
-        $ong->forceFill([
-            'exclusao_pendente' => false,
-            'deletar_em' => null,
-        ])->save();
+        $deletions->cancel($request->user());
 
         return ApiResponse::success(null, 'Exclusão da ONG cancelada com sucesso.');
     }

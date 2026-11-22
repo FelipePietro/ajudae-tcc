@@ -9,6 +9,9 @@ use App\Models\Pessoa;
 use App\Rules\Cpf;
 use App\Services\AvaliacaoService;
 use App\Services\ConfiabilidadeService;
+use App\Services\AccountCredentials;
+use App\Services\AccountDeletion;
+use App\Support\AccountAccess;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -108,26 +111,27 @@ class PessoaController extends Controller
         ], 'Cadastro realizado com sucesso.', 201);
     }
 
-    public function login(Request $request)
+    public function login(Request $request, AccountCredentials $credentials)
     {
         $validated = $request->validate([
             'login_pessoa' => ['required', 'string'],
             'senha_pessoa' => ['required', 'string'],
         ]);
 
-        $pessoa = Pessoa::where('login_pessoa', $validated['login_pessoa'])
-            ->first();
+        $result = $credentials->authenticate('pessoa', $validated['login_pessoa'], $validated['senha_pessoa'],
+            fn (Pessoa $account) => [$account, $account->createToken('pessoa-token', ['pessoa'])->plainTextToken]);
 
-        if (! $pessoa || ! Hash::check($validated['senha_pessoa'], $pessoa->senha_pessoa)) {
+        if ($result === null) {
             return ApiResponse::error('Credenciais inválidas.', null, 401);
         }
 
-        $token = $pessoa
-            ->createToken('pessoa-token', ['pessoa'])
-            ->plainTextToken;
+        [$account, $token] = $result;
+        $profile = $account->exclusao_pendente
+            ? AccountAccess::deletionStatus($account)
+            : new PessoaPrivateResource($this->prepararMetricas($account));
 
         return ApiResponse::success([
-            'user' => new PessoaPrivateResource($this->prepararMetricas($pessoa)),
+            'user' => $profile,
             'token' => $token,
             'token_type' => 'Bearer',
         ], 'Login realizado com sucesso.');
@@ -142,10 +146,14 @@ class PessoaController extends Controller
 
     public function me(Request $request)
     {
-        return ApiResponse::success(new PessoaPrivateResource($this->prepararMetricas($request->user())));
+        $account = $request->user();
+
+        return ApiResponse::success($account->exclusao_pendente
+            ? AccountAccess::deletionStatus($account)
+            : new PessoaPrivateResource($this->prepararMetricas($account)));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, AccountCredentials $credentials)
     {
         $pessoa = Pessoa::findOrFail($id);
 
@@ -212,6 +220,7 @@ class PessoaController extends Controller
                 'max:255',
             ],
 
+            'senha_atual' => ['required_with:senha_pessoa', 'nullable', 'string'],
             'senha_pessoa' => [
                 'sometimes',
                 'string',
@@ -220,57 +229,33 @@ class PessoaController extends Controller
             ],
         ]);
 
-        // Se a senha foi enviada, criptografa antes de salvar
-        if (isset($validated['senha_pessoa'])) {
-            $validated['senha_pessoa'] = Hash::make(
-                $validated['senha_pessoa']
-            );
-        }
+        unset($validated['senha_atual']);
 
-        $pessoa->update($validated);
+        $pessoa = $credentials->update($request->user(), $validated, $request->input('senha_atual'));
 
         return ApiResponse::success(new PessoaPrivateResource($this->prepararMetricas($pessoa->fresh())), 'Pessoa atualizada com sucesso.');
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id, AccountDeletion $deletions)
     {
-        $pessoa = Pessoa::findOrFail($id);
-
-        if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
-            return ApiResponse::error('Você não tem permissão para excluir esta conta.', null, 403);
+        $account = Pessoa::findOrFail($id);
+        if (! $request->user()->is($account)) {
+            return ApiResponse::error('Acesso negado.', null, 403);
         }
 
-        if ($pessoa->exclusao_pendente) {
-            return ApiResponse::error('A exclusão desta conta já está agendada.', null, 409);
-        }
+        $account = $deletions->schedule($request->user());
 
-        $pessoa->forceFill([
-            'exclusao_pendente' => true,
-            'deletar_em' => now()->addDays(7),
-        ])->save();
-
-        return ApiResponse::success(
-            ['deletar_em' => $pessoa->deletar_em],
-            'A exclusão da conta foi agendada para daqui a 7 dias.'
-        );
+        return ApiResponse::success(['deletar_em' => $account->deletar_em], 'A exclusão da conta foi agendada para daqui a 7 dias.');
     }
 
-    public function cancelarExclusao(Request $request, $id)
+    public function cancelarExclusao(Request $request, $id, AccountDeletion $deletions)
     {
-        $pessoa = Pessoa::findOrFail($id);
-
-        if ($request->user()->pessoa_id !== $pessoa->pessoa_id) {
-            return ApiResponse::error('Você não tem permissão para alterar esta conta.', null, 403);
+        $account = Pessoa::findOrFail($id);
+        if (! $request->user()->is($account)) {
+            return ApiResponse::error('Acesso negado.', null, 403);
         }
 
-        if (! $pessoa->exclusao_pendente) {
-            return ApiResponse::error('Não existe exclusão agendada para esta conta.', null, 409);
-        }
-
-        $pessoa->forceFill([
-            'exclusao_pendente' => false,
-            'deletar_em' => null,
-        ])->save();
+        $deletions->cancel($request->user());
 
         return ApiResponse::success(null, 'Exclusão cancelada com sucesso.');
     }

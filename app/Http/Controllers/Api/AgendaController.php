@@ -69,8 +69,9 @@ class AgendaController extends Controller
         Gate::forUser($request->user())->authorize('manage', $eventoModel);
         $validated['evento_id'] = $eventoModel->evento_id;
 
-        $agenda = DB::transaction(function () use ($eventoModel, $validated, $operations) {
+        $agenda = DB::transaction(function () use ($eventoModel, $validated, $operations, $request) {
             $eventoModel = Evento::whereKey($eventoModel->getKey())->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$eventoModel, true]);
             if (in_array($eventoModel->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode receber nova agenda.');
             }
@@ -98,8 +99,9 @@ class AgendaController extends Controller
             'vagas_agenda' => 'sometimes|integer|min:1',
         ]);
 
-        $agenda = DB::transaction(function () use ($agenda, $validated, $operations) {
+        $agenda = DB::transaction(function () use ($agenda, $validated, $operations, $request) {
             $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)
                 || in_array($agenda->status_ativo, ['cancelado', 'finalizado'], true)) {
@@ -139,8 +141,9 @@ class AgendaController extends Controller
         $agenda = Agenda::with('evento')->findOrFail($id);
         Gate::forUser($request->user())->authorize('delete', $agenda);
 
-        DB::transaction(function () use ($agenda, $operations) {
+        DB::transaction(function () use ($agenda, $operations, $request) {
             $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)
                 || in_array($agenda->status_ativo, ['cancelado', 'finalizado'], true)) {
@@ -180,8 +183,9 @@ class AgendaController extends Controller
         $agenda = Agenda::with('evento')->findOrFail($id);
         Gate::forUser($request->user())->authorize('update', $agenda);
 
-        $agenda = DB::transaction(function () use ($agenda, $xp) {
+        $agenda = DB::transaction(function () use ($agenda, $xp, $request) {
             $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('operate', [$evento, true]);
             $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)
                 || $agenda->status_ativo !== 'ativo') {
@@ -231,10 +235,14 @@ class AgendaController extends Controller
         $agenda = Agenda::with('evento')->findOrFail($id);
         Gate::forUser($request->user())->authorize('update', $agenda);
 
-        return ApiResponse::success(
-            ['transacoes_criadas' => $xp->concederAgenda($agenda)],
-            'XP da Agenda consolidado.'
-        );
+        $created = DB::transaction(function () use ($agenda, $request, $xp) {
+            $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('operate', [$evento, true]);
+
+            return $xp->concederAgenda($agenda);
+        }, 3);
+
+        return ApiResponse::success(['transacoes_criadas' => $created], 'XP da Agenda consolidado.');
     }
 
     public function cancelar(Request $request, int $id, EventoOperationalService $operations)
@@ -247,6 +255,7 @@ class AgendaController extends Controller
 
         $agenda = DB::transaction(function () use ($agenda, $request, $validated, $operations) {
             $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)
                 || $agenda->status_ativo !== 'ativo') {

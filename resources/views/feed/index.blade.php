@@ -1,3 +1,6 @@
+@php
+    $integrated = isset($publicEvents);
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -13,7 +16,7 @@
 
     @vite([
         'resources/css/app.css',
-        'resources/js/app.js'
+        $integrated ? 'resources/js/identity.js' : 'resources/js/app.js'
     ])
 </head>
 
@@ -24,7 +27,7 @@
            text-[#292820]"
 >
 
-    @include('/components/navbar-feed')
+    <x-context-navbar :surface="$integrated ? 'institution' : 'context'" />
 
 
     <main
@@ -33,6 +36,9 @@
                sm:px-6 sm:py-9
                lg:px-8"
     >
+        @unless($integrated)
+            <x-event-state :flow="$flow" />
+        @endunless
 
         <div
             class="grid grid-cols-1 gap-6
@@ -69,6 +75,9 @@
                 {{-- BUSCA --}}
                 {{-- ================================================= --}}
 
+                @if($integrated)
+                    <form action="{{ route('feed') }}" method="GET" data-public-feed-filters aria-label="Busca e filtros">
+                @endif
                 <div
                     class="mt-5 flex flex-col gap-3
                            sm:flex-row"
@@ -85,9 +94,10 @@
                             🔎
                         </span>
 
+                        <label for="busca-eventos" class="sr-only">Buscar eventos por título ou cidade</label>
                         <input
                             type="search"
-                            id="busca-eventos"
+                            id="busca-eventos" @if($integrated) name="q" maxlength="120" value="{{ $publicFilters['q'] }}" @endif
                             placeholder="Buscar eventos por título ou cidade..."
                             class="w-full rounded-xl
                                    border border-[#d8d4ca]
@@ -103,20 +113,13 @@
                     </div>
 
 
-                    <button
-                        type="button"
-                        id="btn-filtros"
-                        class="flex items-center justify-center
-                               gap-2 rounded-xl
-                               border border-[#d8d4ca]
-                               bg-white
-                               px-5 py-3
-                               font-poppins text-sm
-                               transition
-                               hover:bg-[#faf9f5]"
-                    >
+                    @if($integrated)
+                        <x-botao-primario as="button" type="submit">Buscar</x-botao-primario>
+                    @endif
+                    <x-botao-secundario as="button" :href="null" type="button"
+                        id="btn-filtros" aria-controls="painel-filtros" :aria-expanded="$integrated && $publicFilters['modalidade'] !== '' ? 'true' : 'false'">
                         ☰ Filtros
-                    </button>
+                    </x-botao-secundario>
 
                 </div>
 
@@ -130,67 +133,28 @@
                            gap-2 overflow-x-auto pb-1"
                 >
 
-                    <button
-                        type="button"
-                        data-periodo="todos"
-                        class="periodo-btn
-                               whitespace-nowrap
-                               rounded-full
-                               bg-[#17392a]
-                               px-4 py-2
-                               font-poppins text-xs
-                               font-medium text-white"
-                    >
+                    <x-botao-secundario as="button" :href="null" type="button"
+                        data-periodo="todos" :class="$integrated ? 'periodo-btn shrink-0 whitespace-nowrap' : 'periodo-btn'" size="sm" aria-pressed="true">
                         Todos
-                    </button>
+                    </x-botao-secundario>
 
 
-                    <button
-                        type="button"
-                        data-periodo="hoje"
-                        class="periodo-btn
-                               whitespace-nowrap
-                               rounded-full
-                               border border-[#d8d4ca]
-                               bg-white
-                               px-4 py-2
-                               font-poppins text-xs
-                               text-[#5f5b52]"
-                    >
+                    <x-botao-secundario as="button" :href="null" type="button"
+                        data-periodo="hoje" :disabled="$integrated" :aria-describedby="$integrated ? 'filtros-pendentes' : null" :class="$integrated ? 'periodo-btn shrink-0 whitespace-nowrap' : 'periodo-btn'" size="sm" aria-pressed="false">
                         Hoje
-                    </button>
+                    </x-botao-secundario>
 
 
-                    <button
-                        type="button"
-                        data-periodo="semana"
-                        class="periodo-btn
-                               whitespace-nowrap
-                               rounded-full
-                               border border-[#d8d4ca]
-                               bg-white
-                               px-4 py-2
-                               font-poppins text-xs
-                               text-[#5f5b52]"
-                    >
+                    <x-botao-secundario as="button" :href="null" type="button"
+                        data-periodo="semana" :disabled="$integrated" :aria-describedby="$integrated ? 'filtros-pendentes' : null" :class="$integrated ? 'periodo-btn shrink-0 whitespace-nowrap' : 'periodo-btn'" size="sm" aria-pressed="false">
                         Esta semana
-                    </button>
+                    </x-botao-secundario>
 
 
-                    <button
-                        type="button"
-                        data-periodo="data"
-                        class="periodo-btn
-                               whitespace-nowrap
-                               rounded-full
-                               border border-[#d8d4ca]
-                               bg-white
-                               px-4 py-2
-                               font-poppins text-xs
-                               text-[#5f5b52]"
-                    >
+                    <x-botao-secundario as="button" :href="null" type="button"
+                        data-periodo="data" :disabled="$integrated" :aria-describedby="$integrated ? 'filtros-pendentes' : null" :class="$integrated ? 'periodo-btn shrink-0 whitespace-nowrap' : 'periodo-btn'" size="sm" aria-pressed="false">
                         Por data
-                    </button>
+                    </x-botao-secundario>
 
                 </div>
 
@@ -206,7 +170,8 @@
                 >
 
                     <select
-                        id="filtro-categoria"
+                        id="filtro-categoria" @if($integrated) disabled aria-describedby="filtros-pendentes" @endif
+                        aria-label="Categoria do evento"
                         class="rounded-xl
                                border border-[#d8d4ca]
                                bg-white
@@ -220,7 +185,7 @@
                             Categoria: Todas
                         </option>
 
-                        @foreach($categorias as $categoria)
+                        @foreach($categorias ?? [] as $categoria)
 
                             <option
                                 value="{{ $categoria['categoria_id'] }}"
@@ -234,7 +199,8 @@
 
 
                     <select
-                        id="filtro-cidade"
+                        id="filtro-cidade" @if($integrated) name="cidade" @endif
+                        aria-label="Cidade do evento"
                         class="rounded-xl
                                border border-[#d8d4ca]
                                bg-white
@@ -244,13 +210,13 @@
                                focus:border-[#17392a]"
                     >
 
-                        <option value="todos">
+                        <option value="{{ $integrated ? '' : 'todos' }}">
                             📍 Todas as cidades
                         </option>
 
                         @foreach($cidades as $cidade)
 
-                            <option value="{{ $cidade }}">
+                            <option value="{{ $cidade }}" @selected($integrated && $publicFilters['cidade'] === $cidade)>
                                 📍 {{ $cidade }}
                             </option>
 
@@ -266,8 +232,8 @@
                 {{-- ================================================= --}}
 
                 <div
-                    id="painel-filtros"
-                    class="mt-3 hidden
+                    id="painel-filtros" @if($integrated && $publicFilters['modalidade'] === '') hidden @endif
+                    class="mt-3 {{ $integrated ? '' : 'hidden' }}
                            rounded-2xl
                            border border-[#dedacf]
                            bg-white
@@ -294,7 +260,7 @@
                             </label>
 
                             <select
-                                id="filtro-modalidade"
+                                id="filtro-modalidade" @if($integrated) name="modalidade" @endif
                                 class="w-full rounded-xl
                                        border border-[#d8d4ca]
                                        bg-white
@@ -304,19 +270,19 @@
                                        focus:border-[#17392a]"
                             >
 
-                                <option value="todos">
+                                <option value="{{ $integrated ? '' : 'todos' }}">
                                     Todas
                                 </option>
 
-                                <option value="presencial">
+                                <option value="presencial" @selected($integrated && $publicFilters['modalidade'] === 'presencial')>
                                     Presencial
                                 </option>
 
-                                <option value="online">
+                                <option value="online" @selected($integrated && $publicFilters['modalidade'] === 'online')>
                                     Online
                                 </option>
 
-                                <option value="hibrido">
+                                <option value="hibrido" @selected($integrated && $publicFilters['modalidade'] === 'hibrido')>
                                     Híbrido
                                 </option>
 
@@ -365,33 +331,21 @@
                                sm:justify-end"
                     >
 
-                        <button
-                            type="button"
-                            id="btn-limpar-filtros"
-                            class="rounded-full
-                                   border border-[#d8d4ca]
-                                   bg-white
-                                   px-5 py-2.5
-                                   font-poppins text-xs
-                                   transition
-                                   hover:bg-[#faf9f5]"
-                        >
+                        @if($integrated)
+                            <x-botao-secundario :href="route('feed')" size="sm">Limpar filtros</x-botao-secundario>
+                            <x-botao-primario as="button" type="submit" size="sm">Aplicar filtros</x-botao-primario>
+                        @else
+                        <x-botao-secundario as="button" :href="null" type="button"
+                            id="btn-limpar-filtros" size="sm">
                             Limpar filtros
-                        </button>
+                        </x-botao-secundario>
 
 
-                        <button
-                            type="button"
-                            id="btn-fechar-filtros"
-                            class="rounded-full
-                                   bg-[#17392a]
-                                   px-5 py-2.5
-                                   font-poppins text-xs
-                                   font-medium
-                                   text-white"
-                        >
+                        <x-botao-primario as="button" :href="null" type="button"
+                            id="btn-fechar-filtros" size="sm">
                             Aplicar filtros
-                        </button>
+                        </x-botao-primario>
+                        @endif
 
                     </div>
 
@@ -413,6 +367,10 @@
                 {{-- GRID DE EVENTOS --}}
                 {{-- ================================================= --}}
 
+                @if($integrated)
+                    <p id="filtros-pendentes" class="mt-3 text-xs text-[#56594f]">Os filtros de categoria e período ainda estão indisponíveis.</p>
+                    </form>
+                @endif
                 <div
                     id="lista-eventos"
                     class="mt-6 grid
@@ -420,6 +378,9 @@
                            md:grid-cols-2"
                 >
 
+                    @if($integrated)
+                        @include('auth.public-feed')
+                    @else
                     @foreach($eventos as $evento)
 
                         @php
@@ -435,11 +396,11 @@
                                 );
 
                             $percentual =
-                                $evento['vagas_evento'] > 0
+                                $evento['agenda_capacity'] > 0
                                     ? (
                                         $evento['confirmados']
                                         /
-                                        $evento['vagas_evento']
+                                        $evento['agenda_capacity']
                                     ) * 100
                                     : 0;
 
@@ -516,8 +477,7 @@
                                            font-medium
                                            shadow-sm"
                                 >
-                                    {{ $evento['vagas_disponiveis'] }}
-                                    vagas
+                                    {{ $evento['vagas_disponiveis'] }} vagas na próxima Agenda
                                 </span>
 
                             </div>
@@ -583,7 +543,7 @@
                                            leading-5"
                                 >
                                     {{ $evento['nm_evento'] }}
-                                </h2>
+                                </h2><p class="mt-2 text-xs text-neutral-500">{{ $evento['agenda_count'] }} {{ $evento['agenda_count'] === 1 ? 'Agenda disponível' : 'Agendas disponíveis' }}</p><p class="mt-1 text-xs text-neutral-500">{{ implode(' · ', array_merge($evento['causas_labels'], $evento['habilidades_labels'])) }}</p>
 
 
                                 {{-- DADOS --}}
@@ -663,30 +623,19 @@
                                             >
                                                 {{ $evento['confirmados'] }}
                                                 /
-                                                {{ $evento['vagas_evento'] }}
+                                                {{ $evento['agenda_capacity'] }}
                                                 confirmados
                                             </p>
 
                                         </div>
 
 
-                                        <a
-                                            href="{{ route(
+                                        <x-botao-primario :href="route(
                                                 'eventos.show',
-                                                $evento['evento_id']
-                                            ) }}"
-                                            class="shrink-0
-                                                   rounded-full
-                                                   bg-[#17392a]
-                                                   px-4 py-2
-                                                   font-poppins
-                                                   text-xs font-medium
-                                                   text-white
-                                                   transition
-                                                   hover:bg-[#102f22]"
-                                        >
+                                                ['id'=>$evento['evento_id'], 'contexto'=>request()->query('contexto','pessoa'), 'cenario'=>$flow['scenario']]
+                                            )" class="shrink-0" size="sm">
                                             Ver evento
-                                        </a>
+                                        </x-botao-primario>
 
                                     </div>
 
@@ -697,13 +646,18 @@
                         </article>
 
                     @endforeach
+                    @endif
 
                 </div>
 
 
+                @if($integrated)
+                    <div class="mt-6">{{ $publicEvents->links() }}</div>
+                @else
+                <p data-feed-count role="status" aria-atomic="true" class="mt-4 text-sm text-[#56594f]"></p>
                 {{-- NENHUM RESULTADO --}}
                 <div
-                    id="sem-resultados"
+                    id="sem-resultados" role="status" aria-atomic="true" @if($flow['loading'] || $flow['error']) hidden @endif
                     class="mt-6 hidden
                            rounded-2xl
                            border border-[#dedacf]
@@ -733,6 +687,7 @@
 
                 </div>
 
+                @endif
             </section>
 
 
@@ -747,6 +702,19 @@
                        xl:self-start"
             >
 
+                @if($integrated)
+                    <section class="rounded-2xl border border-[#dedacf] bg-white p-5 shadow-sm" aria-labelledby="feed-ranking">
+                        <h2 id="feed-ranking" tabindex="-1" class="font-poppins text-sm font-semibold">🏆 Top ranking</h2>
+                        <div class="mt-4 space-y-3"><p class="text-sm text-[#56594f]">A classificação ainda está indisponível.</p></div>
+                        <x-botao-primario :href="route('ranking')" class="mt-3" size="sm">Ver ranking completo</x-botao-primario>
+                    </section>
+                    @if(\App\Support\WebNavigation::for(request())->profile === 'perfil')
+                        <section class="rounded-2xl border border-[#dedacf] bg-white p-5 shadow-sm" aria-labelledby="feed-conquistas">
+                            <h2 id="feed-conquistas" class="font-poppins text-sm font-semibold">Seus badges</h2>
+                            <p class="mt-4 text-sm text-[#56594f]">As conquistas ainda estão indisponíveis nesta página.</p>
+                        </section>
+                    @endif
+                @else
                 {{-- TOP RANKING --}}
                 <section
                     class="rounded-2xl
@@ -825,6 +793,7 @@
                     </div>
 
 
+                    @if(in_array(request()->query('contexto'), ['pessoa','organizador','organizador-vinculado'], true))
                     <div
                         class="mt-5
                                rounded-lg
@@ -845,27 +814,16 @@
                     </div>
 
 
-                    <a
-                        href="/ranking"
-                        class="mt-3
-                               flex items-center
-                               justify-center
-                               rounded-full
-                               border border-[#17392a]
-                               px-4 py-2
-                               font-poppins
-                               text-xs font-medium
-                               text-[#17392a]
-                               transition
-                               hover:bg-[#17392a]
-                               hover:text-white"
-                    >
+                    @endif
+
+                    <x-botao-primario href="/ranking" class="mt-3" size="sm">
                         Ver ranking completo
-                    </a>
+                    </x-botao-primario>
 
                 </section>
 
 
+                @if(in_array(request()->query('contexto'), ['pessoa','organizador','organizador-vinculado'], true))
                 {{-- BADGES --}}
                 <section
                     class="rounded-2xl
@@ -921,24 +879,14 @@
                     </p>
 
 
-                    <a
-                        href="/perfil"
-                        class="mt-4
-                               flex items-center
-                               justify-center
-                               rounded-full
-                               border border-[#d8d4ca]
-                               px-4 py-2
-                               font-poppins
-                               text-xs
-                               transition
-                               hover:bg-[#faf9f5]"
-                    >
+                    <x-botao-secundario href="/perfil" class="mt-4" size="sm">
                         Ver todos os badges
-                    </a>
+                    </x-botao-secundario>
 
                 </section>
 
+
+                @endif
 
                 {{-- DICA --}}
                 <div
@@ -957,6 +905,12 @@
                     Participe de eventos e desbloqueie novos badges.
                 </div>
 
+                @endif
+                @if($integrated)
+                    <div class="rounded-xl border border-[#17392a] bg-[#eaf5ef] px-4 py-4 font-poppins text-xs leading-5 text-[#4e695c]">
+                        💡 <strong>Dica:</strong> use a cidade ou a modalidade para encontrar oportunidades.
+                    </div>
+                @endif
             </aside>
 
         </div>
@@ -968,6 +922,7 @@
     {{-- JAVASCRIPT --}}
     {{-- ============================================================= --}}
 
+    @unless($integrated)
     <script>
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1298,6 +1253,9 @@
                     encontrados > 0
                 );
 
+                const unavailable = @json($flow['loading'] || $flow['error']);
+                document.querySelector('[data-feed-count]').textContent = unavailable ? '' : `${encontrados} ${encontrados === 1 ? 'evento encontrado' : 'eventos encontrados'}.`;
+
 
                 atualizarFiltrosAtivos();
 
@@ -1506,8 +1464,18 @@
                             'hidden'
                         );
 
+                    btnFiltros.setAttribute('aria-expanded', String(!painelFiltros.classList.contains('hidden')));
+
                 }
             );
+
+            painelFiltros.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    painelFiltros.classList.add('hidden');
+                    btnFiltros.setAttribute('aria-expanded', 'false');
+                    btnFiltros.focus();
+                }
+            });
 
 
             btnFecharFiltros.addEventListener(
@@ -1521,6 +1489,9 @@
                         );
 
                     filtrarEventos();
+
+                    btnFiltros.setAttribute('aria-expanded', 'false');
+                    btnFiltros.focus();
 
                 }
             );
@@ -1649,6 +1620,7 @@
         });
 
     </script>
+    @endunless
 
 </body>
 

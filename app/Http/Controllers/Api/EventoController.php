@@ -10,6 +10,7 @@ use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Services\EventoOperationalService;
 use App\Exceptions\ValidationConflictException;
+use App\Support\AccountAccess;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -143,15 +144,15 @@ class EventoController extends Controller
         $validated['status_evento'] = 'aguardando a confirmação';
 
         if ($user instanceof Ong) {
-            if ($user->status_ong !== 'ativo') {
-                return ApiResponse::error('A ONG precisa estar aprovada para criar eventos.', null, 403);
-            }
-            $evento = new Evento($validated);
-            $evento->forceFill([
-                'ong_id' => $user->ong_id,
-                'pessoa_id' => null,
-                'responsavel_pessoa_id' => null,
-            ])->save();
+            $evento = DB::transaction(function () use ($user, $validated) {
+                $ong = Ong::whereKey($user->getKey())->lockForUpdate()->firstOrFail();
+                abort_unless(AccountAccess::activeOng($ong) && (int) $ong->auth_version === (int) $user->auth_version, 403);
+
+                $evento = new Evento($validated);
+                $evento->forceFill(['ong_id' => $ong->ong_id, 'pessoa_id' => null, 'responsavel_pessoa_id' => null])->save();
+
+                return $evento;
+            }, 3);
         }
 
         /*
@@ -164,11 +165,17 @@ class EventoController extends Controller
             $evento = DB::transaction(function () use ($user, $validated) {
                 $pessoa = Pessoa::whereKey($user->getKey())->lockForUpdate()->firstOrFail();
 
-                if ($pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado') {
+                if (! AccountAccess::canOperate($pessoa) || (int) $pessoa->auth_version !== (int) $user->auth_version
+                    || $pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado') {
                     return null;
                 }
 
-                $vinculo = $pessoa->vinculoOngAtivo()->first();
+                $vinculo = $pessoa->vinculoOngAtivo()->lockForUpdate()->first();
+                if ($vinculo) {
+                    $ong = Ong::whereKey($vinculo->ong_id)->lockForUpdate()->firstOrFail();
+                    abort_unless(AccountAccess::activeOng($ong), 403);
+                }
+
                 $evento = new Evento($validated);
                 $evento->forceFill([
                     'ong_id' => $vinculo?->ong_id,
@@ -291,8 +298,9 @@ class EventoController extends Controller
             }
         }
 
-        $evento = DB::transaction(function () use ($evento, $validated, $operations) {
+        $evento = DB::transaction(function () use ($evento, $validated, $operations, $request) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode ser alterado.');
             }
@@ -337,8 +345,9 @@ class EventoController extends Controller
         $evento = Evento::findOrFail($id);
         Gate::forUser($request->user())->authorize('delete', $evento);
 
-        DB::transaction(function () use ($evento) {
+        DB::transaction(function () use ($evento, $request) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode ser excluído.');
             }
@@ -413,6 +422,7 @@ class EventoController extends Controller
 
         $evento = DB::transaction(function () use ($evento, $request, $validated, $operations) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('O evento já está em estado terminal.');
             }
@@ -444,7 +454,7 @@ class EventoController extends Controller
     {
         $evento = DB::transaction(function () use ($request, $id) {
             $evento = Evento::whereKey($id)->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', $evento);
+            Gate::forUser($request->user())->authorize('operate', [$evento, true]);
 
             if ($evento->status_evento !== 'ativo') {
                 throw new ValidationConflictException('O evento não está ativo para finalização.');

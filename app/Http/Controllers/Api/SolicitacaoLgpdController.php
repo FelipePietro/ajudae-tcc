@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
+use App\Models\Pessoa;
 use App\Models\SolicitacaoLgpd;
+use App\Support\AccountAccess;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,13 +48,23 @@ class SolicitacaoLgpdController extends Controller
 
     public function updateStatus(Request $request, int $id)
     {
-        $solicitacao = SolicitacaoLgpd::findOrFail($id);
         $validated = $request->validate([
             'status' => ['required', Rule::in(['pendente', 'em_analise', 'concluida', 'recusada'])],
             'resposta' => ['nullable', 'string', 'max:4000', Rule::requiredIf(in_array($request->input('status'), ['concluida', 'recusada'], true))],
         ]);
 
-        DB::transaction(function () use ($solicitacao, $validated, $request) {
+        $solicitacao = DB::transaction(function () use ($id, $validated, $request) {
+            $identity = $request->user();
+            $actor = Pessoa::whereKey($identity->getKey())->lockForUpdate()->firstOrFail();
+            abort_unless(AccountAccess::canOperate($actor) && (int) $actor->auth_version === (int) $identity->auth_version
+                && $actor->hasPermission('lgpd.responder'), 403);
+
+            $solicitacao = SolicitacaoLgpd::whereKey($id)->lockForUpdate()->firstOrFail();
+            abort_if($solicitacao->status === 'em_analise'
+                && $solicitacao->respondida_por !== null
+                && (int) $solicitacao->respondida_por !== $actor->getKey()
+                && ! $actor->admin_master, 403);
+            $statusAnterior = $solicitacao->status;
             $solicitacao->update([
                 ...$validated,
                 'respondida_por' => $request->user()->pessoa_id,
@@ -63,8 +75,10 @@ class SolicitacaoLgpdController extends Controller
                 'acao' => 'lgpd.status_atualizado',
                 'recurso_type' => SolicitacaoLgpd::class,
                 'recurso_id' => $solicitacao->solicitacao_lgpd_id,
-                'detalhes' => ['status' => $validated['status']],
+                'detalhes' => ['de' => $statusAnterior, 'para' => $validated['status']],
             ]);
+
+            return $solicitacao;
         });
 
         return ApiResponse::success($solicitacao->fresh(), 'Solicitação atualizada com sucesso.');

@@ -15,8 +15,8 @@ use App\Models\VinculoOngOrganizador;
 use App\Services\AvaliacaoService;
 use App\Services\ConfiabilidadeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -270,6 +270,13 @@ class AvaliacaoConfiabilidadeTest extends TestCase
             ->assertOk()->assertJsonPath('data.score', 80)->assertJsonCount(4, 'data.ocorrencias');
         $admin = $this->pessoa('administrador');
         Sanctum::actingAs($admin, ['pessoa']);
+        $this->getJson("/api/v1/pessoas/{$candidato->pessoa_id}/confiabilidade")->assertForbidden();
+        $this->grantPermission($admin, 'usuarios.validar');
+        $candidato->forceFill([
+            'status_validacao' => 'em_analise',
+            'admin_analisando_id' => $admin->getKey(),
+            'analise_assumida_em' => now(),
+        ])->save();
         $this->getJson("/api/v1/pessoas/{$candidato->pessoa_id}/confiabilidade")->assertOk();
     }
 
@@ -307,7 +314,8 @@ class AvaliacaoConfiabilidadeTest extends TestCase
         $this->inscricao($agenda, $a, 'pendente');
         $this->inscricao($agenda, $b, 'pendente');
 
-        $publico = $this->getJson('/api/v1/pessoas')->assertOk()->json('data');
+        $publico = collect($this->getJson('/api/v1/pessoas')->assertOk()->json('data'))
+            ->whereIn('pessoa_id', [$a->getKey(), $b->getKey()]);
         $this->assertCount(2, $publico);
         foreach ($publico as $item) {
             $this->assertSame(4, $item['media_avaliacao']);

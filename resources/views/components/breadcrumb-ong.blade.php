@@ -1,6 +1,14 @@
 @props([
-    'itens' => []
+    'itens' => [],
+    'raizHref' => null,
+    'raizLabel' => 'Dashboard'
 ])
+@php
+if ($raizHref === null && in_array(request()->query('contexto'), ['organizador','organizador-vinculado'], true)) {
+    $raizHref = route('organizador.workspace', ['contexto'=>request()->query('contexto'),'jornada'=>request()->query('jornada')]);
+    $raizLabel = 'Minha atuação';
+}
+@endphp
 
 <nav
     aria-label="Breadcrumb"
@@ -27,14 +35,14 @@
         {{-- DASHBOARD SEMPRE COMO RAIZ --}}
         <li class="shrink-0">
             <a
-                href="{{ route('ong.painel') }}"
+                href="{{ $raizHref ?? route('ong.painel') }}"
                 class="
                     text-[#777A72]
                     transition-colors
                     hover:text-[#17392A]
                 "
             >
-                Dashboard
+                {{ $raizLabel }}
             </a>
         </li>
 
@@ -67,7 +75,7 @@
                     <a
                         href="{{ route(
                             $item['route'],
-                            $item['params'] ?? []
+                            array_merge(array_filter(['contexto'=>request()->query('contexto'), 'jornada'=>is_string(request()->query('jornada')) && in_array(request()->query('jornada'), \App\Support\VisualThreeFixtures::SCENARIOS,true) ? request()->query('jornada') : null]), $item['params'] ?? [])
                         ) }}"
                         class="
                             transition-colors

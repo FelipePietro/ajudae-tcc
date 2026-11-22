@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/css/painel_ong.css',
                 'resources/css/perfil_ong.css',
                 'resources/js/app.js',
+                'resources/js/identity.js',
             ],
             refresh: true,
         }),

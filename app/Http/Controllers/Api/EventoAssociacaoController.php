@@ -49,8 +49,9 @@ class EventoAssociacaoController extends Controller
         Gate::forUser($request->user())->authorize('manage', $evento);
         $validated = $request->validate([$campo => ['required', 'integer', "exists:{$tabela},{$campo}"]]);
 
-        DB::transaction(function () use ($evento, $operations, $relacao, $campo, $tabela, $validated) {
+        DB::transaction(function () use ($evento, $operations, $relacao, $campo, $tabela, $validated, $request) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode alterar associações.');
             }
@@ -70,8 +71,9 @@ class EventoAssociacaoController extends Controller
         $evento = Evento::findOrFail($id);
         Gate::forUser($request->user())->authorize('manage', $evento);
 
-        DB::transaction(function () use ($evento, $operations, $relacao, $tabela, $campo, $valor) {
+        DB::transaction(function () use ($evento, $operations, $relacao, $tabela, $campo, $valor, $request) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode alterar associações.');
             }

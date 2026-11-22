@@ -18,12 +18,12 @@
 </head>
 
 
-<body
+<body data-events-page
     class="min-h-screen overflow-x-hidden
            bg-[#f7f5ef] font-outfit text-[#26251f]"
 >
 
-    <x-navbar-ong ativo="eventos" />
+    <x-context-navbar default-context="ong" />
 
 
     <main
@@ -32,8 +32,9 @@
                lg:w-[calc(100%-230px)]"
     >
 
+
         {{-- BREADCRUMB --}}
-        <header
+        <header role="navigation" aria-label="Breadcrumb"
             class="border-b border-[#dedbd1]
                    bg-white px-4 py-4
                    sm:px-6
@@ -48,16 +49,16 @@
             >
 
                 <a
-                    href="{{ route('ong.dashboard') }}"
+                    href="{{ in_array(request()->query('contexto'), ['organizador','organizador-vinculado'],true) ? route('organizador.workspace',['contexto'=>request()->query('contexto'),'jornada'=>request()->query('jornada')]) : route('ong.dashboard') }}"
                     class="transition hover:text-[#174b36]"
                 >
-                    Dashboard
+                    {{ in_array(request()->query('contexto'),['organizador','organizador-vinculado'],true) ? 'Minha atuação' : 'Dashboard' }}
                 </a>
 
                 <span>›</span>
 
                 <a
-                    href="{{ route('ong.eventos.index') }}"
+                    href="{{ route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')]) }}"
                     class="transition hover:text-[#174b36]"
                 >
                     Meus eventos
@@ -74,11 +75,13 @@
         </header>
 
 
-        <form
+        @if($flow['management_allowed'] ?? true)
+        <form data-event-editor onsubmit="return false;"
             action="{{ route('ong.eventos.atualizar', $evento->evento_id) }}"
             method="POST"
             enctype="multipart/form-data"
         >
+
 
             @csrf
             @method('PUT')
@@ -90,6 +93,8 @@
                        sm:px-6 sm:py-8
                        lg:px-8"
             >
+<x-organizer-scope :flow="$flow" />
+<x-event-state :flow="$flow" :management="true" />
 
                 {{-- TÍTULO --}}
                 <div
@@ -131,7 +136,7 @@
                                font-semibold
                                text-[#174b36]"
                     >
-                        {{ ucfirst($evento->status_evento ?? 'publicado') }}
+                        {{ $flow['event_label'] }}
                     </span>
 
                 </div>
@@ -206,7 +211,7 @@
                                     <input
                                         type="text"
                                         id="nm_evento"
-                                        name="nm_evento"
+                                        name="nm_evento" maxlength="64"
                                         required
                                         value="{{ old('nm_evento', $evento->nm_evento) }}"
                                         class="w-full rounded-xl border
@@ -278,7 +283,7 @@
                                                    font-poppins text-sm
                                                    font-medium"
                                         >
-                                            Número de vagas *
+                                            Vagas informativas do evento *
                                         </label>
 
                                         <input
@@ -297,6 +302,7 @@
                                     </div>
 
 
+                                    <p class="text-xs text-[#817c70]">As vagas do evento são informativas. Cada Agenda tem sua capacidade independente.</p>
                                     {{-- Modalidade --}}
                                     <div class="sm:col-span-2 lg:col-span-1">
 
@@ -376,7 +382,7 @@
 
                                     <textarea
                                         id="descricao_evento"
-                                        name="descricao_evento"
+                                        name="descricao_evento" maxlength="256"
                                         rows="5"
                                         required
                                         class="w-full resize-none
@@ -438,72 +444,11 @@
 
                             <div class="space-y-5 p-4 sm:p-6">
 
-                                {{-- Datas --}}
-                                <div
-                                    class="grid grid-cols-1 gap-4
-                                           md:grid-cols-2"
-                                >
-
-                                    <div>
-
-                                        <label
-                                            for="data_inicio"
-                                            class="mb-2 block
-                                                   font-poppins text-sm
-                                                   font-medium"
-                                        >
-                                            Início *
-                                        </label>
-
-                                        <input
-                                            type="datetime-local"
-                                            id="data_inicio"
-                                            name="data_inicio"
-                                            required
-                                            value="{{ old(
-                                                'data_inicio',
-                                                $agenda?->data_inicio?->format('Y-m-d\TH:i')
-                                            ) }}"
-                                            class="w-full rounded-xl
-                                                   border border-[#d8d4ca]
-                                                   px-4 py-3
-                                                   font-poppins text-sm"
-                                        >
-
-                                    </div>
-
-
-                                    <div>
-
-                                        <label
-                                            for="data_fim"
-                                            class="mb-2 block
-                                                   font-poppins text-sm
-                                                   font-medium"
-                                        >
-                                            Término *
-                                        </label>
-
-                                        <input
-                                            type="datetime-local"
-                                            id="data_fim"
-                                            name="data_fim"
-                                            required
-                                            value="{{ old(
-                                                'data_fim',
-                                                $agenda?->data_fim?->format('Y-m-d\TH:i')
-                                            ) }}"
-                                            class="w-full rounded-xl
-                                                   border border-[#d8d4ca]
-                                                   px-4 py-3
-                                                   font-poppins text-sm"
-                                        >
-
-                                    </div>
-
-                                </div>
-
-
+                                @if($presenceUrl = \App\Support\VisualFiveFixtures::managerUrl($flow['event_id']))
+                                    <x-botao-secundario :href="$presenceUrl" size="sm" class="mb-4">Presença e monitoria</x-botao-secundario>
+                                @endif
+                                <x-agenda-editor :flow="$flow" />
+<div class="grid md:grid-cols-2 gap-4"><label class="text-sm">Cidade<input name="cidade_evento" value="{{ $evento->cidade_evento }}" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2"></label><label class="text-sm">Bairro<input name="bairro_evento" value="{{ $evento->bairro_evento ?? 'Bairro Exemplo' }}" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2"></label><label class="text-sm">UF<input name="uf_evento" value="{{ $evento->uf_evento }}" maxlength="2" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2"></label></div>
                                 {{-- Endereço --}}
                                 <div
                                     class="grid grid-cols-1 gap-4
@@ -524,7 +469,7 @@
                                         <input
                                             type="text"
                                             id="cep_evento"
-                                            name="cep_evento"
+                                            name="cep_evento" data-event-postcode inputmode="numeric" autocomplete="postal-code" maxlength="9" pattern="[0-9]{5}-?[0-9]{3}" aria-describedby="event-postcode-hint"
                                             maxlength="8"
                                             required
                                             value="{{ old('cep_evento', $evento->cep_evento) }}"
@@ -786,10 +731,7 @@
                                     </span>
 
                                     <strong>
-                                        {{ ucfirst(
-                                            $evento->status_evento
-                                            ?? 'publicado'
-                                        ) }}
+                                        {{ $flow['event_label'] }}
                                     </strong>
                                 </div>
 
@@ -799,7 +741,7 @@
                                            gap-3"
                                 >
                                     <span class="text-neutral-500">
-                                        Vagas
+                                        Vagas informativas
                                     </span>
 
                                     <strong>
@@ -902,7 +844,7 @@
                                         class="rounded-full bg-neutral-100
                                                px-2.5 py-1 text-neutral-600"
                                     >
-                                        {{ old('vagas_evento', $evento->vagas_evento) }} vagas
+                                        {{ old('vagas_evento', $evento->vagas_evento) }} vagas informativas
                                     </span>
                                 </div>
 
@@ -1007,38 +949,23 @@
                            sm:justify-end"
                 >
 
-                    <a
-                        href="{{ route('ong.eventos.index') }}"
-                        class="flex items-center justify-center
-                               rounded-full border
-                               border-[#c9c4b8]
-                               bg-white
-                               px-6 py-3
-                               font-poppins text-sm"
-                    >
+                    <x-botao-secundario :href="route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')])">
                         Cancelar
-                    </a>
+                    </x-botao-secundario>
 
 
-                    <button
-                        type="submit"
-                        class="rounded-full
-                               bg-[#174b36]
-                               px-7 py-3
-                               font-poppins text-sm
-                               font-semibold
-                               text-white
-                               transition
-                               hover:bg-[#123b2b]"
-                    >
+                    <x-botao-primario as="button" :href="null" type="submit">
                         Salvar alterações
-                    </button>
+                    </x-botao-primario>
 
                 </div>
 
             </div>
 
         </form>
+        @else
+        <div class="px-4 py-6"><x-organizer-scope :flow="$flow" /></div>
+        @endif
 
     </main>
 
@@ -1226,15 +1153,15 @@
 
                 if (!vagas || vagas < 1) {
                     previewVagas.textContent =
-                        'Vagas a definir';
+                        'Vagas informativas a definir';
 
                     return;
                 }
 
                 previewVagas.textContent =
                     vagas === 1
-                        ? '1 vaga'
-                        : `${vagas} vagas`;
+                        ? '1 vaga informativa'
+                        : `${vagas} vagas informativas`;
             }
 
 
@@ -1588,64 +1515,13 @@
                         return;
                     }
 
-                    modalSucesso
-                        ?.classList
-                        .remove('hidden');
+                    modalSucesso?.showModal();
 
-                    modalSucesso
-                        ?.classList
-                        .add('flex');
+
 
                     document.body
                         .classList
                         .add('overflow-hidden');
-                }
-            );
-
-
-            /*
-             * Clique fora leva para Meus eventos.
-             */
-            modalSucesso?.addEventListener(
-                'click',
-                function (event) {
-
-                    if (
-                        event.target ===
-                        modalSucesso
-                    ) {
-                        window.location.href =
-                            @json(
-                                route(
-                                    'ong.eventos.index'
-                                )
-                            );
-                    }
-                }
-            );
-
-
-            /*
-             * ESC também leva para Meus eventos.
-             */
-            document.addEventListener(
-                'keydown',
-                function (event) {
-
-                    if (
-                        event.key === 'Escape' &&
-                        modalSucesso &&
-                        !modalSucesso
-                            .classList
-                            .contains('hidden')
-                    ) {
-                        window.location.href =
-                            @json(
-                                route(
-                                    'ong.eventos.index'
-                                )
-                            );
-                    }
                 }
             );
 
@@ -1656,15 +1532,7 @@
 
 
     {{-- MODAL DE SUCESSO --}}
-    <div
-        id="modal-sucesso-edicao"
-        class="fixed inset-0 z-[100] hidden
-               items-center justify-center
-               bg-black/45 px-4"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-sucesso-edicao-titulo"
-    >
+    <dialog id="modal-sucesso-edicao" class="ajudae-dialog ajudae-dialog--compact ajudae-dialog--legacy" role="dialog" aria-modal="true" aria-labelledby="modal-sucesso-edicao-titulo"><x-dialog-close />
         <div
             class="w-full max-w-md
                    rounded-3xl border border-[#dedbd1]
@@ -1689,7 +1557,7 @@
                        text-2xl font-bold
                        text-[#17392a]"
             >
-                Alterações salvas!
+                Revisão das alterações
             </h2>
 
             <p
@@ -1697,7 +1565,7 @@
                        text-sm leading-6
                        text-neutral-500"
             >
-                As alterações do evento foram enviadas com sucesso.
+                Confira as informações. Nenhuma alteração foi enviada por esta página.
             </p>
 
             <div
@@ -1713,23 +1581,12 @@
             </div>
 
             <div class="mt-6">
-                <a
-                    href="{{ route('ong.eventos.index') }}"
-                    class="flex w-full
-                           items-center justify-center
-                           rounded-full
-                           bg-[#174b36]
-                           px-6 py-3
-                           font-poppins text-sm
-                           font-semibold text-white
-                           transition
-                           hover:bg-[#123b2b]"
-                >
+                <x-botao-primario :href="route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')])" class="w-full">
                     Ir para meus eventos →
-                </a>
+                </x-botao-primario>
             </div>
         </div>
-    </div>
+    </dialog>
 
 
 </body>

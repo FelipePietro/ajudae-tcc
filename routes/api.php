@@ -58,12 +58,12 @@ Route::prefix('v1/pessoas')->group(function () {
 
     // Autenticadas como Pessoa
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
     ])->group(function () {
 
-        Route::post('/logout', [PessoaController::class, 'logout']);
-        Route::get('/me', [PessoaController::class, 'me']);
+        Route::post('/logout', [PessoaController::class, 'logout'])->name('api.pessoa.logout');
+        Route::get('/me', [PessoaController::class, 'me'])->name('api.pessoa.me');
         Route::post('/{id}/imagem', [ManagedImageController::class, 'pessoaUpload']);
         Route::delete('/{id}/imagem', [ManagedImageController::class, 'pessoaRemove']);
         Route::get('/{pessoa}/confiabilidade', [ConfiabilidadeController::class, 'show']);
@@ -84,7 +84,7 @@ Route::prefix('v1/pessoas')->group(function () {
         Route::patch(
             '/{id}/cancelar-exclusao',
             [PessoaController::class, 'cancelarExclusao']
-        );
+        )->name('api.pessoa.cancel-deletion');
     });
 
     Route::get('/{id}', [PessoaController::class, 'show']);
@@ -104,7 +104,7 @@ Route::prefix('v1/pessoas/{id}/habilidades')->group(function () {
     ]);
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
     ])->group(function () {
 
@@ -134,7 +134,7 @@ Route::prefix('v1/pessoas/{id}/recursos')->group(function () {
     ]);
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
     ])->group(function () {
 
@@ -164,7 +164,7 @@ Route::prefix('v1/pessoas/{id}/causas')->group(function () {
     ]);
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
     ])->group(function () {
 
@@ -196,18 +196,18 @@ Route::prefix('v1/ongs')->group(function () {
 
     // ONG autenticada
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:ong',
     ])->group(function () {
 
-        Route::post('/logout', [OngController::class, 'logout']);
-        Route::get('/me', [OngController::class, 'me']);
+        Route::post('/logout', [OngController::class, 'logout'])->name('api.ong.logout');
+        Route::get('/me', [OngController::class, 'me'])->name('api.ong.me');
         Route::post('/{id}/imagem', [ManagedImageController::class, 'ongUpload']);
         Route::delete('/{id}/imagem', [ManagedImageController::class, 'ongRemove']);
-        Route::post('/me/convites-organizador', [OngOrganizadorController::class, 'convidar']);
-        Route::get('/me/organizadores', [OngOrganizadorController::class, 'index']);
-        Route::delete('/me/organizadores/{vinculo}', [OngOrganizadorController::class, 'encerrar']);
-        Route::patch('/me/eventos/{evento}/responsavel', [OngOrganizadorController::class, 'atribuirResponsavel']);
+        Route::post('/me/convites-organizador', [OngOrganizadorController::class, 'convidar'])->middleware('ong.approved');
+        Route::get('/me/organizadores', [OngOrganizadorController::class, 'index'])->middleware('ong.approved');
+        Route::delete('/me/organizadores/{vinculo}', [OngOrganizadorController::class, 'encerrar'])->middleware('ong.approved');
+        Route::patch('/me/eventos/{evento}/responsavel', [OngOrganizadorController::class, 'atribuirResponsavel'])->middleware('ong.approved');
 
         Route::match(['put', 'patch'], '/{id}', [OngController::class, 'update']);
         Route::delete('/{id}', [OngController::class, 'destroy']);
@@ -215,7 +215,7 @@ Route::prefix('v1/ongs')->group(function () {
         Route::patch(
             '/{id}/cancelar-exclusao',
             [OngController::class, 'cancelarExclusao']
-        );
+        )->name('api.ong.cancel-deletion');
     });
 
     // Admin aprova/reprova ONG
@@ -223,7 +223,7 @@ Route::prefix('v1/ongs')->group(function () {
         '/{id}/status',
         [OngController::class, 'updateStatus']
     )->middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
         'admin:ongs.validar',
     ]);
@@ -243,7 +243,7 @@ Route::prefix('v1/recursos')->group(function () {
     Route::get('/{id}', [RecursoController::class, 'show']);
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
         'admin',
     ])->group(function () {
@@ -266,7 +266,7 @@ Route::prefix('v1/causas')->group(function () {
     Route::get('/{id}', [CausaController::class, 'show']);
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
         'admin',
     ])->group(function () {
@@ -289,7 +289,7 @@ Route::prefix('v1/habilidades')->group(function () {
     Route::get('/{id}', [HabilidadeController::class, 'show']);
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
         'admin',
     ])->group(function () {
@@ -312,7 +312,7 @@ Route::prefix('v1/categorias-evento')->group(function () {
     Route::get('/{id}', [CatEventoController::class, 'show']);
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
         'admin',
     ])->group(function () {
@@ -341,7 +341,7 @@ Route::prefix('v1/eventos')->group(function () {
 
     // ONG aprovada ou Pessoa organizadora
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'ability:ong,pessoa',
         'ong.approved',
     ])->group(function () {
@@ -363,30 +363,30 @@ Route::prefix('v1/eventos')->group(function () {
     });
 
     Route::post('/{id}/avaliacao-ong', [AvaliacaoController::class, 'ong'])
-        ->middleware(['auth:sanctum', 'abilities:pessoa']);
+        ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
 
     Route::post('/{id}/certificado', [CertificadoController::class, 'emitir'])
-        ->middleware(['auth:sanctum', 'abilities:pessoa']);
+        ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
     Route::get('/{id}/certificado', [CertificadoController::class, 'show'])
-        ->middleware(['auth:sanctum', 'abilities:pessoa']);
+        ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
 
     // Admin
     Route::patch(
         '/{id}/status',
         [EventoController::class, 'updateStatus']
     )->middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'abilities:pessoa',
         'admin:eventos.aprovar',
     ]);
     Route::get('/admin/pendentes', [EventoController::class, 'pendentes'])->middleware([
-        'auth:sanctum', 'abilities:pessoa', 'admin:eventos.aprovar',
+        'auth:sanctum', 'bearer.account', 'abilities:pessoa', 'admin:eventos.aprovar',
     ]);
 });
 
 Route::get('/v1/certificados/verificar/{codigo}', [CertificadoController::class, 'verificar']);
 Route::get('/v1/certificados/{certificado}/download', [CertificadoController::class, 'download'])
-    ->middleware(['auth:sanctum', 'abilities:pessoa']);
+    ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
 
 /*
 |--------------------------------------------------------------------------
@@ -398,7 +398,7 @@ Route::post(
     '/v1/pessoas/eventos',
     [EventoController::class, 'store']
 )->middleware([
-    'auth:sanctum',
+    'auth:sanctum', 'bearer.account',
     'abilities:pessoa',
 ]);
 
@@ -421,7 +421,7 @@ Route::get(
 
 Route::get('/v1/eventos/{evento}/agendas', [AgendaController::class, 'porEvento']);
 Route::post('/v1/eventos/{evento}/agendas', [AgendaController::class, 'store'])
-    ->middleware(['auth:sanctum', 'ability:ong,pessoa', 'ong.approved']);
+    ->middleware(['auth:sanctum', 'bearer.account', 'ability:ong,pessoa', 'ong.approved']);
 
 Route::prefix('v1/agendas')->group(function () {
 
@@ -429,7 +429,7 @@ Route::prefix('v1/agendas')->group(function () {
     Route::get('/{id}', [AgendaController::class, 'show']);
 
     Route::middleware([
-        'auth:sanctum',
+        'auth:sanctum', 'bearer.account',
         'ability:ong,pessoa',
         'ong.approved',
     ])->group(function () {
@@ -455,7 +455,7 @@ Route::prefix('v1/agendas')->group(function () {
 Route::get('/v1/ranking', [RankingController::class, 'index']);
 
 Route::prefix('v1/admin/campanhas-xp')->middleware([
-    'auth:sanctum',
+    'auth:sanctum', 'bearer.account',
     'abilities:pessoa',
     'admin:xp.campanhas.gerenciar',
 ])->group(function () {
@@ -476,22 +476,22 @@ Route::post(
     '/v1/agendas/{id}/inscrever',
     [InscricaoController::class, 'store']
 )->middleware([
-    'auth:sanctum',
+    'auth:sanctum', 'bearer.account',
     'abilities:pessoa',
 ]);
 
 Route::post('/v1/agendas/{id}/inscricoes', [InscricaoController::class, 'store'])
-    ->middleware(['auth:sanctum', 'abilities:pessoa']);
+    ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
 
 Route::get('/v1/minhas-inscricoes', [InscricaoController::class, 'minhas'])
-    ->middleware(['auth:sanctum', 'abilities:pessoa']);
+    ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
 
 // Lista as inscrições da própria Pessoa
 Route::get(
     '/v1/pessoas/{id}/inscricoes',
     [InscricaoController::class, 'porPessoa']
 )->middleware([
-    'auth:sanctum',
+    'auth:sanctum', 'bearer.account',
     'abilities:pessoa',
 ]);
 
@@ -500,14 +500,14 @@ Route::delete(
     '/v1/inscricoes/{id}',
     [InscricaoController::class, 'destroy']
 )->middleware([
-    'auth:sanctum',
+    'auth:sanctum', 'bearer.account',
     'abilities:pessoa',
 ]);
 
 // ONG ou organizador responsável gerencia candidatos.
 // A autorização específica acontece dentro do Controller.
 Route::middleware([
-    'auth:sanctum',
+    'auth:sanctum', 'bearer.account',
 ])->group(function () {
 
     Route::get('/v1/inscricoes/{id}', [InscricaoController::class, 'show']);
@@ -531,7 +531,7 @@ Route::middleware([
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth:sanctum', 'ability:pessoa,ong'])->group(function () {
+Route::middleware(['auth:sanctum', 'bearer.account', 'ability:pessoa,ong'])->group(function () {
     Route::get('/v1/documentos/{documento}/download', [DocumentoPessoaController::class, 'download']);
 
     Route::get('/v1/notificacoes', [NotificationController::class, 'index']);
@@ -547,13 +547,13 @@ Route::middleware(['auth:sanctum', 'ability:pessoa,ong'])->group(function () {
     Route::get('/v1/minhas-solicitacoes-lgpd', [SolicitacaoLgpdController::class, 'minhas']);
 });
 
-Route::middleware(['auth:sanctum', 'abilities:pessoa', 'admin:lgpd.visualizar'])->group(function () {
-    Route::get('/v1/admin/solicitacoes-lgpd', [SolicitacaoLgpdController::class, 'index']);
-    Route::patch('/v1/admin/solicitacoes-lgpd/{id}/status', [SolicitacaoLgpdController::class, 'updateStatus']);
+Route::middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa'])->group(function () {
+    Route::get('/v1/admin/solicitacoes-lgpd', [SolicitacaoLgpdController::class, 'index'])->middleware('admin:lgpd.visualizar');
+    Route::patch('/v1/admin/solicitacoes-lgpd/{id}/status', [SolicitacaoLgpdController::class, 'updateStatus'])->middleware('admin:lgpd.responder');
 });
 
 Route::prefix('v1/admin')->middleware([
-    'auth:sanctum',
+    'auth:sanctum', 'bearer.account',
     'abilities:pessoa',
     'admin:usuarios.validar',
 ])->group(function () {
@@ -568,7 +568,7 @@ Route::prefix('v1/admin')->middleware([
     Route::get('/antecedentes/renovacoes', [AntecedentesController::class, 'renovacoes']);
 });
 
-Route::prefix('v1/padrinhos')->middleware(['auth:sanctum', 'abilities:pessoa'])->group(function () {
+Route::prefix('v1/padrinhos')->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa'])->group(function () {
     Route::get('/elegiveis', [PadrinhoController::class, 'elegiveis']);
     Route::get('/me', [PadrinhoController::class, 'meus']);
     Route::get('/recebidas', [PadrinhoController::class, 'recebidas']);
@@ -582,7 +582,7 @@ Route::prefix('v1/padrinhos')->middleware(['auth:sanctum', 'abilities:pessoa'])-
 });
 
 Route::prefix('v1/admin/padrinhos/conclusoes')->middleware([
-    'auth:sanctum', 'abilities:pessoa', 'admin:padrinhos.validar_conclusao',
+    'auth:sanctum', 'bearer.account', 'abilities:pessoa', 'admin:padrinhos.validar_conclusao',
 ])->group(function () {
     Route::get('/', [AdminPadrinhoController::class, 'conclusoes']);
     Route::post('/{pedido}/aprovar', [AdminPadrinhoController::class, 'aprovar']);
@@ -590,7 +590,7 @@ Route::prefix('v1/admin/padrinhos/conclusoes')->middleware([
 });
 
 Route::prefix('v1/admin/solicitacoes-organizador')->middleware([
-    'auth:sanctum',
+    'auth:sanctum', 'bearer.account',
     'abilities:pessoa',
     'admin:organizadores.validar',
 ])->group(function () {
@@ -605,6 +605,7 @@ Route::get('/health', fn () => ApiResponse::success(['status' => 'ok'], 'API onl
 
 // ##### ROTAS TEMPORÁRIAS ######
 
+if (! config('identity.enabled') && app()->environment('local', 'testing') && config('identity.demo')) {
 Route::get('/ong/eventos/{id}/candidatos', function ($id) {
 
     /*
@@ -647,5 +648,6 @@ Route::post('/ong/candidatos/aprovar-lote', function (Request $request) {
     );
 
 })->name('ong.candidatos.aprovar-lote');
+}
 
 // ##### ROTAS TEMPORÁRIAS ######

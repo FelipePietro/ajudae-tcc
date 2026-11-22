@@ -125,21 +125,30 @@ class DocumentoStorageLgpdTest extends TestCase
         Storage::disk('local')->put('documentos/privado.pdf', 'conteudo');
         $documento = $this->documento($titular->pessoa_id, 'documentos/privado.pdf', 'aprovado');
         $rota = "/api/v1/documentos/{$documento->getKey()}/download";
+        $downloads = AdminLog::query()->where('acao', 'documento.download')->where('recurso_id', $documento->getKey());
 
         $disk = Mockery::mock(FilesystemAdapter::class);
         $disk->shouldNotReceive('exists');
         Storage::set('local', $disk);
         Sanctum::actingAs($outro, ['pessoa']);
         $this->getJson($rota)->assertForbidden()->assertDontSee('documentos/privado.pdf');
-        $this->assertSame(0, AdminLog::count());
+        $this->assertFalse($downloads->exists());
 
         Storage::fake('local');
         Storage::disk('local')->put('documentos/privado.pdf', 'conteudo');
         Sanctum::actingAs($admin, ['pessoa']);
+        $this->getJson($rota)->assertForbidden();
+        $this->assertFalse($downloads->exists());
+        $titular->forceFill([
+            'status_validacao' => 'em_analise',
+            'admin_analisando_id' => $admin->getKey(),
+            'analise_assumida_em' => now(),
+        ])->save();
+
         $response = $this->get($rota)->assertOk();
         $this->assertStringContainsString('private', $response->headers->get('Cache-Control'));
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
-        $log = AdminLog::firstOrFail();
+        $log = $downloads->sole();
         $this->assertSame('documento.download', $log->acao);
         $this->assertSame($admin->pessoa_id, $log->pessoa_id);
         $this->assertSame($documento->getKey(), $log->recurso_id);

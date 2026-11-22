@@ -1,5 +1,5 @@
 @props([
-    'itens' => []
+    'itens' => [], 'params' => []
 ])
 
 <div
@@ -29,7 +29,7 @@
 
             <li class="shrink-0">
                 <a
-                    href="{{ route('admin.admin') }}"
+                    href="{{ route('admin.admin', $params) }}"
                     class="
                         text-[#777A72]
                         transition-colors

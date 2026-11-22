@@ -1,0 +1,2365 @@
+# Proposta de baseline Git para revisão
+
+A revisão parte do pré-ajuste de 22/11/2026. Branch `feat/ajustes-pre-deploy`, HEAD `1c028b311edcff2869f1d299dbbff5924425b450`. Há 85 modificados rastreados e 5044 não rastreados. Nenhuma entrada no index. A proposta não altera o Git.
+
+## Preparação
+
+1. Revisar os caminhos indicados abaixo com a equipe, verificando diff contra HEAD e origem nos deltas 6.x/7.x. Validar o backup, catálogos Web/API, suite sintética e termos de acesso.
+2. Criar a baseline local em branch dedicada quando autorizado, incluindo incrementos revisáveis por domínio. Preservar os arquivos 6.x e seus frontends isolados na mesma baseline técnica. A ordem proposta é infraestrutura/guards/rotas e testes de segurança, views/CSS/JS/testes visuais, documentação de integração, depois ajuste de navbar como delta próprio.
+3. Conferir staging seletivo `git diff --cached --name-status`, `git diff --cached --check` e revisão de segredos antes de cada commit autorizado. Fazer revisão especial de deploy automáticos e separar a eventual publicação. Evitar captura de evidências volumosas, scripts com credenciais, `.env`, PHP/Vite caches, arquivos locais, dumps, documentos e dependências. A inclusão de projetos compilados ou alterações de schema exige decisão própria.
+
+## Candidatos por caminho
+
+A lista cobre todas as entradas de código e documentação aprovadas para o backup que diferiam do HEAD. “??” é arquivo local hoje não rastreado. A colocação na lista pede revisão pelo dono do domínio.
+
+### Configuração e ferramentas: revisar portabilidade e segredos (14)
+
+- `M` `AGENTS.md`
+- `??` `Ajudae_Regras_de_Negocio_V1.md`
+- `M` `bootstrap/app.php`
+- `M` `composer.json`
+- `M` `composer.lock`
+- `??` `scripts/auditoria-certificado-6-4.php`
+- `??` `scripts/auditoria-feedback-6-3.py`
+- `??` `scripts/auditoria-final-6-5.py`
+- `??` `scripts/auditoria-frontend-v1.php`
+- `??` `scripts/auditoria-navegacao-3-3.php`
+- `??` `scripts/diagnostico-503-readonly.php`
+- `??` `scripts/entrega-auditoria-6-5.py`
+- `??` `scripts/homologacao-imagem-20261020.ps1`
+- `M` `vite.config.js`
+
+### Contrato, segurança e backend: revisão separada (46)
+
+- `M` `app/Http/Controllers/Api/AgendaController.php`
+- `M` `app/Http/Controllers/Api/ConfiabilidadeController.php`
+- `M` `app/Http/Controllers/Api/DocumentoPessoaController.php`
+- `M` `app/Http/Controllers/Api/EventoAssociacaoController.php`
+- `M` `app/Http/Controllers/Api/EventoController.php`
+- `M` `app/Http/Controllers/Api/EventoHabilidadeController.php`
+- `M` `app/Http/Controllers/Api/InscricaoController.php`
+- `M` `app/Http/Controllers/Api/ManagedImageController.php`
+- `M` `app/Http/Controllers/Api/OngController.php`
+- `M` `app/Http/Controllers/Api/PessoaController.php`
+- `M` `app/Http/Controllers/Api/SolicitacaoLgpdController.php`
+- `??` `app/Http/Controllers/PublicEventPagesController.php`
+- `??` `app/Http/Controllers/SessionAccountController.php`
+- `??` `app/Http/Controllers/SessionPagesController.php`
+- `??` `app/Http/Controllers/WebAuthController.php`
+- `??` `app/Http/Middleware/DemoSafety.php`
+- `M` `app/Http/Middleware/EnsureOngApproved.php`
+- `??` `app/Http/Middleware/RequireBearerAccount.php`
+- `??` `app/Http/Middleware/ResolveWebAccount.php`
+- `??` `app/Http/Middleware/WebFoundation.php`
+- `??` `app/Http/Middleware/WebIdentity.php`
+- `M` `app/Models/Ong.php`
+- `M` `app/Models/Pessoa.php`
+- `??` `app/Policies/DocumentoPessoaPolicy.php`
+- `M` `app/Policies/EventoPolicy.php`
+- `??` `app/Policies/PessoaPolicy.php`
+- `M` `app/Providers/AppServiceProvider.php`
+- `??` `app/Services/AccountCredentials.php`
+- `??` `app/Services/AccountDeletion.php`
+- `M` `app/Services/AvaliacaoService.php`
+- `M` `app/Services/OrganizadorService.php`
+- `M` `app/Services/PadrinhoService.php`
+- `M` `app/Services/PessoaValidationService.php`
+- `??` `app/Services/WebApi.php`
+- `??` `app/Services/WebSession.php`
+- `M` `config/auth.php`
+- `??` `config/erd-generator.php`
+- `??` `config/identity.php`
+- `M` `config/sanctum.php`
+- `M` `config/session.php`
+- `??` `database/migrations/2026_11_20_180000_add_auth_version_to_accounts.php`
+- `M` `routes/api.php`
+- `??` `routes/demo.php`
+- `??` `routes/identity.php`
+- `??` `routes/public-pages.php`
+- `M` `routes/web.php`
+
+### Documentação: revisar sensibilidade e relevância (170)
+
+- `??` `docs/ajustes-visuais-navegacao-botoes-2026-10-24.json`
+- `??` `docs/ajustes-visuais-navegacao-botoes-2026-10-24.md`
+- `??` `docs/ajustes-visuais-navegacao-relatorio-2026-10-24.md`
+- `??` `docs/ajustes-visuais-navegacao-validacao-2026-10-24.json`
+- `??` `docs/auditoria-frontend-v1-2026-10-21.md`
+- `??` `docs/auditoria-frontend-v1-contratos-2026-10-21.md`
+- `??` `docs/auditoria-frontend-v1-inventario-2026-10-21.json`
+- `??` `docs/bloco-7-2-auditoria-complementar-autorizacao-2026-11-20.md`
+- `??` `docs/bloco-7-2-checklist-complementar-autorizacao-2026-11-20.md`
+- `??` `docs/bloco-7-2-correcoes-homologacao-2026-11-20.md`
+- `??` `docs/bloco-7-2-fase-b-checklist.md`
+- `??` `docs/bloco-7-2-fase-b-matriz-testes.md`
+- `??` `docs/bloco-7-2-fase-b-relatorio.md`
+- `??` `docs/bloco-7-3-checklist-homologacao-manual.md`
+- `??` `docs/bloco-7-3-inventario-mocks-pendentes.md`
+- `??` `docs/bloco-7-3-matriz-rotas-navegacao.md`
+- `??` `docs/bloco-7-3-matriz-testes.md`
+- `??` `docs/bloco-7-3-mini-backlog.md`
+- `??` `docs/bloco-7-3-relatorio.md`
+- `??` `docs/bloco-7-4-auditoria-visual-6-5-vs-7-3.md`
+- `??` `docs/bloco-7-4-checklist-homologacao-manual.md`
+- `??` `docs/bloco-7-4-correcao-checklist.md`
+- `??` `docs/bloco-7-4-correcao-matriz-visual.md`
+- `??` `docs/bloco-7-4-correcao-relatorio.md`
+- `??` `docs/bloco-7-4-fidelidade-checklist.md`
+- `??` `docs/bloco-7-4-fidelidade-matriz.md`
+- `??` `docs/bloco-7-4-fidelidade-relatorio.md`
+- `??` `docs/bloco-7-4-fidelidade-rotas.md`
+- `??` `docs/bloco-7-4-inventario-testes.md`
+- `??` `docs/bloco-7-4-matriz-regressoes.md`
+- `??` `docs/bloco-7-4-matriz-seguranca.md`
+- `??` `docs/bloco-7-4-pendencias-integracao.md`
+- `??` `docs/bloco-7-4-relatorio.md`
+- `??` `docs/bloco-visual-1-cenarios-2026-10-22.json`
+- `??` `docs/bloco-visual-1-integracao-2026-10-22.md`
+- `??` `docs/bloco-visual-1-matriz-rn-2026-10-22.md`
+- `??` `docs/bloco-visual-1-relatorio-2026-10-22.md`
+- `??` `docs/bloco-visual-3-1-contratos-2026-10-25.md`
+- `??` `docs/bloco-visual-3-1-inventario-2026-10-25.json`
+- `??` `docs/bloco-visual-3-1-relatorio-2026-10-25.md`
+- `??` `docs/bloco-visual-3-1-validacao-2026-10-25.json`
+- `??` `docs/bloco-visual-3-2-inventario-2026-10-28.json`
+- `??` `docs/bloco-visual-3-2-relatorio-2026-10-28.md`
+- `??` `docs/bloco-visual-3-2-validacao-2026-10-28.json`
+- `??` `docs/bloco-visual-3-3-checklist-homologacao-2026-10-29.md`
+- `??` `docs/bloco-visual-3-3-inventario-delta-2026-10-29.json`
+- `??` `docs/bloco-visual-3-3-relatorio-2026-10-29.md`
+- `??` `docs/bloco-visual-3-3-validacao-2026-10-29.json`
+- `??` `docs/bloco-visual-3-integracao-2026-10-24.md`
+- `??` `docs/bloco-visual-3-inventario-2026-10-24.json`
+- `??` `docs/bloco-visual-3-matriz-rn-2026-10-24.md`
+- `??` `docs/bloco-visual-3-relatorio-2026-10-24.md`
+- `??` `docs/bloco-visual-3-validacao-2026-10-24.json`
+- `??` `docs/bloco-visual-4-1-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-4-1-contratos.md`
+- `??` `docs/bloco-visual-4-1-inventario.json`
+- `??` `docs/bloco-visual-4-1-relatorio.md`
+- `??` `docs/bloco-visual-4-2-1-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-4-2-1-inventario.json`
+- `??` `docs/bloco-visual-4-2-1-notas-backend.md`
+- `??` `docs/bloco-visual-4-2-1-relatorio.md`
+- `??` `docs/bloco-visual-4-2-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-4-2-inventario.json`
+- `??` `docs/bloco-visual-4-2-plano-backend-referral.md`
+- `??` `docs/bloco-visual-4-2-relatorio.md`
+- `??` `docs/bloco-visual-4-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-4-integracao-2026-11-14.md`
+- `??` `docs/bloco-visual-4-inventario.json`
+- `??` `docs/bloco-visual-4-relatorio-2026-11-14.md`
+- `??` `docs/bloco-visual-5-1-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-5-1-integracao.md`
+- `??` `docs/bloco-visual-5-1-inventario.json`
+- `??` `docs/bloco-visual-5-1-maquina-estados.md`
+- `??` `docs/bloco-visual-5-1-matriz-regras.md`
+- `??` `docs/bloco-visual-5-1-relatorio.md`
+- `??` `docs/bloco-visual-5-2-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-5-2-estados.md`
+- `??` `docs/bloco-visual-5-2-inventario.json`
+- `??` `docs/bloco-visual-5-2-matriz-regras.md`
+- `??` `docs/bloco-visual-5-2-plano-backend.md`
+- `??` `docs/bloco-visual-5-2-relatorio.md`
+- `??` `docs/bloco-visual-5-3-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-5-3-estados.md`
+- `??` `docs/bloco-visual-5-3-inventario.json`
+- `??` `docs/bloco-visual-5-3-matriz-regras.md`
+- `??` `docs/bloco-visual-5-3-plano-backend.md`
+- `??` `docs/bloco-visual-5-3-relatorio.md`
+- `??` `docs/bloco-visual-5-4-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-5-4-estados.md`
+- `??` `docs/bloco-visual-5-4-inventario.json`
+- `??` `docs/bloco-visual-5-4-matriz-regras.md`
+- `??` `docs/bloco-visual-5-4-plano-backend.md`
+- `??` `docs/bloco-visual-5-4-relatorio.md`
+- `??` `docs/bloco-visual-5-5-1-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-5-5-1-integracao.md`
+- `??` `docs/bloco-visual-5-5-1-inventario.json`
+- `??` `docs/bloco-visual-5-5-1-relatorio.md`
+- `??` `docs/bloco-visual-5-5-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-5-5-estados.md`
+- `??` `docs/bloco-visual-5-5-inventario.json`
+- `??` `docs/bloco-visual-5-5-matriz-regras.md`
+- `??` `docs/bloco-visual-5-5-plano-backend.md`
+- `??` `docs/bloco-visual-5-5-relatorio.md`
+- `??` `docs/bloco-visual-5-6-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-5-6-estados.md`
+- `??` `docs/bloco-visual-5-6-inventario.json`
+- `??` `docs/bloco-visual-5-6-manifesto.md`
+- `??` `docs/bloco-visual-5-6-matriz-regras.md`
+- `??` `docs/bloco-visual-5-6-plano-backend.md`
+- `??` `docs/bloco-visual-5-6-relatorio.md`
+- `??` `docs/bloco-visual-6-1-1-checklist-complementar.md`
+- `??` `docs/bloco-visual-6-1-1-relatorio.md`
+- `??` `docs/bloco-visual-6-1-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-6-1-inventario.json`
+- `??` `docs/bloco-visual-6-1-matriz-regras.md`
+- `??` `docs/bloco-visual-6-1-plano-integracao.md`
+- `??` `docs/bloco-visual-6-1-relatorio.md`
+- `??` `docs/bloco-visual-6-2-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-6-2-inventario.json`
+- `??` `docs/bloco-visual-6-2-matriz-regras.md`
+- `??` `docs/bloco-visual-6-2-plano-integracao.md`
+- `??` `docs/bloco-visual-6-2-relatorio.md`
+- `??` `docs/bloco-visual-6-3-catalogo-feedback.md`
+- `??` `docs/bloco-visual-6-3-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-6-3-correcao-apadrinhamento-inventario.json`
+- `??` `docs/bloco-visual-6-3-correcao-apadrinhamento.md`
+- `??` `docs/bloco-visual-6-3-inventario.json`
+- `??` `docs/bloco-visual-6-3-matriz-regras.md`
+- `??` `docs/bloco-visual-6-3-plano-integracao.md`
+- `??` `docs/bloco-visual-6-3-relatorio.md`
+- `??` `docs/bloco-visual-6-3-textos.md`
+- `??` `docs/bloco-visual-6-4-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-6-4-inventario.json`
+- `??` `docs/bloco-visual-6-4-marca.md`
+- `??` `docs/bloco-visual-6-4-matriz-regras.md`
+- `??` `docs/bloco-visual-6-4-plano-integracao.md`
+- `??` `docs/bloco-visual-6-4-relatorio.md`
+- `??` `docs/bloco-visual-6-5-checklist-homologacao-manual.md`
+- `??` `docs/bloco-visual-6-5-inventario.json`
+- `??` `docs/bloco-visual-6-5-matriz-regras.md`
+- `??` `docs/bloco-visual-6-5-plano-integracao.md`
+- `??` `docs/bloco-visual-6-5-relatorio.md`
+- `??` `docs/deploy-gd-exif-admin-2026-10-20.md`
+- `??` `docs/diagnostico-503-ssh-2026-10-20.md`
+- `??` `docs/frontend-b0-b1-divergencias-2026-10-22.md`
+- `??` `docs/frontend-b0-b1-matriz-rn-2026-10-22.md`
+- `??` `docs/frontend-b0-b1-relatorio-2026-10-22.md`
+- `??` `docs/frontend-demo-contratos-2026-10-22.md`
+- `??` `docs/frontend-demo-inventario-2026-10-22.json`
+- `??` `docs/frontend-demo-plano-visual-2026-10-22.md`
+- `??` `docs/frontend-demo-restauracao-relatorio-2026-10-22.md`
+- `M` `docs/guia-integracao-api.md`
+- `??` `docs/perfil-ong-sidebar-mapa-2026-10-24.md`
+- `??` `docs/perfil-ong-sidebar-relatorio-2026-10-24.md`
+- `??` `docs/perfil-ong-sidebar-validacao-2026-10-24.json`
+- `??` `docs/railway-homologacao-2026-10-20.md`
+- `??` `docs/railway-testes-sinteticos-2026-10-20.md`
+- `??` `docs/referencia-rn-v1-extraida-2026-10-21.md`
+- `??` `docs/retornar-evento-perfil-ong-2026-10-24.md`
+- `??` `docs/retornar-evento-perfil-ong-validacao-2026-10-24.json`
+- `??` `docs/usabilidade-blocos-1-2-contratos-2026-10-24.md`
+- `??` `docs/usabilidade-blocos-1-2-integracao-2026-10-24.md`
+- `??` `docs/usabilidade-blocos-1-2-relatorio-2026-10-24.md`
+- `??` `docs/usabilidade-blocos-1-2-revisao-v1-2026-10-24.md`
+- `??` `docs/usabilidade-blocos-1-2-validacao-2026-10-24.json`
+- `??` `docs/visual-2-bloco-b-relatorio-2026-10-23.md`
+- `??` `docs/visual-2-etapa-a-relatorio-2026-10-23.md`
+- `??` `docs/visual-2-integracao-2026-10-23.md`
+- `??` `docs/visual-2-inventario-2026-10-23.json`
+- `??` `docs/visual-2-matriz-rn-2026-10-23.md`
+
+### Fora do catálogo de código aprovado (4667)
+
+Caminhos de evidência e saída local somam 2801. A listagem de exclusões no manifesto é por caminho ou subárvore. Revisar separadamente arquivos fora dessas subárvores.
+
+- `??` `database/migrations.zip`
+- `??` `resources/fixtures/admin-documents/certidao.pdf`
+- `??` `resources/fixtures/admin-documents/certidao.png`
+- `??` `resources/fixtures/admin-documents/identidade.png`
+- `??` `scripts/homologacao-auth-20261020.ps1`
+- `??` `storage/framework/admin-browser-qa/Crashpad/metadata`
+- `??` `storage/framework/admin-browser-qa/Crashpad/reports/e9681ce6-c66b-4002-96b8-5ccbfb06ed7c.dmp`
+- `??` `storage/framework/admin-browser-qa/Crashpad/settings.dat`
+- `??` `storage/framework/admin-browser-qa/CrashpadMetrics-active.pma`
+- `??` `storage/framework/admin-browser-qa/Default/Affiliation Database`
+- `??` `storage/framework/admin-browser-qa/Default/Affiliation Database-journal`
+- `??` `storage/framework/admin-browser-qa/Default/BraveWallet/Brave Wallet Storage/000003.log`
+- `??` `storage/framework/admin-browser-qa/Default/BraveWallet/Brave Wallet Storage/CURRENT`
+- `??` `storage/framework/admin-browser-qa/Default/BraveWallet/Brave Wallet Storage/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/BraveWallet/Brave Wallet Storage/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/BraveWallet/Brave Wallet Storage/MANIFEST-000001`
+- `??` `storage/framework/admin-browser-qa/Default/ClientCertificates/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/ClientCertificates/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/Code Cache/js/index`
+- `??` `storage/framework/admin-browser-qa/Default/Code Cache/js/index-dir/the-real-index`
+- `??` `storage/framework/admin-browser-qa/Default/Code Cache/wasm/index`
+- `??` `storage/framework/admin-browser-qa/Default/Code Cache/wasm/index-dir/the-real-index`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Rules/000003.log`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Rules/CURRENT`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Rules/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Rules/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Rules/MANIFEST-000001`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Scripts/000003.log`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Scripts/CURRENT`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Scripts/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Scripts/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/Extension Scripts/MANIFEST-000001`
+- `??` `storage/framework/admin-browser-qa/Default/Extension State/000003.log`
+- `??` `storage/framework/admin-browser-qa/Default/Extension State/CURRENT`
+- `??` `storage/framework/admin-browser-qa/Default/Extension State/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/Extension State/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/Extension State/MANIFEST-000001`
+- `??` `storage/framework/admin-browser-qa/Default/Favicons`
+- `??` `storage/framework/admin-browser-qa/Default/Favicons-journal`
+- `??` `storage/framework/admin-browser-qa/Default/GPUCache/index`
+- `??` `storage/framework/admin-browser-qa/Default/History`
+- `??` `storage/framework/admin-browser-qa/Default/History-journal`
+- `??` `storage/framework/admin-browser-qa/Default/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/Login Data`
+- `??` `storage/framework/admin-browser-qa/Default/Login Data For Account`
+- `??` `storage/framework/admin-browser-qa/Default/Login Data For Account-journal`
+- `??` `storage/framework/admin-browser-qa/Default/Login Data-journal`
+- `??` `storage/framework/admin-browser-qa/Default/Network/Device Bound Sessions`
+- `??` `storage/framework/admin-browser-qa/Default/Network/Device Bound Sessions-journal`
+- `??` `storage/framework/admin-browser-qa/Default/Network/Network Persistent State`
+- `??` `storage/framework/admin-browser-qa/Default/Network/NetworkDataMigrated`
+- `??` `storage/framework/admin-browser-qa/Default/Network/Reporting and NEL`
+- `??` `storage/framework/admin-browser-qa/Default/Network/Reporting and NEL-journal`
+- `??` `storage/framework/admin-browser-qa/Default/Network/SCT Auditing Pending Reports`
+- `??` `storage/framework/admin-browser-qa/Default/Network/Trust Tokens`
+- `??` `storage/framework/admin-browser-qa/Default/Network/Trust Tokens-journal`
+- `??` `storage/framework/admin-browser-qa/Default/PersistentOriginTrials/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/PersistentOriginTrials/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/README`
+- `??` `storage/framework/admin-browser-qa/Default/ServerCertificate`
+- `??` `storage/framework/admin-browser-qa/Default/ServerCertificate-journal`
+- `??` `storage/framework/admin-browser-qa/Default/Sessions/Session_13439158400260495`
+- `??` `storage/framework/admin-browser-qa/Default/Shared Dictionary/cache/index`
+- `??` `storage/framework/admin-browser-qa/Default/Shared Dictionary/cache/index-dir/the-real-index`
+- `??` `storage/framework/admin-browser-qa/Default/Shared Dictionary/db`
+- `??` `storage/framework/admin-browser-qa/Default/Shared Dictionary/db-journal`
+- `??` `storage/framework/admin-browser-qa/Default/Site Characteristics Database/000003.log`
+- `??` `storage/framework/admin-browser-qa/Default/Site Characteristics Database/CURRENT`
+- `??` `storage/framework/admin-browser-qa/Default/Site Characteristics Database/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/Site Characteristics Database/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/Site Characteristics Database/MANIFEST-000001`
+- `??` `storage/framework/admin-browser-qa/Default/Sync Data/LevelDB/000003.log`
+- `??` `storage/framework/admin-browser-qa/Default/Sync Data/LevelDB/CURRENT`
+- `??` `storage/framework/admin-browser-qa/Default/Sync Data/LevelDB/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/Sync Data/LevelDB/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/Sync Data/LevelDB/MANIFEST-000001`
+- `??` `storage/framework/admin-browser-qa/Default/Top Sites`
+- `??` `storage/framework/admin-browser-qa/Default/Top Sites-journal`
+- `??` `storage/framework/admin-browser-qa/Default/Web Data`
+- `??` `storage/framework/admin-browser-qa/Default/Web Data-journal`
+- `??` `storage/framework/admin-browser-qa/Default/chrome_cart_db/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/chrome_cart_db/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/commerce_subscription_db/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/commerce_subscription_db/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/declarative_performance_observer.db`
+- `??` `storage/framework/admin-browser-qa/Default/declarative_performance_observer.db-journal`
+- `??` `storage/framework/admin-browser-qa/Default/discount_infos_db/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/discount_infos_db/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/discounts_db/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/discounts_db/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/heavy_ad_intervention_opt_out.db`
+- `??` `storage/framework/admin-browser-qa/Default/heavy_ad_intervention_opt_out.db-journal`
+- `??` `storage/framework/admin-browser-qa/Default/parcel_tracking_db/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/parcel_tracking_db/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/000003.log`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/CURRENT`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/MANIFEST-000001`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/metadata/000003.log`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/metadata/CURRENT`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/metadata/LOCK`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/metadata/LOG`
+- `??` `storage/framework/admin-browser-qa/Default/shared_proto_db/metadata/MANIFEST-000001`
+- `??` `storage/framework/admin-browser-qa/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.db`
+- `??` `storage/framework/admin-browser-qa/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.db-wal`
+- `??` `storage/framework/admin-browser-qa/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.journal`
+- `??` `storage/framework/admin-browser-qa/Last Version`
+- `??` `storage/framework/admin-browser-qa/Local State`
+- `??` `storage/framework/admin-browser-qa/Variations`
+- `??` `storage/framework/admin-browser-qa/VariationsSafeSeedV2`
+- `??` `storage/framework/admin-browser-qa/VariationsSeedV2`
+- `??` `storage/framework/admin-browser-qa/component_crx_cache/metadata.json54ae40fd-5906-42b8-9c2f-4f8d6db51647.tmp`
+- `??` `storage/framework/admin-browser-qa/extensions_crx_cache/metadata.json66883516-4fc5-4aee-8927-1133647dbecd.tmp`
+- `??` `storage/framework/admin-browser-qa/segmentation_platform/ukm_db`
+- `??` `storage/framework/admin-browser-qa/segmentation_platform/ukm_db-wal`
+- `??` `storage/framework/admin-browser.mjs`
+- `??` `storage/framework/admin-edge/BrowserMetrics-spare.pma`
+- `??` `storage/framework/admin-edge/Crashpad/metadata`
+- `??` `storage/framework/admin-edge/Crashpad/reports/11723fac-afcf-49fc-96b1-781a64a3e4a0.dmp`
+- `??` `storage/framework/admin-edge/Crashpad/settings.dat`
+- `??` `storage/framework/admin-edge/Crashpad/temp/edge_shutdown_crash.txt`
+- `??` `storage/framework/admin-edge/Crashpad/throttle_store.dat`
+- `??` `storage/framework/admin-edge/Crashpad/watson_metadata`
+- `??` `storage/framework/admin-edge/Default/Affiliation Database`
+- `??` `storage/framework/admin-edge/Default/Affiliation Database-journal`
+- `??` `storage/framework/admin-edge/Default/AutofillAiModelCache/LOCK`
+- `??` `storage/framework/admin-edge/Default/AutofillAiModelCache/LOG`
+- `??` `storage/framework/admin-edge/Default/AutofillStrikeDatabase/LOCK`
+- `??` `storage/framework/admin-edge/Default/AutofillStrikeDatabase/LOG`
+- `??` `storage/framework/admin-edge/Default/Blueprints/blueprint_presence_index.json`
+- `??` `storage/framework/admin-edge/Default/BookmarkMergedSurfaceOrdering`
+- `??` `storage/framework/admin-edge/Default/BudgetDatabase/LOCK`
+- `??` `storage/framework/admin-edge/Default/BudgetDatabase/LOG`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/data_0`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/data_1`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/data_2`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/data_3`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000003`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000004`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_00000b`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_00000c`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_00001a`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_00001b`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_00001c`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_0000b0`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_0000b1`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000258`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000259`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_00032b`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_0004aa`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_0004ab`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000512`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000513`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000534`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000535`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_0005ac`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_0005ad`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_0005d6`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_0005d7`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_00064e`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_00064f`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000714`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000715`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000905`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000906`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000952`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000b93`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/f_000b94`
+- `??` `storage/framework/admin-edge/Default/Cache/Cache_Data/index`
+- `??` `storage/framework/admin-edge/Default/Cache/No_Vary_Search/journal.baj`
+- `??` `storage/framework/admin-edge/Default/Cache/No_Vary_Search/snapshot.baf`
+- `??` `storage/framework/admin-edge/Default/ClientCertificates/LOCK`
+- `??` `storage/framework/admin-edge/Default/ClientCertificates/LOG`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/01568a6f003c1391_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/01b5b2d877640bfe_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/0c9e80e2ceb6273d_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/0d3d20f895a141d8_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/118efecb6c321bc1_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/11a6d0e4aa305298_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/13c24f5abac7809d_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/158dc7eae9532e82_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/18e6f5fe751e36cd_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/2303ae3f3ad046b4_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/246b5c4d948afdd1_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/28abe95d451e9e99_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/2a8a6f695a3ff316_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/2cca9bc741a6516d_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/2ceb7e5ff86cd606_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/34763a4b55cd8252_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/4023418cbb31da05_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/4996e84003a9f43e_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/586b7ac973242eae_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/58bb6665ad97a402_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/5b798e9460707720_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/5cce1706364839f1_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/5eff10d92dfd25e1_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/5fbb54f36261c413_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/68e914704b986978_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/6fdb38e3eb8bf924_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/7a4891e4b2ad4ef1_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/7adbbc1f79b1e136_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/7b1eed3da76e5ca7_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/7bfa7b90a257abc5_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/7de0dc67a2b3a69c_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/8020acacb3d13763_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/8bb1867be67136eb_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/945cb8fb56d09a8e_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/9e637bc78adf64d0_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/a46eacc831dfa5b0_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/a603b06de1121f88_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/a6689f1d6222e803_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/a6823781fb5918a0_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/a7257163e44f499d_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/a75a0f979de5a5b9_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/a96800138c1f0b23_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/ac5d4bc87bc0821b_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/aed1f2599e15d434_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/b21fb45197b9c728_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/baded5730168391f_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/beb30725d16173da_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/c13847bfd36e3c73_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/c2e45e21b1c3556d_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/c669a61e7caa9d45_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/c8a683b9059c30bd_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/d08850ed9c9e7816_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/d1ad09d629fc3e50_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/d9c3a8ba6e15774c_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/de2b524f78bc28df_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/e01162d5b6750d3c_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/e573fc6ec7f61498_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/e5c7442a69f647af_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/e94999eac39dfd99_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/e9a142a21b9ad9ef_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/ebce9e52a869b921_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/ee6c2d264d6de39d_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/fb833f95bf0dcfbb_0`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/index`
+- `??` `storage/framework/admin-edge/Default/Code Cache/js/index-dir/the-real-index`
+- `??` `storage/framework/admin-edge/Default/Code Cache/wasm/index`
+- `??` `storage/framework/admin-edge/Default/Code Cache/wasm/index-dir/the-real-index`
+- `??` `storage/framework/admin-edge/Default/DIPS`
+- `??` `storage/framework/admin-edge/Default/DIPS-wal`
+- `??` `storage/framework/admin-edge/Default/DashTrackerDatabase`
+- `??` `storage/framework/admin-edge/Default/DashTrackerDatabase-journal`
+- `??` `storage/framework/admin-edge/Default/DawnGraphiteCache/data_0`
+- `??` `storage/framework/admin-edge/Default/DawnGraphiteCache/data_1`
+- `??` `storage/framework/admin-edge/Default/DawnGraphiteCache/data_2`
+- `??` `storage/framework/admin-edge/Default/DawnGraphiteCache/data_3`
+- `??` `storage/framework/admin-edge/Default/DawnGraphiteCache/index`
+- `??` `storage/framework/admin-edge/Default/DawnWebGPUCache/data_0`
+- `??` `storage/framework/admin-edge/Default/DawnWebGPUCache/data_1`
+- `??` `storage/framework/admin-edge/Default/DawnWebGPUCache/data_2`
+- `??` `storage/framework/admin-edge/Default/DawnWebGPUCache/data_3`
+- `??` `storage/framework/admin-edge/Default/DawnWebGPUCache/index`
+- `??` `storage/framework/admin-edge/Default/DualEngine/SiteList-Consumer.json`
+- `??` `storage/framework/admin-edge/Default/DualEngine/SiteList-Enterprise.json`
+- `??` `storage/framework/admin-edge/Default/EdgeCoupons/coupons_data.db/000003.log`
+- `??` `storage/framework/admin-edge/Default/EdgeCoupons/coupons_data.db/CURRENT`
+- `??` `storage/framework/admin-edge/Default/EdgeCoupons/coupons_data.db/LOCK`
+- `??` `storage/framework/admin-edge/Default/EdgeCoupons/coupons_data.db/LOG`
+- `??` `storage/framework/admin-edge/Default/EdgeCoupons/coupons_data.db/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/EdgeHubAppUsage/EdgeHubAppUsageSQLite.db`
+- `??` `storage/framework/admin-edge/Default/EdgeHubAppUsage/EdgeHubAppUsageSQLite.db-journal`
+- `??` `storage/framework/admin-edge/Default/EdgePushStorageWithConnectTokenAndKey/LOCK`
+- `??` `storage/framework/admin-edge/Default/EdgePushStorageWithConnectTokenAndKey/LOG`
+- `??` `storage/framework/admin-edge/Default/EdgePushStorageWithConnectTokenAndKey/LOG.old`
+- `??` `storage/framework/admin-edge/Default/EdgeSessions/SessionRestoreLog`
+- `??` `storage/framework/admin-edge/Default/Extension Rules/000003.log`
+- `??` `storage/framework/admin-edge/Default/Extension Rules/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Extension Rules/LOCK`
+- `??` `storage/framework/admin-edge/Default/Extension Rules/LOG`
+- `??` `storage/framework/admin-edge/Default/Extension Rules/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Extension Scripts/000003.log`
+- `??` `storage/framework/admin-edge/Default/Extension Scripts/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Extension Scripts/LOCK`
+- `??` `storage/framework/admin-edge/Default/Extension Scripts/LOG`
+- `??` `storage/framework/admin-edge/Default/Extension Scripts/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Extension State/000003.log`
+- `??` `storage/framework/admin-edge/Default/Extension State/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Extension State/LOCK`
+- `??` `storage/framework/admin-edge/Default/Extension State/LOG`
+- `??` `storage/framework/admin-edge/Default/Extension State/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/ExtensionActivityEdge`
+- `??` `storage/framework/admin-edge/Default/ExtensionActivityEdge-journal`
+- `??` `storage/framework/admin-edge/Default/Favicons`
+- `??` `storage/framework/admin-edge/Default/Favicons-journal`
+- `??` `storage/framework/admin-edge/Default/Feature Engagement Tracker/AvailabilityDB/LOCK`
+- `??` `storage/framework/admin-edge/Default/Feature Engagement Tracker/AvailabilityDB/LOG`
+- `??` `storage/framework/admin-edge/Default/Feature Engagement Tracker/EventDB/LOCK`
+- `??` `storage/framework/admin-edge/Default/Feature Engagement Tracker/EventDB/LOG`
+- `??` `storage/framework/admin-edge/Default/GPUCache/data_0`
+- `??` `storage/framework/admin-edge/Default/GPUCache/data_1`
+- `??` `storage/framework/admin-edge/Default/GPUCache/data_2`
+- `??` `storage/framework/admin-edge/Default/GPUCache/data_3`
+- `??` `storage/framework/admin-edge/Default/GPUCache/index`
+- `??` `storage/framework/admin-edge/Default/History`
+- `??` `storage/framework/admin-edge/Default/History-journal`
+- `??` `storage/framework/admin-edge/Default/HubApps Icons`
+- `??` `storage/framework/admin-edge/Default/HubApps Icons-journal`
+- `??` `storage/framework/admin-edge/Default/LOCK`
+- `??` `storage/framework/admin-edge/Default/LOG`
+- `??` `storage/framework/admin-edge/Default/Local Extension Settings/jdiccldimpdaibmpdkjnbmckianbfold/000003.log`
+- `??` `storage/framework/admin-edge/Default/Local Extension Settings/jdiccldimpdaibmpdkjnbmckianbfold/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Local Extension Settings/jdiccldimpdaibmpdkjnbmckianbfold/LOCK`
+- `??` `storage/framework/admin-edge/Default/Local Extension Settings/jdiccldimpdaibmpdkjnbmckianbfold/LOG`
+- `??` `storage/framework/admin-edge/Default/Local Extension Settings/jdiccldimpdaibmpdkjnbmckianbfold/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Local Storage/leveldb/000003.log`
+- `??` `storage/framework/admin-edge/Default/Local Storage/leveldb/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Local Storage/leveldb/LOCK`
+- `??` `storage/framework/admin-edge/Default/Local Storage/leveldb/LOG`
+- `??` `storage/framework/admin-edge/Default/Local Storage/leveldb/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Login Data`
+- `??` `storage/framework/admin-edge/Default/Login Data For Account`
+- `??` `storage/framework/admin-edge/Default/Login Data For Account-journal`
+- `??` `storage/framework/admin-edge/Default/Login Data-journal`
+- `??` `storage/framework/admin-edge/Default/Network Action Predictor`
+- `??` `storage/framework/admin-edge/Default/Network Action Predictor-journal`
+- `??` `storage/framework/admin-edge/Default/Network/Cookies`
+- `??` `storage/framework/admin-edge/Default/Network/Cookies-journal`
+- `??` `storage/framework/admin-edge/Default/Network/Device Bound Sessions`
+- `??` `storage/framework/admin-edge/Default/Network/Device Bound Sessions-journal`
+- `??` `storage/framework/admin-edge/Default/Network/Network Persistent State`
+- `??` `storage/framework/admin-edge/Default/Network/NetworkDataMigrated`
+- `??` `storage/framework/admin-edge/Default/Network/Reporting and NEL`
+- `??` `storage/framework/admin-edge/Default/Network/Reporting and NEL-journal`
+- `??` `storage/framework/admin-edge/Default/Network/SCT Auditing Pending Reports`
+- `??` `storage/framework/admin-edge/Default/Network/Sdch Dictionaries`
+- `??` `storage/framework/admin-edge/Default/Network/Trust Tokens`
+- `??` `storage/framework/admin-edge/Default/Network/Trust Tokens-journal`
+- `??` `storage/framework/admin-edge/Default/Nurturing/campaign_history`
+- `??` `storage/framework/admin-edge/Default/Nurturing/campaign_history-journal`
+- `??` `storage/framework/admin-edge/Default/Pdf/pdfSQLite`
+- `??` `storage/framework/admin-edge/Default/Pdf/pdfSQLite-journal`
+- `??` `storage/framework/admin-edge/Default/PersistentOriginTrials/LOCK`
+- `??` `storage/framework/admin-edge/Default/PersistentOriginTrials/LOG`
+- `??` `storage/framework/admin-edge/Default/Preferences`
+- `??` `storage/framework/admin-edge/Default/PreferredApps`
+- `??` `storage/framework/admin-edge/Default/README`
+- `??` `storage/framework/admin-edge/Default/Secure Preferences`
+- `??` `storage/framework/admin-edge/Default/Segmentation Platform/SegmentInfoDB/LOCK`
+- `??` `storage/framework/admin-edge/Default/Segmentation Platform/SegmentInfoDB/LOG`
+- `??` `storage/framework/admin-edge/Default/Segmentation Platform/SignalDB/LOCK`
+- `??` `storage/framework/admin-edge/Default/Segmentation Platform/SignalDB/LOG`
+- `??` `storage/framework/admin-edge/Default/Segmentation Platform/SignalStorageConfigDB/LOCK`
+- `??` `storage/framework/admin-edge/Default/Segmentation Platform/SignalStorageConfigDB/LOG`
+- `??` `storage/framework/admin-edge/Default/ServerCertificate`
+- `??` `storage/framework/admin-edge/Default/ServerCertificate-journal`
+- `??` `storage/framework/admin-edge/Default/Service Worker/Database/000003.log`
+- `??` `storage/framework/admin-edge/Default/Service Worker/Database/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Service Worker/Database/LOCK`
+- `??` `storage/framework/admin-edge/Default/Service Worker/Database/LOG`
+- `??` `storage/framework/admin-edge/Default/Service Worker/Database/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Service Worker/ScriptCache/2cc80dabc69f58b6_0`
+- `??` `storage/framework/admin-edge/Default/Service Worker/ScriptCache/2cc80dabc69f58b6_1`
+- `??` `storage/framework/admin-edge/Default/Service Worker/ScriptCache/4cb013792b196a35_0`
+- `??` `storage/framework/admin-edge/Default/Service Worker/ScriptCache/f1cdccba37924bda_0`
+- `??` `storage/framework/admin-edge/Default/Service Worker/ScriptCache/index`
+- `??` `storage/framework/admin-edge/Default/Service Worker/ScriptCache/index-dir/the-real-index`
+- `??` `storage/framework/admin-edge/Default/Session Storage/000005.ldb`
+- `??` `storage/framework/admin-edge/Default/Session Storage/000006.log`
+- `??` `storage/framework/admin-edge/Default/Session Storage/000007.ldb`
+- `??` `storage/framework/admin-edge/Default/Session Storage/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Session Storage/LOCK`
+- `??` `storage/framework/admin-edge/Default/Session Storage/LOG`
+- `??` `storage/framework/admin-edge/Default/Session Storage/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Sessions/Session_13439274257799019`
+- `??` `storage/framework/admin-edge/Default/Sessions/Session_13439286144463288`
+- `??` `storage/framework/admin-edge/Default/Sessions/Tabs_13439159442231123`
+- `??` `storage/framework/admin-edge/Default/Shared Dictionary/cache/index`
+- `??` `storage/framework/admin-edge/Default/Shared Dictionary/cache/index-dir/the-real-index`
+- `??` `storage/framework/admin-edge/Default/Shared Dictionary/db`
+- `??` `storage/framework/admin-edge/Default/Shared Dictionary/db-journal`
+- `??` `storage/framework/admin-edge/Default/Shortcuts`
+- `??` `storage/framework/admin-edge/Default/Shortcuts-journal`
+- `??` `storage/framework/admin-edge/Default/Site Characteristics Database/000003.log`
+- `??` `storage/framework/admin-edge/Default/Site Characteristics Database/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Site Characteristics Database/LOCK`
+- `??` `storage/framework/admin-edge/Default/Site Characteristics Database/LOG`
+- `??` `storage/framework/admin-edge/Default/Site Characteristics Database/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/js/6f3a0dc5e6916f1e_0`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/js/index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/js/index-dir/the-real-index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/wasm/index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/wasm/index-dir/the-real-index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnGraphiteCache/data_0`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnGraphiteCache/data_1`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnGraphiteCache/data_2`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnGraphiteCache/data_3`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnGraphiteCache/index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnWebGPUCache/data_0`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnWebGPUCache/data_1`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnWebGPUCache/data_2`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnWebGPUCache/data_3`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/DawnWebGPUCache/index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/GPUCache/data_0`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/GPUCache/data_1`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/GPUCache/data_2`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/GPUCache/data_3`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/GPUCache/index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Local Storage/leveldb/000003.log`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Local Storage/leveldb/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Local Storage/leveldb/LOCK`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Local Storage/leveldb/LOG`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Local Storage/leveldb/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/Device Bound Sessions`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/Device Bound Sessions-journal`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/Network Persistent State`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/NetworkDataMigrated`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/Reporting and NEL`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/Reporting and NEL-journal`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/SCT Auditing Pending Reports`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/Sdch Dictionaries`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/Trust Tokens`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Network/Trust Tokens-journal`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Session Storage/000003.log`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Session Storage/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Session Storage/LOCK`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Session Storage/LOG`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Session Storage/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Shared Dictionary/cache/index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Shared Dictionary/cache/index-dir/the-real-index`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Shared Dictionary/db`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Shared Dictionary/db-journal`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/declarative_performance_observer.db`
+- `??` `storage/framework/admin-edge/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/declarative_performance_observer.db-journal`
+- `??` `storage/framework/admin-edge/Default/Sync Data/LevelDB/000003.log`
+- `??` `storage/framework/admin-edge/Default/Sync Data/LevelDB/CURRENT`
+- `??` `storage/framework/admin-edge/Default/Sync Data/LevelDB/LOCK`
+- `??` `storage/framework/admin-edge/Default/Sync Data/LevelDB/LOG`
+- `??` `storage/framework/admin-edge/Default/Sync Data/LevelDB/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/Sync Data/Logs/sync_diagnostic.log`
+- `??` `storage/framework/admin-edge/Default/Top Sites`
+- `??` `storage/framework/admin-edge/Default/Top Sites-journal`
+- `??` `storage/framework/admin-edge/Default/Vpn Tokens`
+- `??` `storage/framework/admin-edge/Default/Vpn Tokens-journal`
+- `??` `storage/framework/admin-edge/Default/Web Data`
+- `??` `storage/framework/admin-edge/Default/Web Data-journal`
+- `??` `storage/framework/admin-edge/Default/WebStorage/QuotaManager`
+- `??` `storage/framework/admin-edge/Default/WebStorage/QuotaManager-journal`
+- `??` `storage/framework/admin-edge/Default/Workspaces/Logs/Workspaces Diagnostic Log`
+- `??` `storage/framework/admin-edge/Default/Workspaces/Logs/Workspaces Internals Logs`
+- `??` `storage/framework/admin-edge/Default/arbitration_service_config.json`
+- `??` `storage/framework/admin-edge/Default/commerce_subscription_db/LOCK`
+- `??` `storage/framework/admin-edge/Default/commerce_subscription_db/LOG`
+- `??` `storage/framework/admin-edge/Default/declarative_performance_observer.db`
+- `??` `storage/framework/admin-edge/Default/declarative_performance_observer.db-journal`
+- `??` `storage/framework/admin-edge/Default/discount_infos_db/LOCK`
+- `??` `storage/framework/admin-edge/Default/discount_infos_db/LOG`
+- `??` `storage/framework/admin-edge/Default/discounts_db/LOCK`
+- `??` `storage/framework/admin-edge/Default/discounts_db/LOG`
+- `??` `storage/framework/admin-edge/Default/favorites_diagnostic.log`
+- `??` `storage/framework/admin-edge/Default/heavy_ad_intervention_opt_out.db`
+- `??` `storage/framework/admin-edge/Default/heavy_ad_intervention_opt_out.db-journal`
+- `??` `storage/framework/admin-edge/Default/load_statistics.db`
+- `??` `storage/framework/admin-edge/Default/load_statistics.db-shm`
+- `??` `storage/framework/admin-edge/Default/load_statistics.db-wal`
+- `??` `storage/framework/admin-edge/Default/optimization_guide_hint_cache_store/LOCK`
+- `??` `storage/framework/admin-edge/Default/optimization_guide_hint_cache_store/LOG`
+- `??` `storage/framework/admin-edge/Default/parcel_tracking_db/LOCK`
+- `??` `storage/framework/admin-edge/Default/parcel_tracking_db/LOG`
+- `??` `storage/framework/admin-edge/Default/settings_diagnostic.log`
+- `??` `storage/framework/admin-edge/Default/settings_diagnostic.log.old`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/000003.log`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/CURRENT`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/LOCK`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/LOG`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/metadata/000003.log`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/metadata/CURRENT`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/metadata/LOCK`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/metadata/LOG`
+- `??` `storage/framework/admin-edge/Default/shared_proto_db/metadata/MANIFEST-000001`
+- `??` `storage/framework/admin-edge/FirstLaunchAfterInstallation`
+- `??` `storage/framework/admin-edge/GPUPersistentCache/DawnGraphiteCache/OMXJKWSVDDS6L3YMYJJRNHVYDBSO7SEM/cache.db`
+- `??` `storage/framework/admin-edge/GPUPersistentCache/DawnGraphiteCache/OMXJKWSVDDS6L3YMYJJRNHVYDBSO7SEM/cache.db-wal`
+- `??` `storage/framework/admin-edge/GPUPersistentCache/DawnGraphiteCache/OMXJKWSVDDS6L3YMYJJRNHVYDBSO7SEM/cache.journal`
+- `??` `storage/framework/admin-edge/GrShaderCache/data_0`
+- `??` `storage/framework/admin-edge/GrShaderCache/data_1`
+- `??` `storage/framework/admin-edge/GrShaderCache/data_2`
+- `??` `storage/framework/admin-edge/GrShaderCache/data_3`
+- `??` `storage/framework/admin-edge/GrShaderCache/index`
+- `??` `storage/framework/admin-edge/Last Browser`
+- `??` `storage/framework/admin-edge/Last Version`
+- `??` `storage/framework/admin-edge/Local State`
+- `??` `storage/framework/admin-edge/Nurturing/campaign_history`
+- `??` `storage/framework/admin-edge/Nurturing/campaign_history-journal`
+- `??` `storage/framework/admin-edge/ShaderCache/data_0`
+- `??` `storage/framework/admin-edge/ShaderCache/data_1`
+- `??` `storage/framework/admin-edge/ShaderCache/data_2`
+- `??` `storage/framework/admin-edge/ShaderCache/data_3`
+- `??` `storage/framework/admin-edge/ShaderCache/index`
+- `??` `storage/framework/admin-edge/SmartScreen/RemoteData/customSettings`
+- `??` `storage/framework/admin-edge/SmartScreen/RemoteData/customSettings_F95BA787499AB4FA9EFFF472CE383A14`
+- `??` `storage/framework/admin-edge/SmartScreen/RemoteData/edgeSettings`
+- `??` `storage/framework/admin-edge/SmartScreen/RemoteData/edgeSettings_2.0-0`
+- `??` `storage/framework/admin-edge/Variations`
+- `??` `storage/framework/admin-edge/VariationsRuntimeSeedV2`
+- `??` `storage/framework/admin-edge/VariationsSafeSeedV2`
+- `??` `storage/framework/admin-edge/VariationsSeedV2`
+- `??` `storage/framework/admin-edge/component_crx_cache/metadata.json`
+- `??` `storage/framework/admin-edge/extensions_crx_cache/metadata.json`
+- `??` `storage/framework/admin-edge/lockfile`
+- `??` `storage/framework/admin-final-routes.json`
+- `??` `storage/framework/admin-http.html`
+- `??` `storage/framework/admin-menu-check.mjs`
+- `??` `storage/framework/admin-package.py`
+- `??` `storage/framework/admin-regression.mjs`
+- `??` `storage/framework/admin-router.php`
+- `??` `storage/framework/admin-routes.json`
+- `??` `storage/framework/admin-safe.html`
+- `??` `storage/framework/admin41-after-routes.json`
+- `??` `storage/framework/admin41-before-routes.json`
+- `??` `storage/framework/admin41-browser.mjs`
+- `??` `storage/framework/admin41-delivery.py`
+- `??` `storage/framework/admin41-inventory-base.json`
+- `??` `storage/framework/admin41-js-edit.py`
+- `??` `storage/framework/admin41-js-reports.py`
+- `??` `storage/framework/admin41-media.py`
+- `??` `storage/framework/admin41-original/admin.blade.php`
+- `??` `storage/framework/admin41-original/configuracoes.blade.php`
+- `??` `storage/framework/admin41-original/log-acoes.blade.php`
+- `??` `storage/framework/admin41-original/relatorios.blade.php`
+- `??` `storage/framework/admin41-original/usuarios.blade.php`
+- `??` `storage/framework/admin41-package.py`
+- `??` `storage/framework/admin41-pdf-fix.py`
+- `??` `storage/framework/admin41-queue-edit.py`
+- `??` `storage/framework/admin41-reference.php`
+- `??` `storage/framework/admin41-refine.py`
+- `??` `storage/framework/admin41-regressao.mjs`
+- `??` `storage/framework/bloco55-antes.mjs`
+- `??` `storage/framework/bloco55-browser.mjs`
+- `??` `storage/framework/bloco55-delta-final.txt`
+- `??` `storage/framework/bloco55-delta.py`
+- `??` `storage/framework/bloco55-docs.py`
+- `??` `storage/framework/bloco55-editar.py`
+- `??` `storage/framework/bloco55-entrega-docs.py`
+- `??` `storage/framework/bloco55-files.json`
+- `??` `storage/framework/bloco55-inicial/app/Support/VisualFiveFixtures.php`
+- `??` `storage/framework/bloco55-inicial/protected.json`
+- `??` `storage/framework/bloco55-inicial/resources/js/app.js`
+- `??` `storage/framework/bloco55-inicial/resources/js/participation-demo.js`
+- `??` `storage/framework/bloco55-inicial/resources/views/components/participation-agendas.blade.php`
+- `??` `storage/framework/bloco55-inicial/resources/views/participacoes/pessoal.blade.php`
+- `??` `storage/framework/bloco55-inicial/resources/views/perfil/area-privada.blade.php`
+- `??` `storage/framework/bloco55-inicial/resources/views/ranking/index.blade.php`
+- `??` `storage/framework/bloco55-inicial/rn.txt`
+- `??` `storage/framework/bloco55-inicial/routes/demo.php`
+- `??` `storage/framework/bloco55-package.py`
+- `??` `storage/framework/bloco55-pacote.json`
+- `??` `storage/framework/bloco55-verificar.py`
+- `??` `storage/framework/bloco551-browser.mjs`
+- `??` `storage/framework/bloco551-docs.py`
+- `??` `storage/framework/bloco551-editar.py`
+- `??` `storage/framework/bloco551-files.json`
+- `??` `storage/framework/bloco551-inicial/app/Support/NavigationContext.php`
+- `??` `storage/framework/bloco551-inicial/app/Support/VisualFiveFixtures.php`
+- `??` `storage/framework/bloco551-inicial/protected.json`
+- `??` `storage/framework/bloco551-inicial/resources/js/participation-demo.js`
+- `??` `storage/framework/bloco551-inicial/resources/views/components/participation-agendas.blade.php`
+- `??` `storage/framework/bloco551-inicial/routes/demo.php`
+- `??` `storage/framework/bloco551-links-repro.mjs`
+- `??` `storage/framework/bloco551-package.py`
+- `??` `storage/framework/bloco551-pacote.json`
+- `??` `storage/framework/bloco551-repro.mjs`
+- `??` `storage/framework/bloco551-verificar.py`
+- `??` `storage/framework/bloco56-antes.png`
+- `??` `storage/framework/bloco56-browser-final.log`
+- `??` `storage/framework/bloco56-browser.mjs`
+- `??` `storage/framework/bloco56-build-final.log`
+- `??` `storage/framework/bloco56-build.log`
+- `??` `storage/framework/bloco56-entrega.py`
+- `??` `storage/framework/bloco56-feature-final.log`
+- `??` `storage/framework/bloco56-feature.log`
+- `??` `storage/framework/bloco56-files.json`
+- `??` `storage/framework/bloco56-inicial/NavigationContext.php`
+- `??` `storage/framework/bloco56-inicial/app/Support/VisualFiveFixtures.php`
+- `??` `storage/framework/bloco56-inicial/hashes.json`
+- `??` `storage/framework/bloco56-inicial/participation-demo.js`
+- `??` `storage/framework/bloco56-inicial/resources/js/app.js`
+- `??` `storage/framework/bloco56-inicial/resources/views/participacoes/gestao.blade.php`
+- `??` `storage/framework/bloco56-inicial/resources/views/participacoes/pessoal.blade.php`
+- `??` `storage/framework/bloco56-inicial/routes/demo.php`
+- `??` `storage/framework/bloco56-js-final.log`
+- `??` `storage/framework/bloco56-js.log`
+- `??` `storage/framework/bloco56-package.py`
+- `??` `storage/framework/bloco56-pacote.json`
+- `??` `storage/framework/bloco56-pdf.png`
+- `??` `storage/framework/bloco56-pint.log`
+- `??` `storage/framework/bloco56-regression-final.log`
+- `??` `storage/framework/bloco56-regression.mjs`
+- `??` `storage/framework/bloco56-routes.json`
+- `??` `storage/framework/bloco56-whitespace.log`
+- `??` `storage/framework/entrega-6-5.json`
+- `??` `storage/framework/feedback63-adjust.py`
+- `??` `storage/framework/feedback63-baseline.py`
+- `??` `storage/framework/feedback63-certificates-browser.mjs`
+- `??` `storage/framework/feedback63-checks.py`
+- `??` `storage/framework/feedback63-copy-audit.txt`
+- `??` `storage/framework/feedback63-copy-changes.json`
+- `??` `storage/framework/feedback63-copy.py`
+- `??` `storage/framework/feedback63-correction-status.txt`
+- `??` `storage/framework/feedback63-edit.py`
+- `??` `storage/framework/feedback63-finish-edits.py`
+- `??` `storage/framework/feedback63-initial/app/Support/VisualOneFixtures.php`
+- `??` `storage/framework/feedback63-initial/hashes.json`
+- `??` `storage/framework/feedback63-initial/resources/css/app.css`
+- `??` `storage/framework/feedback63-initial/resources/css/cadastro_ong.css`
+- `??` `storage/framework/feedback63-initial/resources/css/components/account.css`
+- `??` `storage/framework/feedback63-initial/resources/css/components/admin.css`
+- `??` `storage/framework/feedback63-initial/resources/css/components/events.css`
+- `??` `storage/framework/feedback63-initial/resources/css/components/notifications.css`
+- `??` `storage/framework/feedback63-initial/resources/css/editar_ong.css`
+- `??` `storage/framework/feedback63-initial/resources/css/painel_ong.css`
+- `??` `storage/framework/feedback63-initial/resources/css/perfil_ong.css`
+- `??` `storage/framework/feedback63-initial/resources/fixtures/admin-documents/certidao.pdf`
+- `??` `storage/framework/feedback63-initial/resources/fixtures/admin-documents/certidao.png`
+- `??` `storage/framework/feedback63-initial/resources/fixtures/admin-documents/identidade.png`
+- `??` `storage/framework/feedback63-initial/resources/js/account-demo.js`
+- `??` `storage/framework/feedback63-initial/resources/js/admin-demo.js`
+- `??` `storage/framework/feedback63-initial/resources/js/app.js`
+- `??` `storage/framework/feedback63-initial/resources/js/dialog-accessibility.js`
+- `??` `storage/framework/feedback63-initial/resources/js/events-demo.js`
+- `??` `storage/framework/feedback63-initial/resources/js/notifications-demo.js`
+- `??` `storage/framework/feedback63-initial/resources/js/organizer-demo.js`
+- `??` `storage/framework/feedback63-initial/resources/js/participation-certificates.js`
+- `??` `storage/framework/feedback63-initial/resources/js/participation-demo.js`
+- `??` `storage/framework/feedback63-initial/resources/js/participation-reliability-core.js`
+- `??` `storage/framework/feedback63-initial/resources/js/participation-reliability.js`
+- `??` `storage/framework/feedback63-initial/resources/js/participation-xp.js`
+- `??` `storage/framework/feedback63-initial/resources/js/privacy-demo.js`
+- `??` `storage/framework/feedback63-initial/resources/js/sponsorship-demo.js`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/admin.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/cadastros-ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/candidatos.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/configuracoes.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/denuncias.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/fila-eventos.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/log-acoes.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/partials/data.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/partials/document-dialog.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/partials/documents.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/partials/filters.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/partials/queue.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/relatorios.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/restrito.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/solicitacoes-lgpd.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/upgrades-org.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/admin/usuarios.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/cadastro.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/candidatura.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/certificados/documento.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/certificados/lista.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/certificados/resumo.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/certificados/verificacao.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/account-field.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/account-wizard.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/admin-sidebar.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/agenda-applications.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/agenda-candidates.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/agenda-editor.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/agenda-options.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/application-steps.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/botao-declined.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/botao-dourado.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/botao-primario.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/botao-secundario.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/breadcrumb-admin.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/breadcrumb-ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/candidatura-card.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/context-navbar.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/demo-notice.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/demo-scenarios.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/dialog-close.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/event-state.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/feedback.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/footer.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/input.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/navbar-feed.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/navbar-ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/navbar.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/notification-context.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/ong-sidebar.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/organizer-event-card.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/organizer-link-card.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/organizer-links.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/organizer-promotion-summary.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/organizer-responsibilities.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/organizer-scope.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/participation-agendas.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/participation-certificates.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/participation-reliability.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/participation-xp.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/privacy-requests.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/private-documents.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/registration-status.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/sponsorship-referral.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/components/volunteer-preferences.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/conta.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/errors/403.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/errors/404.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/errors/419.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/errors/503.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/eventos/detalhe.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/feed/index.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/foundation-unavailable.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/landing-page.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/layouts/account.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/layouts/admin.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/layouts/foundation.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/layouts/organizer.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/legal/privacidade.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/legal/termos.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/login.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/minhas-candidaturas.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/notificacoes/central.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/notificacoes/index-ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/notificacoes/index.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/aprovacao-pendente.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/area-cadastral.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/cadastro_ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/candidatos.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/criar.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/editar.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/editar_ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/excluir_ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/exclusao-pendente.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/meus-eventos.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/painel_ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ong/perfil_ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/organizadores/ong.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/organizadores/solicitacao.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/organizadores/workspace.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/participacoes/gestao.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/participacoes/pessoal.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/perfil/apadrinhamento.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/perfil/area-privada.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/perfil/editar-perfil.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/perfil/excluir.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/perfil/exclusao-pendente.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/perfil/index-perfil.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/perfil/partials/apadrinhamento.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/perfil/preferencias.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/privacidade/conta.blade.php`
+- `??` `storage/framework/feedback63-initial/resources/views/ranking/index.blade.php`
+- `??` `storage/framework/feedback63-initial/routes/api.php`
+- `??` `storage/framework/feedback63-initial/routes/console.php`
+- `??` `storage/framework/feedback63-initial/routes/demo.php`
+- `??` `storage/framework/feedback63-initial/routes/web.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/AgendaInscricaoTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/AntecedentesRenovacaoTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/AuthorizationAdminTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/AvaliacaoConfiabilidadeTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/ContextualBrandNavigationTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/DemoFrontendTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/DocumentoPessoaTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/DocumentoStorageLgpdTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/EventoOperacionalTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/ExampleTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/ExclusaoContasPendentesSchedulerTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/FinalizacaoEventoCertificadoTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/GdFormatsTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/IntegrityHistoryTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/LegacyCertificateMigrationTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/ManagedImageMemoryTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/ManagedImageTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/OngAuthAndEventoTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/OngPublicNavigationTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/OrganizadorWorkflowTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/PadrinhoWorkflowTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/PessoaAuthTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/PessoaValidationAccessTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/PessoaValidationWorkflowTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/PredeployCorsTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/PresencaAusenciaDesistenciaTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/RailwayStorageTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/SyntheticAdminProvisioningTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/TrustedProxyHttpsTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualFourTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualNavigationTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualNotificationsTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualOneTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualParticipationCertificateTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualParticipationClosureTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualParticipationEvaluationTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualParticipationJustificationTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualParticipationReliabilityTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualParticipationTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualParticipationXpTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualPrivacyTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualSponsorshipTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualThreeCorrectionsTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualThreeRefinementsTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualThreeTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualTwoTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/VisualUsabilityTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Feature/XpCampanhaRankingTest.php`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/admin-demo.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/certificates-browser.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/certificates-regression.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/notifications-actions-browser.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/notifications-badge-browser.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/notifications-browser.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/notifications-guided-browser.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/notifications-inventory.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/notifications-regression.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/notifications.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/organizer-demo.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/organizer-fixtures.php`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/participation-certificates.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/participation-closure.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/participation-demo.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/participation-evaluations.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/participation-justification.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/participation-reliability.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/participation-xp.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/privacy-browser.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/privacy-domain-actions.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/privacy-navigation.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/privacy-regression.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/privacy.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/rendered-dialog-scripts.php`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/rendered-dialog-scripts.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Frontend/sponsorship-demo.test.mjs`
+- `??` `storage/framework/feedback63-initial/tests/Reference/README.md`
+- `??` `storage/framework/feedback63-initial/tests/Reference/WebFoundationTest.php`
+- `??` `storage/framework/feedback63-initial/tests/TestCase.php`
+- `??` `storage/framework/feedback63-initial/tests/Unit/ExampleTest.php`
+- `??` `storage/framework/feedback63-package.json`
+- `??` `storage/framework/feedback63-package.py`
+- `??` `storage/framework/feedback63-privacy-browser.mjs`
+- `??` `storage/framework/feedback63-privacy-domain-actions.mjs`
+- `??` `storage/framework/feedback63-privacy-regression.mjs`
+- `??` `storage/framework/feedback63-read.py`
+- `??` `storage/framework/feedback63-referral-baseline.py`
+- `??` `storage/framework/feedback63-referral-checks.py`
+- `??` `storage/framework/feedback63-referral-delivery.py`
+- `??` `storage/framework/feedback63-referral-initial/hashes.json`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/app.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/cadastro_ong.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/components/account.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/components/admin.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/components/events.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/components/notifications.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/editar_ong.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/painel_ong.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/css/perfil_ong.css`
+- `??` `storage/framework/feedback63-referral-initial/resources/fixtures/admin-documents/certidao.pdf`
+- `??` `storage/framework/feedback63-referral-initial/resources/fixtures/admin-documents/certidao.png`
+- `??` `storage/framework/feedback63-referral-initial/resources/fixtures/admin-documents/identidade.png`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/account-demo.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/admin-demo.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/app.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/dialog-accessibility.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/events-demo.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/notifications-demo.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/organizer-demo.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/participation-certificates.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/participation-demo.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/participation-reliability-core.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/participation-reliability.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/participation-xp.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/privacy-demo.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/js/sponsorship-demo.js`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/admin.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/cadastros-ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/candidatos.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/configuracoes.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/denuncias.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/fila-eventos.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/log-acoes.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/partials/data.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/partials/document-dialog.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/partials/documents.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/partials/filters.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/partials/queue.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/relatorios.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/restrito.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/solicitacoes-lgpd.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/upgrades-org.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/admin/usuarios.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/cadastro.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/candidatura.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/certificados/documento.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/certificados/lista.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/certificados/resumo.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/certificados/verificacao.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/account-field.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/account-wizard.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/admin-sidebar.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/agenda-applications.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/agenda-candidates.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/agenda-editor.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/agenda-options.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/application-steps.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/botao-declined.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/botao-dourado.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/botao-primario.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/botao-secundario.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/breadcrumb-admin.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/breadcrumb-ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/candidatura-card.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/context-navbar.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/demo-notice.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/demo-scenarios.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/dialog-close.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/error-screen.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/event-state.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/feedback.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/footer.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/input.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/navbar-feed.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/navbar-ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/navbar.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/notification-context.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/ong-sidebar.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/organizer-event-card.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/organizer-link-card.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/organizer-links.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/organizer-promotion-summary.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/organizer-responsibilities.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/organizer-scope.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/participation-agendas.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/participation-certificates.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/participation-reliability.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/participation-xp.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/privacy-requests.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/private-documents.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/registration-status.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/sponsorship-referral.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/components/volunteer-preferences.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/conta.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/errors/401.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/errors/403.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/errors/404.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/errors/409.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/errors/419.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/errors/422.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/errors/500.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/errors/503.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/eventos/detalhe.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/feed/index.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/foundation-unavailable.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/landing-page.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/layouts/account.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/layouts/admin.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/layouts/foundation.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/layouts/organizer.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/legal/privacidade.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/legal/termos.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/login.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/minhas-candidaturas.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/notificacoes/central.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/notificacoes/index-ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/notificacoes/index.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/aprovacao-pendente.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/area-cadastral.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/cadastro_ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/candidatos.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/criar.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/editar.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/editar_ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/excluir_ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/exclusao-pendente.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/meus-eventos.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/painel_ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ong/perfil_ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/organizadores/ong.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/organizadores/solicitacao.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/organizadores/workspace.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/participacoes/gestao.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/participacoes/pessoal.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/perfil/apadrinhamento.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/perfil/area-privada.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/perfil/editar-perfil.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/perfil/excluir.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/perfil/exclusao-pendente.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/perfil/index-perfil.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/perfil/partials/apadrinhamento.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/perfil/preferencias.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/privacidade/conta.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/resources/views/ranking/index.blade.php`
+- `??` `storage/framework/feedback63-referral-initial/routes/api.php`
+- `??` `storage/framework/feedback63-referral-initial/routes/console.php`
+- `??` `storage/framework/feedback63-referral-initial/routes/demo.php`
+- `??` `storage/framework/feedback63-referral-initial/routes/web.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/AgendaInscricaoTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/AntecedentesRenovacaoTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/AuthorizationAdminTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/AvaliacaoConfiabilidadeTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/ContextualBrandNavigationTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/DemoFrontendTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/DocumentoPessoaTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/DocumentoStorageLgpdTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/EventoOperacionalTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/ExampleTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/ExclusaoContasPendentesSchedulerTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/FinalizacaoEventoCertificadoTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/GdFormatsTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/IntegrityHistoryTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/LegacyCertificateMigrationTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/ManagedImageMemoryTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/ManagedImageTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/OngAuthAndEventoTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/OngPublicNavigationTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/OrganizadorWorkflowTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/PadrinhoWorkflowTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/PessoaAuthTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/PessoaValidationAccessTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/PessoaValidationWorkflowTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/PredeployCorsTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/PresencaAusenciaDesistenciaTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/RailwayStorageTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/SyntheticAdminProvisioningTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/TrustedProxyHttpsTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualFeedbackTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualFourTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualNavigationTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualNotificationsTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualOneTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualParticipationCertificateTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualParticipationClosureTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualParticipationEvaluationTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualParticipationJustificationTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualParticipationReliabilityTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualParticipationTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualParticipationXpTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualPrivacyTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualSponsorshipTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualThreeCorrectionsTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualThreeRefinementsTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualThreeTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualTwoTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/VisualUsabilityTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Feature/XpCampanhaRankingTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/admin-demo.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/certificates-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/certificates-regression.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/feedback-admin-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/feedback-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/feedback-closure-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/feedback-regressions.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/notifications-actions-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/notifications-badge-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/notifications-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/notifications-guided-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/notifications-inventory.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/notifications-regression.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/notifications.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/organizer-demo.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/organizer-fixtures.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/participation-certificates.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/participation-closure.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/participation-demo.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/participation-evaluations.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/participation-justification.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/participation-reliability.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/participation-xp.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/privacy-browser.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/privacy-domain-actions.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/privacy-navigation.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/privacy-regression.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/privacy.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/rendered-dialog-scripts.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/rendered-dialog-scripts.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Frontend/sponsorship-demo.test.mjs`
+- `??` `storage/framework/feedback63-referral-initial/tests/Reference/README.md`
+- `??` `storage/framework/feedback63-referral-initial/tests/Reference/WebFoundationTest.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/TestCase.php`
+- `??` `storage/framework/feedback63-referral-initial/tests/Unit/ExampleTest.php`
+- `??` `storage/framework/feedback63-referral-package.json`
+- `??` `storage/framework/feedback63-registration-regression.mjs`
+- `??` `storage/framework/feedback63-rn.txt`
+- `??` `storage/framework/privacy62-initial/app/Support/ApiResponse.php`
+- `??` `storage/framework/privacy62-initial/app/Support/NavigationContext.php`
+- `??` `storage/framework/privacy62-initial/app/Support/NotificationFixtures.php`
+- `??` `storage/framework/privacy62-initial/app/Support/PublicProfileFixtures.php`
+- `??` `storage/framework/privacy62-initial/app/Support/SponsorshipFixtures.php`
+- `??` `storage/framework/privacy62-initial/app/Support/VisualFiveFixtures.php`
+- `??` `storage/framework/privacy62-initial/app/Support/VisualFourFixtures.php`
+- `??` `storage/framework/privacy62-initial/app/Support/VisualOneFixtures.php`
+- `??` `storage/framework/privacy62-initial/app/Support/VisualThreeFixtures.php`
+- `??` `storage/framework/privacy62-initial/app/Support/VisualTwoFixtures.php`
+- `??` `storage/framework/privacy62-initial/delta.json`
+- `??` `storage/framework/privacy62-initial/hashes.json`
+- `??` `storage/framework/privacy62-initial/resources/css/app.css`
+- `??` `storage/framework/privacy62-initial/resources/css/cadastro_ong.css`
+- `??` `storage/framework/privacy62-initial/resources/css/components/account.css`
+- `??` `storage/framework/privacy62-initial/resources/css/components/admin.css`
+- `??` `storage/framework/privacy62-initial/resources/css/components/events.css`
+- `??` `storage/framework/privacy62-initial/resources/css/components/notifications.css`
+- `??` `storage/framework/privacy62-initial/resources/css/editar_ong.css`
+- `??` `storage/framework/privacy62-initial/resources/css/painel_ong.css`
+- `??` `storage/framework/privacy62-initial/resources/css/perfil_ong.css`
+- `??` `storage/framework/privacy62-initial/resources/fixtures/admin-documents/certidao.pdf`
+- `??` `storage/framework/privacy62-initial/resources/fixtures/admin-documents/certidao.png`
+- `??` `storage/framework/privacy62-initial/resources/fixtures/admin-documents/identidade.png`
+- `??` `storage/framework/privacy62-initial/resources/js/account-demo.js`
+- `??` `storage/framework/privacy62-initial/resources/js/admin-demo.js`
+- `??` `storage/framework/privacy62-initial/resources/js/app.js`
+- `??` `storage/framework/privacy62-initial/resources/js/dialog-accessibility.js`
+- `??` `storage/framework/privacy62-initial/resources/js/events-demo.js`
+- `??` `storage/framework/privacy62-initial/resources/js/notifications-demo.js`
+- `??` `storage/framework/privacy62-initial/resources/js/organizer-demo.js`
+- `??` `storage/framework/privacy62-initial/resources/js/participation-certificates.js`
+- `??` `storage/framework/privacy62-initial/resources/js/participation-demo.js`
+- `??` `storage/framework/privacy62-initial/resources/js/participation-reliability-core.js`
+- `??` `storage/framework/privacy62-initial/resources/js/participation-reliability.js`
+- `??` `storage/framework/privacy62-initial/resources/js/participation-xp.js`
+- `??` `storage/framework/privacy62-initial/resources/js/sponsorship-demo.js`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/admin.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/cadastros-ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/candidatos.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/configuracoes.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/denuncias.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/fila-eventos.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/log-acoes.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/partials/data.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/partials/document-dialog.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/partials/documents.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/partials/filters.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/partials/queue.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/relatorios.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/restrito.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/solicitacoes-lgpd.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/upgrades-org.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/admin/usuarios.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/cadastro.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/candidatura.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/certificados/documento.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/certificados/lista.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/certificados/resumo.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/certificados/verificacao.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/account-field.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/account-wizard.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/admin-sidebar.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/agenda-applications.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/agenda-candidates.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/agenda-editor.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/agenda-options.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/application-steps.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/botao-declined.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/botao-dourado.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/botao-primario.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/botao-secundario.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/breadcrumb-admin.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/breadcrumb-ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/candidatura-card.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/context-navbar.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/demo-notice.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/demo-scenarios.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/dialog-close.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/event-state.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/feedback.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/footer.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/input.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/navbar-feed.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/navbar-ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/navbar.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/notification-context.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/ong-sidebar.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/organizer-event-card.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/organizer-link-card.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/organizer-links.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/organizer-promotion-summary.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/organizer-responsibilities.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/organizer-scope.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/participation-agendas.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/participation-certificates.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/participation-reliability.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/participation-xp.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/private-documents.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/registration-status.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/sponsorship-referral.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/components/volunteer-preferences.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/conta.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/errors/403.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/errors/404.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/errors/419.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/errors/503.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/eventos/detalhe.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/feed/index.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/foundation-unavailable.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/landing-page.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/layouts/account.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/layouts/admin.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/layouts/foundation.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/layouts/organizer.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/legal/privacidade.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/legal/termos.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/login.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/minhas-candidaturas.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/notificacoes/central.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/notificacoes/index-ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/notificacoes/index.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/aprovacao-pendente.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/area-cadastral.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/cadastro_ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/candidatos.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/criar.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/editar.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/editar_ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/excluir_ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/exclusao-pendente.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/meus-eventos.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/painel_ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ong/perfil_ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/organizadores/ong.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/organizadores/solicitacao.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/organizadores/workspace.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/participacoes/gestao.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/participacoes/pessoal.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/perfil/apadrinhamento.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/perfil/area-privada.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/perfil/editar-perfil.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/perfil/excluir.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/perfil/exclusao-pendente.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/perfil/index-perfil.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/perfil/partials/apadrinhamento.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/perfil/preferencias.blade.php`
+- `??` `storage/framework/privacy62-initial/resources/views/ranking/index.blade.php`
+- `??` `storage/framework/privacy62-initial/routes/api.php`
+- `??` `storage/framework/privacy62-initial/routes/console.php`
+- `??` `storage/framework/privacy62-initial/routes/demo.php`
+- `??` `storage/framework/privacy62-initial/routes/web.php`
+- `??` `storage/framework/privacy62-initial/status.txt`
+- `??` `storage/framework/privacy62-initial/tests/Feature/DemoFrontendTest.php`
+- `??` `storage/framework/privacy62-initial/tests/Feature/VisualThreeCorrectionsTest.php`
+- `??` `storage/framework/privacy62-initial/tests/Feature/VisualThreeRefinementsTest.php`
+- `??` `storage/framework/privacy62-initial/tests/Feature/VisualUsabilityTest.php`
+- `??` `storage/framework/privacy62-initial/tests/Frontend/rendered-dialog-scripts.php`
+- `??` `storage/framework/privacy62-package.json`
+- `??` `storage/framework/privacy62-rn.txt`
+- `??` `storage/framework/referral421-edge-profile/Crashpad/metadata`
+- `??` `storage/framework/referral421-edge-profile/Crashpad/reports/2e6e3ce5-de68-4873-a028-2c14caa81c5b.dmp`
+- `??` `storage/framework/referral421-edge-profile/Crashpad/reports/ba967605-78ff-4c4f-abc7-bb4585a02fe9.dmp`
+- `??` `storage/framework/referral421-edge-profile/Crashpad/settings.dat`
+- `??` `storage/framework/referral421-edge-profile/Crashpad/temp/edge_shutdown_crash.txt`
+- `??` `storage/framework/referral421-edge-profile/Crashpad/throttle_store.dat`
+- `??` `storage/framework/referral421-edge-profile/Crashpad/watson_metadata`
+- `??` `storage/framework/referral421-edge-profile/Default/Affiliation Database`
+- `??` `storage/framework/referral421-edge-profile/Default/Affiliation Database-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Cache/Cache_Data/data_0`
+- `??` `storage/framework/referral421-edge-profile/Default/Cache/Cache_Data/data_1`
+- `??` `storage/framework/referral421-edge-profile/Default/Cache/Cache_Data/data_2`
+- `??` `storage/framework/referral421-edge-profile/Default/Cache/Cache_Data/data_3`
+- `??` `storage/framework/referral421-edge-profile/Default/Cache/Cache_Data/index`
+- `??` `storage/framework/referral421-edge-profile/Default/Cache/No_Vary_Search/journal.baj`
+- `??` `storage/framework/referral421-edge-profile/Default/Cache/No_Vary_Search/snapshot.baf`
+- `??` `storage/framework/referral421-edge-profile/Default/ClientCertificates/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/ClientCertificates/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/Code Cache/js/index`
+- `??` `storage/framework/referral421-edge-profile/Default/Code Cache/js/index-dir/the-real-index`
+- `??` `storage/framework/referral421-edge-profile/Default/Code Cache/wasm/index`
+- `??` `storage/framework/referral421-edge-profile/Default/Code Cache/wasm/index-dir/the-real-index`
+- `??` `storage/framework/referral421-edge-profile/Default/EdgePushStorageWithConnectTokenAndKey/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/EdgePushStorageWithConnectTokenAndKey/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/EdgePushStorageWithConnectTokenAndKey/LOG.old`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Rules/000003.log`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Rules/CURRENT`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Rules/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Rules/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Rules/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Scripts/000003.log`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Scripts/CURRENT`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Scripts/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Scripts/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension Scripts/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension State/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension State/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/Extension State/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge-profile/Default/ExtensionActivityEdge`
+- `??` `storage/framework/referral421-edge-profile/Default/Favicons`
+- `??` `storage/framework/referral421-edge-profile/Default/Favicons-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/GPUCache/data_0`
+- `??` `storage/framework/referral421-edge-profile/Default/GPUCache/data_1`
+- `??` `storage/framework/referral421-edge-profile/Default/GPUCache/data_2`
+- `??` `storage/framework/referral421-edge-profile/Default/GPUCache/index`
+- `??` `storage/framework/referral421-edge-profile/Default/History`
+- `??` `storage/framework/referral421-edge-profile/Default/History-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/HubApps Icons`
+- `??` `storage/framework/referral421-edge-profile/Default/HubApps Icons-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/Login Data`
+- `??` `storage/framework/referral421-edge-profile/Default/Login Data For Account`
+- `??` `storage/framework/referral421-edge-profile/Default/Login Data For Account-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Login Data-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Cookies`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Cookies-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Device Bound Sessions`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Device Bound Sessions-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Network Persistent State`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/NetworkDataMigrated`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Reporting and NEL`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Reporting and NEL-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/SCT Auditing Pending Reports`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Sdch Dictionaries`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Trust Tokens`
+- `??` `storage/framework/referral421-edge-profile/Default/Network/Trust Tokens-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Nurturing/campaign_history`
+- `??` `storage/framework/referral421-edge-profile/Default/Nurturing/campaign_history-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/PersistentOriginTrials/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/PersistentOriginTrials/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/Preferences`
+- `??` `storage/framework/referral421-edge-profile/Default/README`
+- `??` `storage/framework/referral421-edge-profile/Default/Secure Preferences`
+- `??` `storage/framework/referral421-edge-profile/Default/ServerCertificate`
+- `??` `storage/framework/referral421-edge-profile/Default/ServerCertificate-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Sessions/Session_13439273109977290`
+- `??` `storage/framework/referral421-edge-profile/Default/Shared Dictionary/cache/index`
+- `??` `storage/framework/referral421-edge-profile/Default/Shared Dictionary/cache/index-dir/the-real-index`
+- `??` `storage/framework/referral421-edge-profile/Default/Shared Dictionary/db`
+- `??` `storage/framework/referral421-edge-profile/Default/Shared Dictionary/db-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Site Characteristics Database/000003.log`
+- `??` `storage/framework/referral421-edge-profile/Default/Site Characteristics Database/CURRENT`
+- `??` `storage/framework/referral421-edge-profile/Default/Site Characteristics Database/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/Site Characteristics Database/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/Site Characteristics Database/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge-profile/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/js/index`
+- `??` `storage/framework/referral421-edge-profile/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/js/index-dir/9551217d-58a7-4549-9539-38c633e904f1.tmp`
+- `??` `storage/framework/referral421-edge-profile/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/js/index-dir/temp-index`
+- `??` `storage/framework/referral421-edge-profile/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/wasm/index`
+- `??` `storage/framework/referral421-edge-profile/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/wasm/index-dir/temp-index`
+- `??` `storage/framework/referral421-edge-profile/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/declarative_performance_observer.db`
+- `??` `storage/framework/referral421-edge-profile/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/declarative_performance_observer.db-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Sync Data/LevelDB/000003.log`
+- `??` `storage/framework/referral421-edge-profile/Default/Sync Data/LevelDB/CURRENT`
+- `??` `storage/framework/referral421-edge-profile/Default/Sync Data/LevelDB/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/Sync Data/LevelDB/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/Sync Data/LevelDB/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge-profile/Default/Top Sites`
+- `??` `storage/framework/referral421-edge-profile/Default/Top Sites-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Vpn Tokens`
+- `??` `storage/framework/referral421-edge-profile/Default/Vpn Tokens-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/Web Data`
+- `??` `storage/framework/referral421-edge-profile/Default/Web Data-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/WebStorage/QuotaManager`
+- `??` `storage/framework/referral421-edge-profile/Default/WebStorage/QuotaManager-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/arbitration_service_config.json`
+- `??` `storage/framework/referral421-edge-profile/Default/commerce_subscription_db/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/commerce_subscription_db/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/declarative_performance_observer.db`
+- `??` `storage/framework/referral421-edge-profile/Default/declarative_performance_observer.db-journal`
+- `??` `storage/framework/referral421-edge-profile/Default/discount_infos_db/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/discount_infos_db/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/discounts_db/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/discounts_db/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/load_statistics.db`
+- `??` `storage/framework/referral421-edge-profile/Default/load_statistics.db-shm`
+- `??` `storage/framework/referral421-edge-profile/Default/load_statistics.db-wal`
+- `??` `storage/framework/referral421-edge-profile/Default/parcel_tracking_db/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/parcel_tracking_db/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/shared_proto_db/metadata/LOCK`
+- `??` `storage/framework/referral421-edge-profile/Default/shared_proto_db/metadata/LOG`
+- `??` `storage/framework/referral421-edge-profile/Default/shared_proto_db/metadata/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge-profile/FirstLaunchAfterInstallation`
+- `??` `storage/framework/referral421-edge-profile/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.db`
+- `??` `storage/framework/referral421-edge-profile/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.db-wal`
+- `??` `storage/framework/referral421-edge-profile/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.journal`
+- `??` `storage/framework/referral421-edge-profile/Last Version`
+- `??` `storage/framework/referral421-edge-profile/Local State`
+- `??` `storage/framework/referral421-edge-profile/Nurturing/campaign_history`
+- `??` `storage/framework/referral421-edge-profile/Nurturing/campaign_history-journal`
+- `??` `storage/framework/referral421-edge-profile/SmartScreen/RemoteData/customSettings`
+- `??` `storage/framework/referral421-edge-profile/SmartScreen/RemoteData/customSettings_F95BA787499AB4FA9EFFF472CE383A14`
+- `??` `storage/framework/referral421-edge-profile/SmartScreen/RemoteData/edgeSettings`
+- `??` `storage/framework/referral421-edge-profile/SmartScreen/RemoteData/edgeSettings_2.0-0`
+- `??` `storage/framework/referral421-edge-profile/Variations`
+- `??` `storage/framework/referral421-edge-profile/VariationsRuntimeSeedV2`
+- `??` `storage/framework/referral421-edge-profile/VariationsSafeSeedV2`
+- `??` `storage/framework/referral421-edge-profile/VariationsSeedV2`
+- `??` `storage/framework/referral421-edge-profile/component_crx_cache/metadata.json`
+- `??` `storage/framework/referral421-edge-profile/extensions_crx_cache/metadata.json7fb56863-06c8-4423-996e-74b49dba3e4a.tmp`
+- `??` `storage/framework/referral421-edge-profile/extensions_crx_cache/metadata.jsona8008f8c-6ef1-47d9-be9f-27fa0036d3af.tmp`
+- `??` `storage/framework/referral421-edge2/Crashpad/metadata`
+- `??` `storage/framework/referral421-edge2/Crashpad/reports/43957588-6d0b-4336-a259-12a9f15e779a.dmp`
+- `??` `storage/framework/referral421-edge2/Crashpad/reports/6695ff11-a65f-47c9-bbb1-45c6782f7955.dmp`
+- `??` `storage/framework/referral421-edge2/Crashpad/settings.dat`
+- `??` `storage/framework/referral421-edge2/Crashpad/temp/edge_shutdown_crash.txt`
+- `??` `storage/framework/referral421-edge2/Crashpad/throttle_store.dat`
+- `??` `storage/framework/referral421-edge2/Crashpad/watson_metadata`
+- `??` `storage/framework/referral421-edge2/Default/Affiliation Database`
+- `??` `storage/framework/referral421-edge2/Default/Affiliation Database-journal`
+- `??` `storage/framework/referral421-edge2/Default/Cache/Cache_Data/data_0`
+- `??` `storage/framework/referral421-edge2/Default/Cache/Cache_Data/data_1`
+- `??` `storage/framework/referral421-edge2/Default/Cache/Cache_Data/data_2`
+- `??` `storage/framework/referral421-edge2/Default/Cache/Cache_Data/data_3`
+- `??` `storage/framework/referral421-edge2/Default/Cache/Cache_Data/index`
+- `??` `storage/framework/referral421-edge2/Default/Cache/No_Vary_Search/journal.baj`
+- `??` `storage/framework/referral421-edge2/Default/Cache/No_Vary_Search/snapshot.baf`
+- `??` `storage/framework/referral421-edge2/Default/ClientCertificates/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/ClientCertificates/LOG`
+- `??` `storage/framework/referral421-edge2/Default/Code Cache/js/index`
+- `??` `storage/framework/referral421-edge2/Default/Code Cache/js/index-dir/the-real-index`
+- `??` `storage/framework/referral421-edge2/Default/Code Cache/wasm/index`
+- `??` `storage/framework/referral421-edge2/Default/Code Cache/wasm/index-dir/5ceb83d4-c426-4a71-a0fa-dc067036612f.tmp`
+- `??` `storage/framework/referral421-edge2/Default/Code Cache/wasm/index-dir/temp-index`
+- `??` `storage/framework/referral421-edge2/Default/EdgePushStorageWithConnectTokenAndKey/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/EdgePushStorageWithConnectTokenAndKey/LOG`
+- `??` `storage/framework/referral421-edge2/Default/Extension Rules/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/Extension Rules/LOG`
+- `??` `storage/framework/referral421-edge2/Default/Extension Rules/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge2/Default/ExtensionActivityEdge`
+- `??` `storage/framework/referral421-edge2/Default/ExtensionActivityEdge-journal`
+- `??` `storage/framework/referral421-edge2/Default/GPUCache/index`
+- `??` `storage/framework/referral421-edge2/Default/History`
+- `??` `storage/framework/referral421-edge2/Default/History-journal`
+- `??` `storage/framework/referral421-edge2/Default/Login Data`
+- `??` `storage/framework/referral421-edge2/Default/Login Data For Account`
+- `??` `storage/framework/referral421-edge2/Default/Login Data For Account-journal`
+- `??` `storage/framework/referral421-edge2/Default/Login Data-journal`
+- `??` `storage/framework/referral421-edge2/Default/Network/Cookies`
+- `??` `storage/framework/referral421-edge2/Default/Network/Cookies-journal`
+- `??` `storage/framework/referral421-edge2/Default/Network/Device Bound Sessions`
+- `??` `storage/framework/referral421-edge2/Default/Network/Device Bound Sessions-journal`
+- `??` `storage/framework/referral421-edge2/Default/Network/NetworkDataMigrated`
+- `??` `storage/framework/referral421-edge2/Default/Network/Reporting and NEL`
+- `??` `storage/framework/referral421-edge2/Default/Network/Reporting and NEL-journal`
+- `??` `storage/framework/referral421-edge2/Default/Network/SCT Auditing Pending Reports`
+- `??` `storage/framework/referral421-edge2/Default/Network/Sdch Dictionaries860999ae-89c3-4d18-a296-e4efd9a1edf7.tmp`
+- `??` `storage/framework/referral421-edge2/Default/Network/Trust Tokens`
+- `??` `storage/framework/referral421-edge2/Default/Network/Trust Tokens-journal`
+- `??` `storage/framework/referral421-edge2/Default/PersistentOriginTrials/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/PersistentOriginTrials/LOG`
+- `??` `storage/framework/referral421-edge2/Default/README`
+- `??` `storage/framework/referral421-edge2/Default/ServerCertificate`
+- `??` `storage/framework/referral421-edge2/Default/ServerCertificate-journal`
+- `??` `storage/framework/referral421-edge2/Default/Sessions/Session_13439273299486476`
+- `??` `storage/framework/referral421-edge2/Default/Shared Dictionary/cache/index`
+- `??` `storage/framework/referral421-edge2/Default/Shared Dictionary/cache/index-dir/the-real-index`
+- `??` `storage/framework/referral421-edge2/Default/Shared Dictionary/db`
+- `??` `storage/framework/referral421-edge2/Default/Shared Dictionary/db-journal`
+- `??` `storage/framework/referral421-edge2/Default/Site Characteristics Database/000003.log`
+- `??` `storage/framework/referral421-edge2/Default/Site Characteristics Database/CURRENT`
+- `??` `storage/framework/referral421-edge2/Default/Site Characteristics Database/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/Site Characteristics Database/LOG`
+- `??` `storage/framework/referral421-edge2/Default/Site Characteristics Database/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge2/Default/Storage/ext/ihmafllikibpmigkcoadcmckbfhibefp/def/Code Cache/wasm/index`
+- `??` `storage/framework/referral421-edge2/Default/Sync Data/LevelDB/000003.log`
+- `??` `storage/framework/referral421-edge2/Default/Sync Data/LevelDB/CURRENT`
+- `??` `storage/framework/referral421-edge2/Default/Sync Data/LevelDB/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/Sync Data/LevelDB/LOG`
+- `??` `storage/framework/referral421-edge2/Default/Sync Data/LevelDB/MANIFEST-000001`
+- `??` `storage/framework/referral421-edge2/Default/Top Sites`
+- `??` `storage/framework/referral421-edge2/Default/Top Sites-journal`
+- `??` `storage/framework/referral421-edge2/Default/Vpn Tokens`
+- `??` `storage/framework/referral421-edge2/Default/Vpn Tokens-journal`
+- `??` `storage/framework/referral421-edge2/Default/Web Data`
+- `??` `storage/framework/referral421-edge2/Default/Web Data-journal`
+- `??` `storage/framework/referral421-edge2/Default/arbitration_service_config.json`
+- `??` `storage/framework/referral421-edge2/Default/commerce_subscription_db/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/commerce_subscription_db/LOG`
+- `??` `storage/framework/referral421-edge2/Default/declarative_performance_observer.db`
+- `??` `storage/framework/referral421-edge2/Default/declarative_performance_observer.db-journal`
+- `??` `storage/framework/referral421-edge2/Default/discount_infos_db/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/discount_infos_db/LOG`
+- `??` `storage/framework/referral421-edge2/Default/discounts_db/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/discounts_db/LOG`
+- `??` `storage/framework/referral421-edge2/Default/parcel_tracking_db/LOCK`
+- `??` `storage/framework/referral421-edge2/Default/parcel_tracking_db/LOG`
+- `??` `storage/framework/referral421-edge2/FirstLaunchAfterInstallation`
+- `??` `storage/framework/referral421-edge2/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.db`
+- `??` `storage/framework/referral421-edge2/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.db-wal`
+- `??` `storage/framework/referral421-edge2/GPUPersistentCache/DawnGraphiteCache/23IMHJGI2WIIJ3PDLCHAHUJAGHTLTEBB/cache.journal`
+- `??` `storage/framework/referral421-edge2/Last Version`
+- `??` `storage/framework/referral421-edge2/Local State`
+- `??` `storage/framework/referral421-edge2/Nurturing/campaign_history`
+- `??` `storage/framework/referral421-edge2/Nurturing/campaign_history-journal`
+- `??` `storage/framework/referral421-edge2/SmartScreen/RemoteData/customSettings`
+- `??` `storage/framework/referral421-edge2/SmartScreen/RemoteData/customSettings_F95BA787499AB4FA9EFFF472CE383A14`
+- `??` `storage/framework/referral421-edge2/SmartScreen/RemoteData/edgeSettings`
+- `??` `storage/framework/referral421-edge2/SmartScreen/RemoteData/edgeSettings_2.0-0`
+- `??` `storage/framework/referral421-edge2/Variations`
+- `??` `storage/framework/referral421-edge2/VariationsRuntimeSeedV2`
+- `??` `storage/framework/referral421-edge2/VariationsSafeSeedV2`
+- `??` `storage/framework/referral421-edge2/VariationsSeedV2`
+- `??` `storage/framework/visual64-after-summary.json`
+- `??` `storage/framework/visual64-audit.mjs`
+- `??` `storage/framework/visual64-before-summary.json`
+- `??` `storage/framework/visual64-certificates.mjs`
+- `??` `storage/framework/visual64-delivery.py`
+- `??` `storage/framework/visual64-domains.mjs`
+- `??` `storage/framework/visual64-edit.py`
+- `??` `storage/framework/visual64-entrega-summary.json`
+- `??` `storage/framework/visual64-final-summary.json`
+- `??` `storage/framework/visual64-initial/app/Console/Commands/AlertarRenovacaoAntecedentes.php`
+- `??` `storage/framework/visual64-initial/app/Console/Commands/ExcluirArquivosDocumentosRetidos.php`
+- `??` `storage/framework/visual64-initial/app/Console/Commands/ExcluirContasPendentes.php`
+- `??` `storage/framework/visual64-initial/app/Console/Commands/HomologacaoAdmin.php`
+- `??` `storage/framework/visual64-initial/app/Console/Commands/ReconciliarImagensPendentes.php`
+- `??` `storage/framework/visual64-initial/app/Exceptions/ValidationConflictException.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/AdminOrganizadorController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/AdminPadrinhoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/AdminPessoaValidationController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/AgendaController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/AntecedentesController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/AssinaturaController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/AvaliacaoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/CampanhaXpController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/CatEventoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/CausaController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/CertificadoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/ConfiabilidadeController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/DocumentoPessoaController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/EventoAssociacaoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/EventoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/EventoHabilidadeController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/HabilidadeController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/InscricaoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/ManagedImageController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/NotificationController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/OngController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/OngOrganizadorController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/OrganizadorController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/PadrinhoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/PessoaCausaController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/PessoaController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/PessoaHabilidadeController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/PessoaRecursoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/PessoaValidationController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/RankingController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/RecursoController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Api/SolicitacaoLgpdController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/Controller.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/NotificationController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Controllers/WebAuthController.php`
+- `??` `storage/framework/visual64-initial/app/Http/Middleware/AdminMiddleware.php`
+- `??` `storage/framework/visual64-initial/app/Http/Middleware/DemoSafety.php`
+- `??` `storage/framework/visual64-initial/app/Http/Middleware/EnsureOngApproved.php`
+- `??` `storage/framework/visual64-initial/app/Http/Middleware/WebFoundation.php`
+- `??` `storage/framework/visual64-initial/app/Http/Middleware/WebIdentity.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/CertificadoResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/DocumentoPessoaResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/EventoResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/HistoricoValidacaoPessoaResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/InscricaoResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/OngAdminResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/OngPrivateResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/OngPublicResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/PessoaAdminResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/PessoaPrivateResource.php`
+- `??` `storage/framework/visual64-initial/app/Http/Resources/PessoaPublicResource.php`
+- `??` `storage/framework/visual64-initial/app/Models/Acompanhamento.php`
+- `??` `storage/framework/visual64-initial/app/Models/AdminLog.php`
+- `??` `storage/framework/visual64-initial/app/Models/Agenda.php`
+- `??` `storage/framework/visual64-initial/app/Models/Assinatura.php`
+- `??` `storage/framework/visual64-initial/app/Models/AvaliacaoOng.php`
+- `??` `storage/framework/visual64-initial/app/Models/AvaliacaoVoluntario.php`
+- `??` `storage/framework/visual64-initial/app/Models/CampanhaXp.php`
+- `??` `storage/framework/visual64-initial/app/Models/CatEvento.php`
+- `??` `storage/framework/visual64-initial/app/Models/Causa.php`
+- `??` `storage/framework/visual64-initial/app/Models/Certificado.php`
+- `??` `storage/framework/visual64-initial/app/Models/ConclusaoPadrinho.php`
+- `??` `storage/framework/visual64-initial/app/Models/DocumentoPessoa.php`
+- `??` `storage/framework/visual64-initial/app/Models/Evento.php`
+- `??` `storage/framework/visual64-initial/app/Models/Habilidade.php`
+- `??` `storage/framework/visual64-initial/app/Models/HistoricoValidacaoPessoa.php`
+- `??` `storage/framework/visual64-initial/app/Models/Inscricao.php`
+- `??` `storage/framework/visual64-initial/app/Models/Monitoria.php`
+- `??` `storage/framework/visual64-initial/app/Models/Notification.php`
+- `??` `storage/framework/visual64-initial/app/Models/Ong.php`
+- `??` `storage/framework/visual64-initial/app/Models/Permissao.php`
+- `??` `storage/framework/visual64-initial/app/Models/Pessoa.php`
+- `??` `storage/framework/visual64-initial/app/Models/Recurso.php`
+- `??` `storage/framework/visual64-initial/app/Models/SolicitacaoLgpd.php`
+- `??` `storage/framework/visual64-initial/app/Models/SolicitacaoOrganizador.php`
+- `??` `storage/framework/visual64-initial/app/Models/SolicitacaoPadrinho.php`
+- `??` `storage/framework/visual64-initial/app/Models/VinculoOngOrganizador.php`
+- `??` `storage/framework/visual64-initial/app/Models/XpTransacao.php`
+- `??` `storage/framework/visual64-initial/app/Policies/AgendaPolicy.php`
+- `??` `storage/framework/visual64-initial/app/Policies/EventoPolicy.php`
+- `??` `storage/framework/visual64-initial/app/Providers/AppServiceProvider.php`
+- `??` `storage/framework/visual64-initial/app/Rules/Cnpj.php`
+- `??` `storage/framework/visual64-initial/app/Rules/Cpf.php`
+- `??` `storage/framework/visual64-initial/app/Services/AntecedentesService.php`
+- `??` `storage/framework/visual64-initial/app/Services/AvaliacaoService.php`
+- `??` `storage/framework/visual64-initial/app/Services/CertificadoService.php`
+- `??` `storage/framework/visual64-initial/app/Services/ConfiabilidadeService.php`
+- `??` `storage/framework/visual64-initial/app/Services/DocumentoStorage.php`
+- `??` `storage/framework/visual64-initial/app/Services/EventoOperationalService.php`
+- `??` `storage/framework/visual64-initial/app/Services/ManagedImageStorage.php`
+- `??` `storage/framework/visual64-initial/app/Services/MatchService.php`
+- `??` `storage/framework/visual64-initial/app/Services/OrganizadorService.php`
+- `??` `storage/framework/visual64-initial/app/Services/PadrinhoService.php`
+- `??` `storage/framework/visual64-initial/app/Services/PessoaValidationService.php`
+- `??` `storage/framework/visual64-initial/app/Services/RailwayStorageConfiguration.php`
+- `??` `storage/framework/visual64-initial/app/Services/RankingService.php`
+- `??` `storage/framework/visual64-initial/app/Services/SyntheticAdminProvisioner.php`
+- `??` `storage/framework/visual64-initial/app/Services/WebApi.php`
+- `??` `storage/framework/visual64-initial/app/Services/WebSession.php`
+- `??` `storage/framework/visual64-initial/app/Services/XpService.php`
+- `??` `storage/framework/visual64-initial/app/Support/ApiResponse.php`
+- `??` `storage/framework/visual64-initial/app/Support/NavigationContext.php`
+- `??` `storage/framework/visual64-initial/app/Support/NotificationFixtures.php`
+- `??` `storage/framework/visual64-initial/app/Support/PrivacyFixtures.php`
+- `??` `storage/framework/visual64-initial/app/Support/PublicProfileFixtures.php`
+- `??` `storage/framework/visual64-initial/app/Support/SponsorshipFixtures.php`
+- `??` `storage/framework/visual64-initial/app/Support/VisualFiveFixtures.php`
+- `??` `storage/framework/visual64-initial/app/Support/VisualFourFixtures.php`
+- `??` `storage/framework/visual64-initial/app/Support/VisualOneFixtures.php`
+- `??` `storage/framework/visual64-initial/app/Support/VisualThreeFixtures.php`
+- `??` `storage/framework/visual64-initial/app/Support/VisualTwoFixtures.php`
+- `??` `storage/framework/visual64-initial/app/View/Components/Footer.php`
+- `??` `storage/framework/visual64-initial/app/View/Components/Input.php`
+- `??` `storage/framework/visual64-initial/app/View/Components/Navbar-feed.php`
+- `??` `storage/framework/visual64-initial/app/View/Components/Navbar.php`
+- `??` `storage/framework/visual64-initial/app/View/Components/botao-primario.php`
+- `??` `storage/framework/visual64-initial/app/View/Components/botao-secundario.php`
+- `??` `storage/framework/visual64-initial/git-status.txt`
+- `??` `storage/framework/visual64-initial/hashes.json`
+- `??` `storage/framework/visual64-initial/resources/css/app.css`
+- `??` `storage/framework/visual64-initial/resources/css/cadastro_ong.css`
+- `??` `storage/framework/visual64-initial/resources/css/components/account.css`
+- `??` `storage/framework/visual64-initial/resources/css/components/admin.css`
+- `??` `storage/framework/visual64-initial/resources/css/components/events.css`
+- `??` `storage/framework/visual64-initial/resources/css/components/notifications.css`
+- `??` `storage/framework/visual64-initial/resources/css/editar_ong.css`
+- `??` `storage/framework/visual64-initial/resources/css/painel_ong.css`
+- `??` `storage/framework/visual64-initial/resources/css/perfil_ong.css`
+- `??` `storage/framework/visual64-initial/resources/fixtures/admin-documents/certidao.pdf`
+- `??` `storage/framework/visual64-initial/resources/fixtures/admin-documents/certidao.png`
+- `??` `storage/framework/visual64-initial/resources/fixtures/admin-documents/identidade.png`
+- `??` `storage/framework/visual64-initial/resources/js/account-demo.js`
+- `??` `storage/framework/visual64-initial/resources/js/admin-demo.js`
+- `??` `storage/framework/visual64-initial/resources/js/app.js`
+- `??` `storage/framework/visual64-initial/resources/js/dialog-accessibility.js`
+- `??` `storage/framework/visual64-initial/resources/js/events-demo.js`
+- `??` `storage/framework/visual64-initial/resources/js/notifications-demo.js`
+- `??` `storage/framework/visual64-initial/resources/js/organizer-demo.js`
+- `??` `storage/framework/visual64-initial/resources/js/participation-certificates.js`
+- `??` `storage/framework/visual64-initial/resources/js/participation-demo.js`
+- `??` `storage/framework/visual64-initial/resources/js/participation-reliability-core.js`
+- `??` `storage/framework/visual64-initial/resources/js/participation-reliability.js`
+- `??` `storage/framework/visual64-initial/resources/js/participation-xp.js`
+- `??` `storage/framework/visual64-initial/resources/js/privacy-demo.js`
+- `??` `storage/framework/visual64-initial/resources/js/sponsorship-demo.js`
+- `??` `storage/framework/visual64-initial/resources/views/admin/admin.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/cadastros-ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/candidatos.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/configuracoes.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/denuncias.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/fila-eventos.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/log-acoes.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/partials/data.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/partials/document-dialog.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/partials/documents.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/partials/filters.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/partials/queue.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/relatorios.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/restrito.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/solicitacoes-lgpd.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/upgrades-org.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/admin/usuarios.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/cadastro.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/candidatura.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/certificados/documento.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/certificados/lista.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/certificados/resumo.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/certificados/verificacao.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/account-field.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/account-wizard.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/admin-sidebar.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/agenda-applications.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/agenda-candidates.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/agenda-editor.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/agenda-options.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/application-steps.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/botao-declined.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/botao-dourado.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/botao-primario.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/botao-secundario.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/breadcrumb-admin.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/breadcrumb-ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/candidatura-card.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/context-navbar.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/demo-notice.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/demo-scenarios.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/dialog-close.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/error-screen.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/event-state.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/feedback.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/footer.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/input.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/navbar-feed.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/navbar-ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/navbar.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/notification-context.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/ong-sidebar.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/organizer-event-card.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/organizer-link-card.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/organizer-links.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/organizer-promotion-summary.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/organizer-responsibilities.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/organizer-scope.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/participation-agendas.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/participation-certificates.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/participation-reliability.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/participation-xp.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/privacy-requests.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/private-documents.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/registration-status.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/sponsorship-referral.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/components/volunteer-preferences.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/conta.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/errors/401.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/errors/403.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/errors/404.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/errors/409.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/errors/419.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/errors/422.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/errors/500.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/errors/503.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/eventos/detalhe.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/feed/index.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/foundation-unavailable.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/landing-page.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/layouts/account.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/layouts/admin.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/layouts/foundation.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/layouts/organizer.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/legal/privacidade.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/legal/termos.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/login.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/minhas-candidaturas.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/notificacoes/central.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/notificacoes/index-ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/notificacoes/index.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/aprovacao-pendente.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/area-cadastral.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/cadastro_ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/candidatos.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/criar.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/editar.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/editar_ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/excluir_ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/exclusao-pendente.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/meus-eventos.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/painel_ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ong/perfil_ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/organizadores/ong.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/organizadores/solicitacao.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/organizadores/workspace.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/participacoes/gestao.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/participacoes/pessoal.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/perfil/apadrinhamento.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/perfil/area-privada.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/perfil/editar-perfil.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/perfil/excluir.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/perfil/exclusao-pendente.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/perfil/index-perfil.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/perfil/partials/apadrinhamento.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/perfil/preferencias.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/privacidade/conta.blade.php`
+- `??` `storage/framework/visual64-initial/resources/views/ranking/index.blade.php`
+- `??` `storage/framework/visual64-initial/routes/api.php`
+- `??` `storage/framework/visual64-initial/routes/console.php`
+- `??` `storage/framework/visual64-initial/routes/demo.php`
+- `??` `storage/framework/visual64-initial/routes/web.php`
+- `??` `storage/framework/visual64-initial/scripts/New-AuditZip.ps1`
+- `??` `storage/framework/visual64-initial/scripts/auditoria-feedback-6-3.py`
+- `??` `storage/framework/visual64-initial/scripts/auditoria-frontend-v1.php`
+- `??` `storage/framework/visual64-initial/scripts/auditoria-navegacao-3-3.php`
+- `??` `storage/framework/visual64-initial/scripts/check-gd.php`
+- `??` `storage/framework/visual64-initial/scripts/diagnostico-503-readonly.php`
+- `??` `storage/framework/visual64-initial/scripts/homologacao-auth-20261020.ps1`
+- `??` `storage/framework/visual64-initial/scripts/homologacao-imagem-20261020.ps1`
+- `??` `storage/framework/visual64-initial/tests/Feature/AgendaInscricaoTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/AntecedentesRenovacaoTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/AuthorizationAdminTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/AvaliacaoConfiabilidadeTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/ContextualBrandNavigationTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/DemoFrontendTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/DocumentoPessoaTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/DocumentoStorageLgpdTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/EventoOperacionalTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/ExampleTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/ExclusaoContasPendentesSchedulerTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/FinalizacaoEventoCertificadoTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/GdFormatsTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/IntegrityHistoryTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/LegacyCertificateMigrationTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/ManagedImageMemoryTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/ManagedImageTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/OngAuthAndEventoTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/OngPublicNavigationTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/OrganizadorWorkflowTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/PadrinhoWorkflowTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/PessoaAuthTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/PessoaValidationAccessTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/PessoaValidationWorkflowTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/PredeployCorsTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/PresencaAusenciaDesistenciaTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/RailwayStorageTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/SyntheticAdminProvisioningTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/TrustedProxyHttpsTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualFeedbackTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualFourTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualNavigationTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualNotificationsTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualOneTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualParticipationCertificateTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualParticipationClosureTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualParticipationEvaluationTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualParticipationJustificationTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualParticipationReliabilityTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualParticipationTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualParticipationXpTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualPrivacyTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualSponsorshipTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualThreeCorrectionsTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualThreeRefinementsTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualThreeTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualTwoTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/VisualUsabilityTest.php`
+- `??` `storage/framework/visual64-initial/tests/Feature/XpCampanhaRankingTest.php`
+- `??` `storage/framework/visual64-initial/tests/Frontend/admin-demo.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/certificates-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/certificates-regression.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/feedback-admin-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/feedback-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/feedback-closure-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/feedback-regressions.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/notifications-actions-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/notifications-badge-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/notifications-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/notifications-guided-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/notifications-inventory.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/notifications-regression.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/notifications.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/organizer-demo.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/organizer-fixtures.php`
+- `??` `storage/framework/visual64-initial/tests/Frontend/participation-certificates.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/participation-closure.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/participation-demo.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/participation-evaluations.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/participation-justification.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/participation-reliability.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/participation-xp.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/privacy-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/privacy-domain-actions.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/privacy-navigation.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/privacy-regression.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/privacy.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/registration-sponsorship-browser.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/registration-sponsorship-regression.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/rendered-dialog-scripts.php`
+- `??` `storage/framework/visual64-initial/tests/Frontend/rendered-dialog-scripts.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Frontend/sponsorship-demo.test.mjs`
+- `??` `storage/framework/visual64-initial/tests/Reference/README.md`
+- `??` `storage/framework/visual64-initial/tests/Reference/WebFoundationTest.php`
+- `??` `storage/framework/visual64-initial/tests/TestCase.php`
+- `??` `storage/framework/visual64-initial/tests/Unit/ExampleTest.php`
+- `??` `storage/framework/visual64-package.json`
+- `??` `storage/framework/visual64-rn.txt`
+- `??` `storage/framework/visual64-routes.json`
+- `??` `storage/framework/visual64-samples.json`
+- `??` `storage/framework/visual65-accessibility.mjs`
+- `??` `storage/framework/visual65-audit.mjs`
+- `??` `storage/framework/visual65-baseline.json`
+- `??` `storage/framework/visual65-closure.mjs`
+- `??` `storage/framework/visual65-domains.mjs`
+- `??` `storage/framework/visual65-feedback.mjs`
+- `??` `storage/framework/visual65-privacy.mjs`
+- `??` `storage/framework/visual65-rn.txt`
+
+### Frontend e ativos: revisar origem e imports (163)
+
+- `??` `app/Support/AccountAccess.php`
+- `??` `app/Support/NavigationContext.php`
+- `??` `app/Support/NotificationFixtures.php`
+- `??` `app/Support/PrivacyFixtures.php`
+- `??` `app/Support/PublicProfileFixtures.php`
+- `??` `app/Support/SponsorshipFixtures.php`
+- `??` `app/Support/VisualFiveFixtures.php`
+- `??` `app/Support/VisualFourFixtures.php`
+- `??` `app/Support/VisualOneFixtures.php`
+- `??` `app/Support/VisualThreeFixtures.php`
+- `??` `app/Support/VisualTwoFixtures.php`
+- `??` `app/Support/WebNavigation.php`
+- `??` `public/images/avatar-pessoa.svg`
+- `M` `resources/css/app.css`
+- `??` `resources/css/components/accessibility.css`
+- `??` `resources/css/components/account.css`
+- `??` `resources/css/components/admin.css`
+- `??` `resources/css/components/events.css`
+- `??` `resources/css/components/notifications.css`
+- `??` `resources/js/account-demo.js`
+- `??` `resources/js/admin-demo.js`
+- `M` `resources/js/app.js`
+- `??` `resources/js/dialog-accessibility.js`
+- `??` `resources/js/events-demo.js`
+- `??` `resources/js/identity.js`
+- `??` `resources/js/navigation-accessibility.js`
+- `??` `resources/js/notifications-demo.js`
+- `??` `resources/js/organizer-demo.js`
+- `??` `resources/js/participation-certificates.js`
+- `??` `resources/js/participation-demo.js`
+- `??` `resources/js/participation-reliability-core.js`
+- `??` `resources/js/participation-reliability.js`
+- `??` `resources/js/participation-xp.js`
+- `??` `resources/js/privacy-demo.js`
+- `??` `resources/js/sponsorship-demo.js`
+- `M` `resources/views/admin/admin.blade.php`
+- `??` `resources/views/admin/area-indisponivel.blade.php`
+- `M` `resources/views/admin/cadastros-ong.blade.php`
+- `??` `resources/views/admin/candidatos.blade.php`
+- `M` `resources/views/admin/configuracoes.blade.php`
+- `M` `resources/views/admin/denuncias.blade.php`
+- `M` `resources/views/admin/fila-eventos.blade.php`
+- `??` `resources/views/admin/integrated-entry.blade.php`
+- `M` `resources/views/admin/log-acoes.blade.php`
+- `??` `resources/views/admin/partials/data.blade.php`
+- `??` `resources/views/admin/partials/document-dialog.blade.php`
+- `??` `resources/views/admin/partials/documents.blade.php`
+- `??` `resources/views/admin/partials/filters.blade.php`
+- `??` `resources/views/admin/partials/queue.blade.php`
+- `M` `resources/views/admin/relatorios.blade.php`
+- `??` `resources/views/admin/restrito.blade.php`
+- `M` `resources/views/admin/solicitacoes-lgpd.blade.php`
+- `M` `resources/views/admin/upgrades-org.blade.php`
+- `M` `resources/views/admin/usuarios.blade.php`
+- `??` `resources/views/auth/account.blade.php`
+- `??` `resources/views/auth/feature-unavailable.blade.php`
+- `??` `resources/views/auth/institutional-area.blade.php`
+- `??` `resources/views/auth/institutional-panel.blade.php`
+- `??` `resources/views/auth/login-form.blade.php`
+- `??` `resources/views/auth/public-event.blade.php`
+- `??` `resources/views/auth/public-feed.blade.php`
+- `??` `resources/views/auth/registration-unavailable.blade.php`
+- `M` `resources/views/cadastro.blade.php`
+- `M` `resources/views/candidatura.blade.php`
+- `M` `resources/views/certificados/documento.blade.php`
+- `??` `resources/views/certificados/lista.blade.php`
+- `??` `resources/views/certificados/resumo.blade.php`
+- `??` `resources/views/certificados/verificacao.blade.php`
+- `??` `resources/views/components/account-field.blade.php`
+- `??` `resources/views/components/account-wizard.blade.php`
+- `M` `resources/views/components/admin-sidebar.blade.php`
+- `??` `resources/views/components/agenda-applications.blade.php`
+- `??` `resources/views/components/agenda-candidates.blade.php`
+- `??` `resources/views/components/agenda-editor.blade.php`
+- `??` `resources/views/components/agenda-options.blade.php`
+- `??` `resources/views/components/application-steps.blade.php`
+- `M` `resources/views/components/botao-declined.blade.php`
+- `M` `resources/views/components/botao-dourado.blade.php`
+- `M` `resources/views/components/botao-primario.blade.php`
+- `M` `resources/views/components/botao-secundario.blade.php`
+- `M` `resources/views/components/breadcrumb-admin.blade.php`
+- `M` `resources/views/components/breadcrumb-ong.blade.php`
+- `??` `resources/views/components/context-navbar.blade.php`
+- `??` `resources/views/components/demo-notice.blade.php`
+- `??` `resources/views/components/demo-scenarios.blade.php`
+- `??` `resources/views/components/dialog-close.blade.php`
+- `??` `resources/views/components/error-screen.blade.php`
+- `??` `resources/views/components/event-state.blade.php`
+- `??` `resources/views/components/feedback.blade.php`
+- `M` `resources/views/components/footer.blade.php`
+- `M` `resources/views/components/navbar-feed.blade.php`
+- `M` `resources/views/components/navbar-ong.blade.php`
+- `M` `resources/views/components/navbar.blade.php`
+- `??` `resources/views/components/notification-context.blade.php`
+- `M` `resources/views/components/ong-sidebar.blade.php`
+- `??` `resources/views/components/organizer-event-card.blade.php`
+- `??` `resources/views/components/organizer-link-card.blade.php`
+- `??` `resources/views/components/organizer-links.blade.php`
+- `??` `resources/views/components/organizer-promotion-summary.blade.php`
+- `??` `resources/views/components/organizer-responsibilities.blade.php`
+- `??` `resources/views/components/organizer-scope.blade.php`
+- `??` `resources/views/components/participation-agendas.blade.php`
+- `??` `resources/views/components/participation-certificates.blade.php`
+- `??` `resources/views/components/participation-reliability.blade.php`
+- `??` `resources/views/components/participation-xp.blade.php`
+- `??` `resources/views/components/privacy-requests.blade.php`
+- `??` `resources/views/components/private-documents.blade.php`
+- `??` `resources/views/components/registration-status.blade.php`
+- `??` `resources/views/components/sponsorship-referral.blade.php`
+- `??` `resources/views/components/volunteer-preferences.blade.php`
+- `??` `resources/views/components/web-navigation-links.blade.php`
+- `??` `resources/views/components/web-navigation.blade.php`
+- `??` `resources/views/conta.blade.php`
+- `??` `resources/views/errors/401.blade.php`
+- `??` `resources/views/errors/403.blade.php`
+- `??` `resources/views/errors/404.blade.php`
+- `??` `resources/views/errors/409.blade.php`
+- `??` `resources/views/errors/419.blade.php`
+- `??` `resources/views/errors/422.blade.php`
+- `??` `resources/views/errors/500.blade.php`
+- `??` `resources/views/errors/503.blade.php`
+- `M` `resources/views/eventos/detalhe.blade.php`
+- `M` `resources/views/feed/index.blade.php`
+- `??` `resources/views/foundation-unavailable.blade.php`
+- `M` `resources/views/landing-page.blade.php`
+- `??` `resources/views/layouts/account.blade.php`
+- `??` `resources/views/layouts/admin.blade.php`
+- `??` `resources/views/layouts/foundation.blade.php`
+- `??` `resources/views/layouts/identity.blade.php`
+- `??` `resources/views/layouts/organizer.blade.php`
+- `??` `resources/views/layouts/web-workspace.blade.php`
+- `M` `resources/views/legal/privacidade.blade.php`
+- `M` `resources/views/legal/termos.blade.php`
+- `M` `resources/views/login.blade.php`
+- `M` `resources/views/minhas-candidaturas.blade.php`
+- `??` `resources/views/notificacoes/central.blade.php`
+- `M` `resources/views/ong/aprovacao-pendente.blade.php`
+- `??` `resources/views/ong/area-cadastral.blade.php`
+- `M` `resources/views/ong/cadastro_ong.blade.php`
+- `M` `resources/views/ong/candidatos.blade.php`
+- `M` `resources/views/ong/criar.blade.php`
+- `M` `resources/views/ong/editar.blade.php`
+- `M` `resources/views/ong/editar_ong.blade.php`
+- `M` `resources/views/ong/excluir_ong.blade.php`
+- `M` `resources/views/ong/exclusao-pendente.blade.php`
+- `M` `resources/views/ong/meus-eventos.blade.php`
+- `M` `resources/views/ong/painel_ong.blade.php`
+- `M` `resources/views/ong/perfil_ong.blade.php`
+- `??` `resources/views/organizadores/ong.blade.php`
+- `??` `resources/views/organizadores/solicitacao.blade.php`
+- `??` `resources/views/organizadores/workspace.blade.php`
+- `??` `resources/views/participacoes/gestao.blade.php`
+- `??` `resources/views/participacoes/pessoal.blade.php`
+- `??` `resources/views/perfil/apadrinhamento.blade.php`
+- `??` `resources/views/perfil/area-privada.blade.php`
+- `M` `resources/views/perfil/editar-perfil.blade.php`
+- `M` `resources/views/perfil/excluir.blade.php`
+- `M` `resources/views/perfil/exclusao-pendente.blade.php`
+- `M` `resources/views/perfil/index-perfil.blade.php`
+- `??` `resources/views/perfil/partials/apadrinhamento.blade.php`
+- `M` `resources/views/perfil/preferencias.blade.php`
+- `??` `resources/views/privacidade/conta.blade.php`
+- `M` `resources/views/ranking/index.blade.php`
+
+### Testes: revisar dados sintéticos e isolamento (69)
+
+- `M` `tests/Feature/AvaliacaoConfiabilidadeTest.php`
+- `??` `tests/Feature/ContextualBrandNavigationTest.php`
+- `??` `tests/Feature/DemoFrontendTest.php`
+- `M` `tests/Feature/DocumentoStorageLgpdTest.php`
+- `M` `tests/Feature/FinalizacaoEventoCertificadoTest.php`
+- `??` `tests/Feature/IntegratedNavigationTest.php`
+- `??` `tests/Feature/OngPublicNavigationTest.php`
+- `??` `tests/Feature/VisualAccessibilityTest.php`
+- `??` `tests/Feature/VisualFeedbackTest.php`
+- `??` `tests/Feature/VisualFinalJourneyTest.php`
+- `??` `tests/Feature/VisualFourTest.php`
+- `??` `tests/Feature/VisualNavigationTest.php`
+- `??` `tests/Feature/VisualNotificationsTest.php`
+- `??` `tests/Feature/VisualOneTest.php`
+- `??` `tests/Feature/VisualParticipationCertificateTest.php`
+- `??` `tests/Feature/VisualParticipationClosureTest.php`
+- `??` `tests/Feature/VisualParticipationEvaluationTest.php`
+- `??` `tests/Feature/VisualParticipationJustificationTest.php`
+- `??` `tests/Feature/VisualParticipationReliabilityTest.php`
+- `??` `tests/Feature/VisualParticipationTest.php`
+- `??` `tests/Feature/VisualParticipationXpTest.php`
+- `??` `tests/Feature/VisualPrivacyTest.php`
+- `??` `tests/Feature/VisualSponsorshipTest.php`
+- `??` `tests/Feature/VisualThreeCorrectionsTest.php`
+- `??` `tests/Feature/VisualThreeRefinementsTest.php`
+- `??` `tests/Feature/VisualThreeTest.php`
+- `??` `tests/Feature/VisualTwoTest.php`
+- `??` `tests/Feature/VisualUsabilityTest.php`
+- `??` `tests/Frontend/accessibility-audit.mjs`
+- `??` `tests/Frontend/accessibility-browser.mjs`
+- `??` `tests/Frontend/admin-demo.test.mjs`
+- `??` `tests/Frontend/certificates-browser.mjs`
+- `??` `tests/Frontend/certificates-regression.mjs`
+- `??` `tests/Frontend/feedback-admin-browser.mjs`
+- `??` `tests/Frontend/feedback-browser.mjs`
+- `??` `tests/Frontend/feedback-closure-browser.mjs`
+- `??` `tests/Frontend/feedback-regressions.mjs`
+- `??` `tests/Frontend/final-corrections-browser.mjs`
+- `??` `tests/Frontend/final-journeys-browser.mjs`
+- `??` `tests/Frontend/final-route-audit.mjs`
+- `??` `tests/Frontend/notifications-actions-browser.mjs`
+- `??` `tests/Frontend/notifications-badge-browser.mjs`
+- `??` `tests/Frontend/notifications-browser.mjs`
+- `??` `tests/Frontend/notifications-guided-browser.mjs`
+- `??` `tests/Frontend/notifications-inventory.mjs`
+- `??` `tests/Frontend/notifications-regression.mjs`
+- `??` `tests/Frontend/notifications.test.mjs`
+- `??` `tests/Frontend/organizer-demo.test.mjs`
+- `??` `tests/Frontend/organizer-fixtures.php`
+- `??` `tests/Frontend/participation-certificates.test.mjs`
+- `??` `tests/Frontend/participation-closure.test.mjs`
+- `??` `tests/Frontend/participation-demo.test.mjs`
+- `??` `tests/Frontend/participation-evaluations.test.mjs`
+- `??` `tests/Frontend/participation-justification.test.mjs`
+- `??` `tests/Frontend/participation-reliability.test.mjs`
+- `??` `tests/Frontend/participation-xp.test.mjs`
+- `??` `tests/Frontend/privacy-browser.mjs`
+- `??` `tests/Frontend/privacy-domain-actions.mjs`
+- `??` `tests/Frontend/privacy-navigation.mjs`
+- `??` `tests/Frontend/privacy-regression.mjs`
+- `??` `tests/Frontend/privacy.test.mjs`
+- `??` `tests/Frontend/registration-sponsorship-browser.mjs`
+- `??` `tests/Frontend/registration-sponsorship-regression.mjs`
+- `??` `tests/Frontend/rendered-dialog-scripts.php`
+- `??` `tests/Frontend/rendered-dialog-scripts.test.mjs`
+- `??` `tests/Frontend/sponsorship-demo.test.mjs`
+- `??` `tests/Reference/README.md`
+- `??` `tests/Reference/WebFoundationTest.php`
+- `??` `tests/Unit/IdentityBoundaryTest.php`
+
+O delta de navbar desta execução afeta `app/Support/WebNavigation.php` e `tests/Feature/IntegratedNavigationTest.php`. Avaliar um commit pequeno depois da baseline revisada. A acessibilidade de menus compartilha markup e CSS do checkout.
+
+[Relatório de preservação](bloco-7-4-preservacao-relatorio.md).

@@ -88,18 +88,8 @@ class AvaliacaoService
 
     private function autorizarResponsavel(Evento $evento, Pessoa|Ong $ator): void
     {
-        if ($evento->responsavel_pessoa_id !== null) {
-            if (! ($ator instanceof Pessoa)
-                || $ator->pessoa_id !== $evento->responsavel_pessoa_id
-                || ! app(EventoPolicy::class)->manage($ator, $evento)) {
-                throw new AuthorizationException('Somente o responsável operacional pode avaliar o voluntário.');
-            }
-
-            return;
-        }
-
-        if (! ($ator instanceof Ong) || $ator->ong_id !== $evento->ong_id) {
-            throw new AuthorizationException('Somente a ONG proprietária pode avaliar o voluntário.');
+        if (! app(EventoPolicy::class)->operate($ator, $evento, true)) {
+            throw new AuthorizationException('Somente o responsável operacional pode avaliar o voluntário.');
         }
     }
 

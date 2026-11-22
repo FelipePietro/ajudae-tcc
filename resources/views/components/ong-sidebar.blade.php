@@ -3,7 +3,7 @@
 <label for="ong-menu" class="ong-menu-bg"></label>
 
 <aside class="ong-sidebar">
-    <a href="/dashboard" class="ong-sidebar-brand">
+    <a data-brand-home href="{{ \App\Support\NavigationContext::homeUrl() }}" class="ong-sidebar-brand">
         <span class="ong-sidebar-logo" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
                 <path d="M12 3c1.8 3.2 2.2 5.4 1.4 7.2C12.6 12 11 13 9.5 14.2 8 15.4 7 17 7 19c2.4-1 4.4-1.2 6.2-.4 1.6.7 2.8 2.2 3.8 4.2 1.6-4.6.6-8.2-1.4-10.2C13.8 10.8 12.6 9.4 12 3Z" fill="#E6C56A"/>
