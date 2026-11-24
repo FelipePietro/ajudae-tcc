@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\DocumentoPessoaController;
 use App\Http\Controllers\Api\HabilidadeController;
 use App\Http\Controllers\Api\ManagedImageController;
 use App\Http\Controllers\Api\InscricaoController;
+use App\Http\Controllers\Api\JustificativaParticipacaoController;
+use App\Http\Controllers\Api\MonitoriaController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OngController;
 use App\Http\Controllers\Api\OngOrganizadorController;
@@ -364,6 +366,8 @@ Route::prefix('v1/eventos')->group(function () {
 
     Route::post('/{id}/avaliacao-ong', [AvaliacaoController::class, 'ong'])
         ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
+    Route::get('/{id}/avaliacao-ong', [AvaliacaoController::class, 'consultarOng'])
+        ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
 
     Route::post('/{id}/certificado', [CertificadoController::class, 'emitir'])
         ->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa']);
@@ -533,6 +537,11 @@ Route::middleware([
 
 Route::middleware(['auth:sanctum', 'bearer.account', 'ability:pessoa,ong'])->group(function () {
     Route::get('/v1/documentos/{documento}/download', [DocumentoPessoaController::class, 'download']);
+    Route::get('/v1/inscricoes/{id}/monitoria', [MonitoriaController::class, 'show'])->whereNumber('id');
+    Route::patch('/v1/inscricoes/{id}/monitoria', [MonitoriaController::class, 'update'])->whereNumber('id');
+    Route::get('/v1/inscricoes/{id}/justificativa', [JustificativaParticipacaoController::class, 'show'])->whereNumber('id');
+    Route::post('/v1/inscricoes/{id}/justificativa', [JustificativaParticipacaoController::class, 'store'])->whereNumber('id');
+    Route::patch('/v1/inscricoes/{id}/justificativa', [JustificativaParticipacaoController::class, 'update'])->whereNumber('id');
 
     Route::get('/v1/notificacoes', [NotificationController::class, 'index']);
     Route::get('/v1/notificacoes/{id}', [NotificationController::class, 'show']);
@@ -560,6 +569,7 @@ Route::prefix('v1/admin')->middleware([
     Route::get('/validacoes-pessoa', [AdminPessoaValidationController::class, 'index']);
     Route::get('/validacoes-pessoa/{pessoa}', [AdminPessoaValidationController::class, 'show']);
     Route::post('/validacoes-pessoa/{pessoa}/assumir', [AdminPessoaValidationController::class, 'assumir']);
+    Route::post('/validacoes-pessoa/{pessoa}/exigir-padrinho', [AdminPessoaValidationController::class, 'exigirPadrinho']);
     Route::post('/validacoes-pessoa/{pessoa}/solicitar-correcao', [AdminPessoaValidationController::class, 'solicitarCorrecao']);
     Route::post('/validacoes-pessoa/{pessoa}/aprovar', [AdminPessoaValidationController::class, 'aprovar']);
     Route::post('/validacoes-pessoa/{pessoa}/reprovar', [AdminPessoaValidationController::class, 'reprovar']);
@@ -570,6 +580,10 @@ Route::prefix('v1/admin')->middleware([
 
 Route::prefix('v1/padrinhos')->middleware(['auth:sanctum', 'bearer.account', 'abilities:pessoa'])->group(function () {
     Route::get('/elegiveis', [PadrinhoController::class, 'elegiveis']);
+    Route::get('/codigo', [PadrinhoController::class, 'codigo']);
+    Route::post('/codigo', [PadrinhoController::class, 'emitirCodigo']);
+    Route::delete('/codigo', [PadrinhoController::class, 'revogarCodigo']);
+    Route::post('/indicacao', [PadrinhoController::class, 'indicar'])->middleware('throttle:5,1');
     Route::get('/me', [PadrinhoController::class, 'meus']);
     Route::get('/recebidas', [PadrinhoController::class, 'recebidas']);
     Route::post('/solicitacoes', [PadrinhoController::class, 'solicitar']);

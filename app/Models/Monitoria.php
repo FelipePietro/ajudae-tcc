@@ -16,5 +16,6 @@ class Monitoria extends Model
         'presenca' => 'boolean',
         'carga_horaria' => 'decimal:2',
         'validado_em' => 'datetime',
+        'confirmada' => 'boolean',
     ];
 }

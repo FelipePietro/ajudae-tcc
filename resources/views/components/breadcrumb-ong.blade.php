@@ -4,7 +4,7 @@
     'raizLabel' => 'Dashboard'
 ])
 @php
-if ($raizHref === null && in_array(request()->query('contexto'), ['organizador','organizador-vinculado'], true)) {
+if (!config('identity.enabled') && $raizHref === null && in_array(request()->query('contexto'), ['organizador','organizador-vinculado'], true)) {
     $raizHref = route('organizador.workspace', ['contexto'=>request()->query('contexto'),'jornada'=>request()->query('jornada')]);
     $raizLabel = 'Minha atuação';
 }
@@ -75,7 +75,7 @@ if ($raizHref === null && in_array(request()->query('contexto'), ['organizador',
                     <a
                         href="{{ route(
                             $item['route'],
-                            array_merge(array_filter(['contexto'=>request()->query('contexto'), 'jornada'=>is_string(request()->query('jornada')) && in_array(request()->query('jornada'), \App\Support\VisualThreeFixtures::SCENARIOS,true) ? request()->query('jornada') : null]), $item['params'] ?? [])
+                            array_merge(config('identity.enabled') ? [] : array_filter(['contexto'=>request()->query('contexto'), 'jornada'=>is_string(request()->query('jornada')) && in_array(request()->query('jornada'), \App\Support\VisualThreeFixtures::SCENARIOS,true) ? request()->query('jornada') : null]), $item['params'] ?? [])
                         ) }}"
                         class="
                             transition-colors

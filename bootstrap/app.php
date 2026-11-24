@@ -54,7 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->dontFlash(['senha', 'senha_confirmation', 'senha_atual', 'login', 'senha_pessoa', 'senha_pessoa_confirmation', 'senha_ong', 'senha_ong_confirmation']);
 
         $exceptions->render(function (ValidationConflictException $exception, Request $request) {
-            return $request->is('api/*')
+            return ($request->is('api/*') || $request->expectsJson())
                 ? ApiResponse::error($exception->getMessage(), null, 409)
                 : null;
         });

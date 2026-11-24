@@ -443,7 +443,7 @@ class AvaliacaoConfiabilidadeTest extends TestCase
         $this->assertSame('voluntario', $voluntario->fresh()->role_pessoa);
     }
 
-    public function test_avaliacoes_dos_dois_tipos_exigem_evento_ativo_sem_efeitos_colaterais(): void
+    public function test_estados_sem_janela_de_avaliacao_nao_permitem_envio(): void
     {
         $ong = $this->ong();
         $voluntario = $this->pessoa();
@@ -460,7 +460,9 @@ class AvaliacaoConfiabilidadeTest extends TestCase
 
             Sanctum::actingAs($voluntario, ['pessoa']);
             $this->postJson("/api/v1/eventos/{$evento->evento_id}/avaliacao-ong", ['nota' => 2])
-                ->assertStatus(409)->assertJsonPath('message', 'Somente evento ativo recebe avaliações.');
+                ->assertStatus(409)->assertJsonPath('message', $estado === 'finalizado'
+                    ? 'O prazo para avaliar a ONG está encerrado ou não pôde ser confirmado.'
+                    : 'Somente evento ativo recebe avaliações.');
 
             $this->assertSame(0, AvaliacaoVoluntario::where('evento_id', $evento->evento_id)->count());
             $this->assertSame(0, AvaliacaoOng::where('evento_id', $evento->evento_id)->count());
@@ -496,18 +498,21 @@ class AvaliacaoConfiabilidadeTest extends TestCase
         $this->assertDatabaseCount('avaliacao_ong', 0);
     }
 
-    public function test_avaliacoes_ativas_sao_historicas_apos_finalizacao_sem_nova_avaliacao_tardia(): void
+    public function test_avaliacao_ong_pos_finalizacao_inclui_limite_e_preserva_consulta_apos_o_prazo(): void
     {
         $ong = $this->ong();
         $voluntario = $this->pessoa();
         $outro = $this->pessoa();
+        $foraDoPrazo = $this->pessoa();
+        $semPresenca = $this->pessoa();
         $evento = $this->evento($ong);
         $agenda = $this->agenda($evento);
         $this->inscricao($agenda, $voluntario, 'participou');
         $this->inscricao($agenda, $outro, 'participou');
+        $this->inscricao($agenda, $foraDoPrazo, 'participou');
 
         Sanctum::actingAs($ong, ['ong']);
-        foreach ([$voluntario, $outro] as $pessoa) {
+        foreach ([$voluntario, $outro, $foraDoPrazo] as $pessoa) {
             $this->postJson("/api/v1/eventos/{$evento->evento_id}/avaliacoes/{$pessoa->pessoa_id}", ['nota' => 1])
                 ->assertCreated();
         }
@@ -516,17 +521,32 @@ class AvaliacaoConfiabilidadeTest extends TestCase
 
         Sanctum::actingAs($ong, ['ong']);
         $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertOk();
+        $finalizadoEm = Carbon::parse($evento->fresh()->finalizado_em);
+        $url = "/api/v1/eventos/{$evento->evento_id}/avaliacao-ong";
         $notificacoesAntes = $ong->notificacoes()->count() + $voluntario->notificacoes()->count();
         foreach ([$voluntario, $outro] as $pessoa) {
             $this->postJson("/api/v1/eventos/{$evento->evento_id}/avaliacoes/{$pessoa->pessoa_id}", ['nota' => 5])
                 ->assertStatus(409)->assertJsonPath('message', 'Somente evento ativo recebe avaliações.');
         }
+        $limite = $finalizadoEm->copy()->addDays(7);
+        Carbon::setTestNow($limite);
+        $evento->forceFill(['nm_evento' => 'Mutirão atualizado'])->save();
+        Sanctum::actingAs($semPresenca, ['pessoa']);
+        $this->getJson($url)->assertNotFound();
+        $this->postJson($url, ['nota' => 3, 'pessoa_id' => $outro->pessoa_id])->assertStatus(409);
         Sanctum::actingAs($outro, ['pessoa']);
-        $this->postJson("/api/v1/eventos/{$evento->evento_id}/avaliacao-ong", ['nota' => 3])
-            ->assertStatus(409)->assertJsonPath('message', 'Somente evento ativo recebe avaliações.');
+        $this->postJson($url, ['nota' => 3])->assertCreated()->assertJsonPath('data.nota', 3);
+        $this->postJson($url, ['nota' => 5])->assertStatus(409);
+        Carbon::setTestNow($limite->copy()->addSecond());
+        $this->getJson($url)->assertOk()->assertJsonPath('data.nota', 3);
+        Sanctum::actingAs($foraDoPrazo, ['pessoa']);
+        $this->postJson($url, ['nota' => 2])->assertStatus(409)->assertSee('prazo para avaliar');
+        $this->getJson($url)->assertNotFound();
+        Sanctum::actingAs($ong, ['ong']);
+        $this->getJson($url)->assertForbidden();
 
-        $this->assertSame(2, AvaliacaoVoluntario::where('evento_id', $evento->evento_id)->count());
-        $this->assertSame(1, AvaliacaoOng::where('evento_id', $evento->evento_id)->count());
+        $this->assertSame(3, AvaliacaoVoluntario::where('evento_id', $evento->evento_id)->count());
+        $this->assertSame(2, AvaliacaoOng::where('evento_id', $evento->evento_id)->count());
         $this->assertSame($notificacoesAntes, $ong->notificacoes()->count() + $voluntario->notificacoes()->count());
         $this->assertSame('finalizado', $evento->fresh()->status_evento);
     }

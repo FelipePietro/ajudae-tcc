@@ -26,7 +26,7 @@
             <h2>Situação cadastral</h2>
             <p>{{ ucfirst(str_replace('_', ' ', $accountStatus ?? '')) }}</p>
         </section>
-        <div class="account-two-columns">
+        <div @class(['account-two-columns' => $canRequestDeletion])>
         <section class="account-card">
             <h2>Alterar senha</h2>
             <form method="POST" action="{{ route('identity.password') }}">
@@ -46,14 +46,16 @@
                 <x-botao-primario as="button" :href="null" type="submit">Alterar senha</x-botao-primario>
             </form>
         </section>
-        <section class="account-card">
-            <h2>Excluir conta</h2>
-            <form method="POST" action="{{ route('identity.deletion.schedule') }}">
-                @csrf
-                <label class="mb-4 block"><input type="checkbox" name="confirmar_exclusao" value="1" required> Confirmo que desejo solicitar a exclusão da conta.</label>
-                <x-botao-declined as="button" :href="null" type="submit">Solicitar exclusão</x-botao-declined>
-            </form>
-        </section>
+        @if($canRequestDeletion)
+            <section class="account-card">
+                <h2>Excluir conta</h2>
+                <form method="POST" action="{{ route('identity.deletion.schedule') }}">
+                    @csrf
+                    <label class="mb-4 block"><input type="checkbox" name="confirmar_exclusao" value="1" required> Confirmo que desejo solicitar a exclusão da conta.</label>
+                    <x-botao-declined as="button" :href="null" type="submit">Solicitar exclusão</x-botao-declined>
+                </form>
+            </section>
+        @endif
         </div>
     @endif
 </div>

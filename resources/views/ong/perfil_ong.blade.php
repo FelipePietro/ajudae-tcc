@@ -1,3 +1,6 @@
+@php
+    $integrated = config('identity.enabled');
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -14,7 +17,7 @@
     @vite([
         'resources/css/app.css',
         'resources/css/painel_ong.css',
-        'resources/js/app.js'
+        $integrated ? 'resources/js/identity.js' : 'resources/js/app.js'
     ])
 </head>
 
@@ -31,7 +34,7 @@
     {{-- CONTEÚDO --}}
     {{-- ========================================================= --}}
 
-    <main class="ong-page-content">
+    <main @class(['ong-page-content' => !$integrated, 'mx-auto max-w-[1180px]' => $integrated])>
 
 
 
@@ -87,8 +90,8 @@
 
                             <span>
                                 📍
-                                {{ $usuario['cidade'] ?? 'São Paulo' }},
-                                {{ $usuario['estado'] ?? 'SP' }}
+                                {{ $usuario['cidade'] ?? ($integrated ? '—' : 'São Paulo') }},
+                                {{ $usuario['estado'] ?? ($integrated ? '—' : 'SP') }}
                             </span>
 
                             <span class="hidden sm:inline">
@@ -105,7 +108,7 @@
 
                             <span>
                                 Desde
-                                {{ $usuario['membro_desde'] ?? '2026' }}
+                                {{ $usuario['membro_desde'] ?? ($integrated ? '—' : '2026') }}
                             </span>
 
                         </div>
@@ -163,7 +166,7 @@
                 <div class="stat-card">
 
                     <div class="stat-value stat-dark">
-                        {{ $stats['eventos_organizados'] ?? 0 }}
+                        {{ $stats['eventos_organizados'] ?? ($integrated ? '—' : 0) }}
                     </div>
 
                     <div class="stat-label">
@@ -176,7 +179,7 @@
                 <div class="stat-card">
 
                     <div class="stat-value stat-blue">
-                        {{ $stats['voluntarios_gerenciados'] ?? 0 }}
+                        {{ $stats['voluntarios_gerenciados'] ?? ($integrated ? '—' : 0) }}
                     </div>
 
                     <div class="stat-label">
@@ -189,7 +192,7 @@
                 <div class="stat-card">
 
                     <div class="stat-value stat-orange">
-                        {{ $stats['badges'] ?? 0 }}
+                        {{ $stats['badges'] ?? ($integrated ? '—' : 0) }}
                     </div>
 
                     <div class="stat-label">
@@ -235,6 +238,7 @@
                             </div>
 
                         </div>
+                        @if($integrated && $usuario['descricao'])<p class="mb-5 break-words">{{ $usuario['descricao'] }}</p>@endif
 
 
                         <div
@@ -314,8 +318,8 @@
                                         text-[#1F2420]
                                     "
                                 >
-                                    {{ $usuario['cidade'] ?? 'São Paulo' }},
-                                    {{ $usuario['estado'] ?? 'SP' }}
+                                    {{ $usuario['cidade'] ?? ($integrated ? '—' : 'São Paulo') }},
+                                    {{ $usuario['estado'] ?? ($integrated ? '—' : 'SP') }}
                                 </p>
 
                             </div>
@@ -340,7 +344,7 @@
                                         text-[#1F2420]
                                     "
                                 >
-                                    {{ $usuario['membro_desde'] ?? '2026' }}
+                                    {{ $usuario['membro_desde'] ?? ($integrated ? '—' : '2026') }}
                                 </p>
 
                             </div>
@@ -419,7 +423,7 @@
                             </div>
 
 
-                            <x-botao-secundario :href="route('feed', ['contexto'=>request()->query('contexto','ong')])">
+                            <x-botao-secundario :href="$integrated ? route('feed') : route('feed', ['contexto'=>request()->query('contexto','ong')])">
                                 Explorar eventos
                             </x-botao-secundario>
 
@@ -550,13 +554,13 @@
                                             text-[#6B7269]
                                         "
                                     >
-                                        Nenhum evento criado ainda.
+                                        {{ $integrated ? 'A consulta de Eventos desta organização ainda está indisponível.' : 'Nenhum evento criado ainda.' }}
                                     </p>
 
 
-                                    <x-botao-primario :href="route('ong.eventos.criar')" class="mt-4">
+                                    @unless($integrated)<x-botao-primario :href="route('ong.eventos.criar')" class="mt-4">
                                         + Criar primeiro evento
-                                    </x-botao-primario>
+                                    </x-botao-primario>@endunless
 
                                 </div>
 
@@ -624,8 +628,8 @@
 
                                 <div class="info-value">
 
-                                    {{ $usuario['cidade'] ?? 'São Paulo' }},
-                                    {{ $usuario['estado'] ?? 'SP' }}
+                                    {{ $usuario['cidade'] ?? ($integrated ? '—' : 'São Paulo') }},
+                                    {{ $usuario['estado'] ?? ($integrated ? '—' : 'SP') }}
 
                                 </div>
 

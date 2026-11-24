@@ -130,7 +130,7 @@
 
                 <div
                     class="mt-4 flex max-w-full
-                           gap-2 overflow-x-auto pb-1"
+                           gap-2 pb-1 {{ $integrated ? 'flex-wrap' : 'overflow-x-auto' }}"
                 >
 
                     <x-botao-secundario as="button" :href="null" type="button"
@@ -702,19 +702,11 @@
                        xl:self-start"
             >
 
-                @if($integrated)
-                    <section class="rounded-2xl border border-[#dedacf] bg-white p-5 shadow-sm" aria-labelledby="feed-ranking">
-                        <h2 id="feed-ranking" tabindex="-1" class="font-poppins text-sm font-semibold">🏆 Top ranking</h2>
-                        <div class="mt-4 space-y-3"><p class="text-sm text-[#56594f]">A classificação ainda está indisponível.</p></div>
-                        <x-botao-primario :href="route('ranking')" class="mt-3" size="sm">Ver ranking completo</x-botao-primario>
-                    </section>
-                    @if(\App\Support\WebNavigation::for(request())->profile === 'perfil')
-                        <section class="rounded-2xl border border-[#dedacf] bg-white p-5 shadow-sm" aria-labelledby="feed-conquistas">
-                            <h2 id="feed-conquistas" class="font-poppins text-sm font-semibold">Seus badges</h2>
-                            <p class="mt-4 text-sm text-[#56594f]">As conquistas ainda estão indisponíveis nesta página.</p>
-                        </section>
-                    @endif
-                @else
+                @php
+                    $showBadges = $integrated
+                        ? \App\Support\WebNavigation::for(request())->profile === 'perfil'
+                        : in_array(request()->query('contexto'), ['pessoa','organizador','organizador-vinculado'], true);
+                @endphp
                 {{-- TOP RANKING --}}
                 <section
                     class="rounded-2xl
@@ -733,6 +725,9 @@
 
                     <div class="mt-4 space-y-3">
 
+                        @if($integrated)
+                            <p class="text-sm text-[#56594f]">A classificação ainda está indisponível.</p>
+                        @else
                         @foreach($topRanking as $pessoa)
 
                             <div
@@ -789,11 +784,12 @@
                             </div>
 
                         @endforeach
+                        @endif
 
                     </div>
 
 
-                    @if(in_array(request()->query('contexto'), ['pessoa','organizador','organizador-vinculado'], true))
+                    @if(!$integrated && $showBadges)
                     <div
                         class="mt-5
                                rounded-lg
@@ -816,14 +812,14 @@
 
                     @endif
 
-                    <x-botao-primario href="/ranking" class="mt-3" size="sm">
+                    <x-botao-primario :href="route('ranking')" class="mt-3" size="sm">
                         Ver ranking completo
                     </x-botao-primario>
 
                 </section>
 
 
-                @if(in_array(request()->query('contexto'), ['pessoa','organizador','organizador-vinculado'], true))
+                @if($showBadges)
                 {{-- BADGES --}}
                 <section
                     class="rounded-2xl
@@ -841,6 +837,9 @@
                     </h2>
 
 
+                    @if($integrated)
+                        <p class="mt-4 text-sm text-[#56594f]">As conquistas ainda estão indisponíveis nesta página.</p>
+                    @else
                     <div
                         class="mt-4 grid
                                grid-cols-3 gap-2"
@@ -882,6 +881,7 @@
                     <x-botao-secundario href="/perfil" class="mt-4" size="sm">
                         Ver todos os badges
                     </x-botao-secundario>
+                    @endif
 
                 </section>
 
@@ -902,15 +902,9 @@
                     💡
                     <strong>Dica:</strong>
 
-                    Participe de eventos e desbloqueie novos badges.
+                    {{ $integrated ? 'Use a cidade ou a modalidade para encontrar oportunidades.' : 'Participe de eventos e desbloqueie novos badges.' }}
                 </div>
 
-                @endif
-                @if($integrated)
-                    <div class="rounded-xl border border-[#17392a] bg-[#eaf5ef] px-4 py-4 font-poppins text-xs leading-5 text-[#4e695c]">
-                        💡 <strong>Dica:</strong> use a cidade ou a modalidade para encontrar oportunidades.
-                    </div>
-                @endif
             </aside>
 
         </div>

@@ -30,6 +30,7 @@ class ConfiabilidadeService
 
         $inscricoes = Inscricao::query()
             ->whereIn('pessoa_id', $ids->unique()->values())
+            ->withExists(['justificativaParticipacao as justificativa_deferida' => fn ($query) => $query->where('status', 'deferida')])
             ->whereHas('agenda', fn ($query) => $query->where('status_ativo', '!=', 'cancelado'))
             ->get()
             ->groupBy('pessoa_id');
@@ -62,6 +63,7 @@ class ConfiabilidadeService
     {
         $inscricoes = Inscricao::query()
             ->where('pessoa_id', $pessoa->pessoa_id)
+            ->withExists(['justificativaParticipacao as justificativa_deferida' => fn ($query) => $query->where('status', 'deferida')])
             ->whereHas('agenda', fn ($query) => $query->where('status_ativo', '!=', 'cancelado'))
             ->get();
 
@@ -103,10 +105,12 @@ class ConfiabilidadeService
             }
 
             if ($tipo !== null) {
+                $revertida = $delta < 0 && $inscricao->justificativa_deferida;
                 $ocorrencias[] = [
                     'inscricao_id' => $inscricao->inscricao_id,
                     'tipo' => $tipo,
-                    'delta' => $delta,
+                    'delta' => $revertida ? 0 : $delta,
+                    ...($revertida ? ['penalidade_revertida' => true] : []),
                     'registrado_em' => $quando->toISOString(),
                     '_quando' => $quando,
                 ];

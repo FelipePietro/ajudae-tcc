@@ -26,6 +26,7 @@ class PessoaPrivateResource extends PessoaPublicResource
             'aprovado_em' => $this->aprovado_em?->toISOString(),
             'reprovado_definitivamente_em' => $this->reprovado_definitivamente_em?->toISOString(),
             'bloqueado_ate' => $this->bloqueado_ate?->toISOString(),
+            'padrinho_exigido' => $this->padrinho_exigido_em !== null,
             'documentos' => DocumentoPessoaResource::collection($this->whenLoaded('documentos')),
             'exclusao_pendente' => $this->exclusao_pendente,
             'deletar_em' => $this->deletar_em?->toISOString(),

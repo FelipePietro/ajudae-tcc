@@ -2,16 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Models\Agenda;
 use App\Models\Acompanhamento;
+use App\Models\Agenda;
 use App\Models\AvaliacaoVoluntario;
 use App\Models\CatEvento;
+use App\Models\DocumentoPessoa;
 use App\Models\Evento;
 use App\Models\Inscricao;
 use App\Models\Pessoa;
 use App\Models\SolicitacaoPadrinho;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -101,6 +103,81 @@ class PadrinhoWorkflowTest extends TestCase
         $this->assertSame(3, Acompanhamento::count());
         $padrinho->forceFill(['aprovado_em' => now()->subDay()])->save();
         $this->assertSame(2, Acompanhamento::where('status', 'ativo')->count());
+    }
+
+    public function test_indicacao_no_cadastro_nao_substitui_decisao_humana_e_padrinho_e_revalidado(): void
+    {
+        [$padrinho] = $this->padrinhoElegivel();
+        $this->withToken($padrinho->createToken('teste', ['pessoa'])->plainTextToken);
+        $codigo = $this->postJson('/api/v1/padrinhos/codigo')->assertOk()->json('data.codigo');
+        $this->assertMatchesRegularExpression('/\A[0-9a-f]{64}\z/', $codigo);
+        $this->getJson('/api/v1/padrinhos/codigo')->assertOk()->assertJsonPath('data.codigo', $codigo);
+        $this->assertDatabaseMissing('codigo_indicacao_padrinho', ['codigo' => $codigo]);
+
+        $cadastro = $this->postJson('/api/v1/pessoas/register', $this->pessoaPayload(['codigo_padrinho' => $codigo]))
+            ->assertCreated()
+            ->assertJsonPath('data.user.status_validacao', 'aguardando_validacao')
+            ->assertJsonMissingPath('data.user.codigo_padrinho');
+        $pessoa = Pessoa::findOrFail($cadastro->json('data.user.pessoa_id'));
+        $pedido = SolicitacaoPadrinho::where('apadrinhado_id', $pessoa->getKey())->firstOrFail();
+        $this->assertSame('pendente', $pedido->status);
+
+        $admin = $this->pessoa('administrador');
+        $this->grantPermission($admin, 'usuarios.validar');
+        $tokenAdmin = $admin->createToken('teste', ['pessoa'])->plainTextToken;
+        $base = "/api/v1/admin/validacoes-pessoa/{$pessoa->getKey()}";
+        Auth::forgetGuards();
+        $this->withToken($cadastro->json('data.token'))->postJson("{$base}/exigir-padrinho", ['motivo' => 'Revisão humana'])->assertForbidden();
+        Auth::forgetGuards();
+        $this->withToken($tokenAdmin)->postJson("{$base}/assumir")->assertOk();
+        $this->postJson("{$base}/exigir-padrinho", ['motivo' => 'Revisão humana'])
+            ->assertOk()->assertJsonPath('data.padrinho_exigido', true)
+            ->assertJsonMissingPath('data.padrinho_exigido_motivo');
+
+        foreach (['documento_identidade', 'antecedentes_criminais'] as $tipo) {
+            DocumentoPessoa::create([
+                'pessoa_id' => $pessoa->getKey(), 'tipo' => $tipo, 'storage_path' => "teste/{$tipo}.pdf",
+                'mime_type' => 'application/pdf', 'size_bytes' => 100, 'status' => 'aprovado',
+                'ativo' => true, 'uploaded_at' => now(), 'validated_at' => now(), 'validated_by_admin_id' => $admin->getKey(),
+            ]);
+        }
+
+        $this->postJson("{$base}/aprovar", ['padrinho_exigido' => false])->assertConflict();
+        $tokenPadrinho = $padrinho->createToken('teste', ['pessoa'])->plainTextToken;
+        Auth::forgetGuards();
+        $this->withToken($tokenPadrinho)->postJson("/api/v1/padrinhos/solicitacoes/{$pedido->getKey()}/aceitar")->assertOk();
+        $this->assertSame('em_analise', $pessoa->fresh()->status_validacao);
+        $padrinho->forceFill(['aprovado_em' => now()->subDay()])->save();
+        Auth::forgetGuards();
+        $this->withToken($tokenAdmin)->postJson("{$base}/aprovar")->assertConflict();
+        $padrinho->forceFill(['aprovado_em' => now()->subDays(61)])->save();
+        $this->postJson("{$base}/aprovar")->assertOk()->assertJsonPath('data.status_validacao', 'aprovado');
+    }
+
+    public function test_codigo_revogado_mantem_pedido_e_nao_cria_cadastro_parcial(): void
+    {
+        [$padrinho] = $this->padrinhoElegivel();
+        $token = $padrinho->createToken('teste', ['pessoa'])->plainTextToken;
+        $codigo = $this->withToken($token)->postJson('/api/v1/padrinhos/codigo')->assertOk()->json('data.codigo');
+        $afilhado = $this->pessoa();
+        $afilhado->forceFill(['status_validacao' => 'correcao_solicitada'])->save();
+        $dados = ['codigo_padrinho' => $codigo];
+        Auth::forgetGuards();
+        $this->withToken($afilhado->createToken('teste', ['pessoa'])->plainTextToken)
+            ->postJson('/api/v1/padrinhos/indicacao', $dados)->assertOk();
+        $this->postJson('/api/v1/padrinhos/indicacao', $dados)->assertOk();
+        $this->assertDatabaseCount('solicitacao_padrinho', 1);
+
+        Auth::forgetGuards();
+        $this->withToken($token)->deleteJson('/api/v1/padrinhos/codigo')->assertOk();
+        $this->getJson('/api/v1/padrinhos/codigo')->assertOk()->assertJsonPath('data.codigo', null);
+        $this->postJson('/api/v1/pessoas/register', $this->pessoaPayload($dados))
+            ->assertUnprocessable()->assertJsonValidationErrors('codigo_padrinho');
+        $this->assertDatabaseMissing('pessoa', ['email_pessoa' => 'maria@example.com']);
+        $this->assertDatabaseCount('solicitacao_padrinho', 1);
+        $pedido = SolicitacaoPadrinho::firstOrFail();
+        $this->postJson("/api/v1/padrinhos/solicitacoes/{$pedido->getKey()}/recusar")->assertOk();
+        $this->assertSame('recusada', $pedido->fresh()->status);
     }
 
     public function test_conclusao_exige_seis_meses_e_cinco_agendas_durante_vinculo_com_admin_autorizado(): void

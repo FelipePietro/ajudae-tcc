@@ -9,9 +9,12 @@ use App\Models\Pessoa;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PessoaValidationService
 {
+    public function __construct(private readonly PadrinhoService $padrinhos) {}
+
     public function assumir(Pessoa $pessoa, Pessoa $admin): Pessoa
     {
         return DB::transaction(function () use ($pessoa, $admin) {
@@ -79,6 +82,10 @@ class PessoaValidationService
         return DB::transaction(function () use ($pessoa, $admin) {
             $pessoa = Pessoa::whereKey($pessoa->getKey())->lockForUpdate()->firstOrFail();
             $this->garantirConclusaoPermitida($pessoa, $admin);
+            if ($pessoa->padrinho_exigido_em !== null) {
+                $this->padrinhos->garantirVinculoParaAprovacao($pessoa);
+            }
+
             $documentos = $pessoa->documentos()
                 ->where('ativo', true)
                 ->whereIn('tipo', ['documento_identidade', 'antecedentes_criminais'])
@@ -104,7 +111,46 @@ class PessoaValidationService
             $this->registrarAdminLog($pessoa, $admin, 'pessoa.validacao_aprovada');
 
             return $pessoa->refresh();
-        });
+        }, 3);
+    }
+
+    public function exigirPadrinho(Pessoa $pessoa, Pessoa $admin, string $motivo): Pessoa
+    {
+        if (! $admin->hasPermission('usuarios.validar')) {
+            throw new AuthorizationException;
+        }
+
+        $motivo = trim($motivo);
+        if ($motivo === '') {
+            throw ValidationException::withMessages(['motivo' => 'Informe o motivo da exigência.']);
+        }
+
+        return DB::transaction(function () use ($pessoa, $admin, $motivo) {
+            $pessoa = Pessoa::whereKey($pessoa->getKey())->lockForUpdate()->firstOrFail();
+            $this->garantirConclusaoPermitida($pessoa, $admin);
+
+            if ($pessoa->padrinho_exigido_em !== null) {
+                if ($pessoa->padrinho_exigido_motivo !== $motivo) {
+                    throw new ValidationConflictException('Já existe uma exigência de padrinho registrada.');
+                }
+
+                return $pessoa;
+            }
+
+            $pessoa->forceFill([
+                'padrinho_exigido_em' => now(),
+                'padrinho_exigido_por_id' => $admin->pessoa_id,
+                'padrinho_exigido_motivo' => $motivo,
+            ])->save();
+
+            $this->registrarAdminLog($pessoa, $admin, 'pessoa.validacao_padrinho_exigido');
+            $pessoa->notificacoes()->create([
+                'tipo_notificacao' => 'validacao.padrinho_exigido',
+                'mensagem_notificacao' => 'A análise do seu cadastro precisa de um vínculo de apadrinhamento aceito.',
+            ]);
+
+            return $pessoa;
+        }, 3);
     }
 
     public function reprovarDefinitivamente(Pessoa $pessoa, Pessoa $admin, string $motivo): Pessoa

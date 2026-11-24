@@ -3,7 +3,25 @@
 
 @section('content')
 @isset($integratedAdmin)
-    @include('admin.integrated-entry')
+    @php
+        $permissions = \App\Support\WebNavigation::for(request())->adminPermissions;
+        $canRead = isset($permissions['lgpd.visualizar']);
+        $canRespond = isset($permissions['lgpd.responder']);
+        $description = match (true) {
+            $canRead && $canRespond => 'Esta conta tem permissão para consultar e responder solicitações de privacidade.',
+            $canRespond => 'Esta conta tem permissão para responder solicitações de privacidade.',
+            default => 'Esta conta tem permissão para consultar solicitações de privacidade.',
+        };
+    @endphp
+    @include('admin.partials.queue', [
+        'description' => $description,
+        'queueLabel' => 'Solicitações de titulares',
+        'queueMessage' => $page === 'responder-lgpd' ? 'A resposta a solicitações ainda está indisponível.' : 'A fila de solicitações ainda está indisponível.',
+    ])
+    @if($canRespond && $page === 'solicitacoes-lgpd')
+        <x-botao-secundario :href="route('admin.responder-lgpd')" class="mt-4">Área de resposta</x-botao-secundario>
+    @endif
+    <x-botao-secundario :href="route('admin.admin')" class="mt-4">Voltar ao painel</x-botao-secundario>
 @else
     @include('admin.partials.queue', ['description' => 'Acompanhe o andamento e a resposta às solicitações de titulares.'])
     <section data-privacy-root>

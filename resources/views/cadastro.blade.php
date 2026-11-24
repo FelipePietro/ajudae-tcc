@@ -1,6 +1,8 @@
 @extends('layouts.account')
 @section('title', 'Cadastro de Pessoa')
 @section('content')
-<x-demo-scenarios :demo="$demo" />
-<x-account-wizard :demo="$demo" :sections="$sections" />
+@unless($integratedRegistration ?? false)
+    <x-demo-scenarios :demo="$demo" />
+@endunless
+<x-account-wizard :demo="$demo ?? null" :sections="$sections" :integrated="$integratedRegistration ?? false" />
 @endsection

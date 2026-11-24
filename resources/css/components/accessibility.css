@@ -6,10 +6,10 @@
 :is(.ong-sidebar, #sidebar-ong) :focus-visible { outline-color: #e6c56a; }
 :is(.global-skip, .account-skip) {
     position: fixed; top: 8px; left: 8px; z-index: 1000;
-    transform: translateY(-200%); padding: 12px 18px;
+    transform: translateY(-200%); opacity: 0; pointer-events: none; padding: 12px 18px;
     border-radius: 8px; background: #17392a; color: #fff;
 }
-:is(.global-skip, .account-skip):focus { transform: translateY(0); }
+:is(.global-skip, .account-skip):focus { transform: translateY(0); opacity: 1; pointer-events: auto; }
 main { scroll-margin-top: 80px; }
 .btn-dourado[data-button-component] { color: #17392a; }
 .btn-dourado[data-button-component]:hover { color: #17392a; }

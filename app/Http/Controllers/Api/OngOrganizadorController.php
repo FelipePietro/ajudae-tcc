@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Evento;
 use App\Models\Pessoa;
 use App\Models\VinculoOngOrganizador;
-use App\Services\OrganizadorService;
 use App\Services\EventoOperationalService;
+use App\Services\OrganizadorService;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 
@@ -29,7 +29,9 @@ class OngOrganizadorController extends Controller
     public function index(Request $request)
     {
         return ApiResponse::success(
-            VinculoOngOrganizador::with('pessoa')
+            VinculoOngOrganizador::with(['pessoa' => fn ($query) => $query
+                ->select('pessoa_id', 'nm_pessoa')
+                ->where('exclusao_pendente', false)])
                 ->where('ong_id', $request->user()->ong_id)
                 ->latest('convidado_em')
                 ->get()

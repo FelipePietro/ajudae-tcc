@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AvaliacaoOng;
 use App\Models\Evento;
 use App\Models\Pessoa;
 use App\Services\AvaliacaoService;
@@ -38,12 +39,28 @@ class AvaliacaoController extends Controller
         }
         $avaliacao = $service->registrarOng(Evento::findOrFail($evento), $request->user(), $validated['nota']);
 
-        return ApiResponse::success([
+        return ApiResponse::success($this->dadosAvaliacaoOng($avaliacao), 'Avaliação da ONG registrada.', 201);
+    }
+
+    public function consultarOng(Request $request, int $evento, AvaliacaoService $service)
+    {
+        if (! ($request->user() instanceof Pessoa)) {
+            throw new AuthorizationException('Somente a própria Pessoa pode consultar a avaliação enviada.');
+        }
+
+        $avaliacao = $service->consultarOng(Evento::findOrFail($evento), $request->user());
+
+        return ApiResponse::success($this->dadosAvaliacaoOng($avaliacao));
+    }
+
+    private function dadosAvaliacaoOng(AvaliacaoOng $avaliacao): array
+    {
+        return [
             'avaliacao_ong_id' => $avaliacao->avaliacao_ong_id,
             'evento_id' => $avaliacao->evento_id,
             'pessoa_id' => $avaliacao->pessoa_id,
             'nota' => $avaliacao->nota,
-        ], 'Avaliação da ONG registrada.', 201);
+        ];
     }
 
     private function regrasNota(): array

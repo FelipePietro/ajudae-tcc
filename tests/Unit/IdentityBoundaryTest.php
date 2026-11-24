@@ -83,8 +83,11 @@ class IdentityBoundaryTest extends TestCase
         $this->get('/login?tipo[]=administrador')->assertOk()->assertSee('value="pessoa" checked', false);
         $this->get('/perfil?papel=administrador')->assertRedirect('/login');
         $this->get('/admin?contexto=administrador')->assertRedirect('/login');
-        $this->get('/cadastro')->assertOk()->assertSee('O cadastro está indisponível');
-        $this->get('/certificados/verificar')->assertNotFound();
+        $this->get('/cadastro')->assertOk()
+            ->assertSee('data-web-registration', false)
+            ->assertDontSee('data-demo-seed', false);
+        $this->get('/cadastro/ong')->assertOk()->assertSee('O cadastro está indisponível');
+        $this->get('/certificados/verificar')->assertOk()->assertSee('data-web-certificate-verification', false);
     }
 
     public function test_bearer_middleware_rejects_transient_and_wrong_type_abilities(): void
@@ -155,6 +158,7 @@ class IdentityBoundaryTest extends TestCase
 
         $pessoa = (new Pessoa)->forceFill([
             'pessoa_id' => 42, 'auth_version' => 3,
+            'role_pessoa' => 'voluntario', 'status_validacao' => 'aprovado',
             'senha_pessoa' => password_hash('outra-credencial-sintetica', PASSWORD_BCRYPT),
         ]);
         $this->mock(AccountCredentials::class)

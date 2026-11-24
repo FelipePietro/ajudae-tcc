@@ -1,20 +1,53 @@
-
-
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minhas Candidaturas — Ajudae</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', config('identity.enabled') ? 'resources/js/identity.js' : 'resources/js/app.js'])
 </head>
 
-<body data-events-page>
+<body @unless(config('identity.enabled')) data-events-page @endunless>
 
     {{-- NAVBAR --}}
     <x-context-navbar />
 
-    @isset($participation)
+    @if(config('identity.enabled'))
+        <main class="mx-auto grid max-w-[1100px] gap-8 px-6 py-8 lg:grid-cols-[1fr_300px]">
+            <section>
+                <h1 class="mb-1 text-xl font-bold text-verde-900">Minhas candidaturas</h1>
+                <p class="mb-6 text-sm text-[#56594f]">Acompanhe o status de todas as suas candidaturas</p>
+                <x-botao-secundario :href="route('participacoes')" size="sm" class="mb-5">Minhas participações</x-botao-secundario>
+                <div data-application-history data-url="{{ route('identity.application.index') }}" data-csrf="{{ csrf_token() }}">
+                    <p data-history-status role="status"></p>
+                    <div data-history-list class="grid gap-4"></div>
+                    <x-botao-secundario as="button" type="button" data-history-more hidden>Carregar mais</x-botao-secundario>
+                    <template>
+                        <article class="account-card">
+                            <h2 class="text-lg font-semibold"></h2>
+                            <p data-time></p><p data-state class="capitalize font-semibold"></p>
+                            <details class="my-3"><summary>Carta de apresentação</summary><p class="whitespace-pre-wrap break-words"></p></details>
+                            <x-botao-declined as="button" type="button" size="sm">Desistir desta Agenda</x-botao-declined>
+                        </article>
+                    </template>
+                    <dialog class="m-auto w-[min(448px,calc(100%-2rem))] rounded-xl p-6 backdrop:bg-black/50" aria-labelledby="withdraw-heading">
+                        <h2 id="withdraw-heading" class="text-lg font-semibold">Desistir desta Agenda?</h2>
+                        <p class="my-3">A desistência fica registrada no histórico. Se houver penalidade, o horário e as regras da Agenda serão considerados.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <form method="dialog"><x-botao-secundario as="button" type="submit">Voltar</x-botao-secundario></form>
+                            <x-botao-declined as="button" type="button" data-withdraw>Confirmar desistência</x-botao-declined>
+                        </div>
+                        <p data-withdraw-error role="alert"></p>
+                    </dialog>
+                </div>
+            </section>
+            <aside>
+                <section class="sidebar-card"><h2 class="sidebar-titulo">Seu progresso</h2><p>O progresso e as conquistas ainda estão indisponíveis.</p></section>
+                <section class="sidebar-card"><h2 class="sidebar-titulo">Atividade recente</h2><p>A consulta da atividade ainda está indisponível.</p></section>
+            </aside>
+        </main>
+    @elseif(isset($participation))
         <main class="max-w-[1100px] w-full mx-auto py-8 px-6">
             <header class="mb-6">
                 <h1 class="text-xl font-bold text-verde-900">Minhas candidaturas</h1>
@@ -122,7 +155,7 @@
 
         </div>
     </main>
-    @endisset
+    @endif
 
 
     <x-footer />

@@ -1,13 +1,16 @@
 @php
+    $integrated = isset($integratedAdmin);
+    if (!$integrated) {
     $selected = request()->query('registro');
     $multi = in_array($page, ['fila-eventos', 'cadastros-ong', 'upgrades-org', 'candidatos'], true);
     $labels = \App\Support\VisualFourFixtures::STATUSES;
     $tones = \App\Support\VisualFourFixtures::TONES;
     $visibleStates = array_unique(array_merge(array_map([\App\Support\VisualFourFixtures::class, 'displayState'], $records), \App\Support\VisualFourFixtures::RESULTS[$page] ?? []));
+    }
 @endphp
 <header class="fila-cabecalho">
     <div><h1>{{ $title }}</h1><p>{{ $description }}</p></div>
-    @if($page === 'fila-eventos' && $variant !== 'falha')
+    @if($page === 'fila-eventos' && $variant !== 'falha' && !$integrated)
         <div class="fila-resumo" aria-label="Totais de Eventos na fila">
             <div><strong data-admin-event-total="initial">{{ count(array_filter($records, fn ($row) => \App\Support\VisualFourFixtures::displayState($row) === 'aguardando a confirmação')) }}</strong><span>Aguardando aprovação inicial</span></div>
             <div><strong data-admin-event-total="reanalysis">{{ count(array_filter($records, fn ($row) => \App\Support\VisualFourFixtures::displayState($row) === 'reanalise')) }}</strong><span>Aguardando reanálise</span></div>
@@ -15,7 +18,18 @@
     @endif
 </header>
 
-@if($variant === 'falha')
+@if($integrated)
+    <div class="admin-widget admin-review-filters">
+        <label>Buscar registro <input type="search" class="cfg-input" disabled></label>
+        <label>Situação <select class="cfg-input" disabled><option>Todas</option></select></label>
+    </div>
+    <div class="admin-fila admin-review-queue">
+        <section class="admin-card" role="status">
+            <header class="admin-card-topo"><h2>{{ $queueLabel ?? $title }}</h2></header>
+            <p class="admin-desc">{{ $queueMessage ?? 'A consulta dos registros e as decisões nesta fila ainda estão indisponíveis.' }}</p>
+        </section>
+    </div>
+@elseif($variant === 'falha')
     <p role="alert" class="admin-widget">Não foi possível carregar os registros. <a href="{{ route('admin.'.$page, ['contexto' => 'administrador']) }}">Tentar novamente</a></p>
 @elseif($records)
     @if($multi)
@@ -133,4 +147,4 @@
 @else
     <p class="admin-widget">Nenhum registro disponível.</p>
 @endif
-@include('admin.partials.data')
+@unless($integrated)@include('admin.partials.data')@endunless

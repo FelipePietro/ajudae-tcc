@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 
 class CertificadoService
 {
+    public function __construct(private readonly MonitoriaService $monitoria) {}
+
     public function emitir(Evento $evento, Pessoa $pessoa): Certificado
     {
         return DB::transaction(function () use ($evento, $pessoa) {
@@ -21,6 +23,7 @@ class CertificadoService
                 throw new ValidationConflictException('O evento precisa estar finalizado para emitir certificado.');
             }
 
+            $this->monitoria->exigirValidacaoParaCertificado($evento, $pessoa);
             $existente = Certificado::where('evento_id', $evento->evento_id)
                 ->where('pessoa_id', $pessoa->pessoa_id)->first();
             if ($existente) {

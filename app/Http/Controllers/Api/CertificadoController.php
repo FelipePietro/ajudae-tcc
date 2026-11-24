@@ -4,23 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CertificadoResource;
+use App\Http\Responses\CertificadoPdfResponse;
 use App\Models\Certificado;
 use App\Models\Evento;
 use App\Models\Pessoa;
 use App\Services\CertificadoService;
+use App\Support\AccountAccess;
 use App\Support\ApiResponse;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
-use Throwable;
 
 class CertificadoController extends Controller
 {
     public function emitir(Request $request, int $id, CertificadoService $service)
     {
         $pessoa = $request->user();
-        if (! $pessoa instanceof Pessoa) {
-            throw new AuthorizationException();
+        if (! $pessoa instanceof Pessoa || ! AccountAccess::hasPersonalJourney($pessoa)) {
+            throw new AuthorizationException;
         }
 
         $certificado = $service->emitir(Evento::findOrFail($id), $pessoa);
@@ -31,8 +31,8 @@ class CertificadoController extends Controller
     public function show(Request $request, int $id)
     {
         $pessoa = $request->user();
-        if (! $pessoa instanceof Pessoa) {
-            throw new AuthorizationException();
+        if (! $pessoa instanceof Pessoa || ! AccountAccess::hasPersonalJourney($pessoa)) {
+            throw new AuthorizationException;
         }
 
         $certificado = Certificado::where('evento_id', $id)
@@ -57,27 +57,13 @@ class CertificadoController extends Controller
         ]);
     }
 
-    public function download(Request $request, Certificado $certificado)
+    public function download(Request $request, Certificado $certificado, CertificadoPdfResponse $pdf)
     {
         $pessoa = $request->user();
-        if (! $pessoa instanceof Pessoa || $certificado->pessoa_id !== $pessoa->pessoa_id) {
-            throw new AuthorizationException();
+        if (! $pessoa instanceof Pessoa || ! AccountAccess::hasPersonalJourney($pessoa) || $certificado->pessoa_id !== $pessoa->pessoa_id) {
+            throw new AuthorizationException;
         }
 
-        try {
-            $bytes = Pdf::loadView('certificados.documento', ['certificado' => $certificado])
-                ->setPaper('a4')->output();
-        } catch (Throwable) {
-            return ApiResponse::error('Não foi possível gerar o certificado agora.', null, 503);
-        }
-
-        $codigo = preg_replace('/[^A-Za-z0-9-]/', '', $certificado->codigo_verificacao);
-
-        return response($bytes, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="certificado-ajudae-'.$codigo.'.pdf"',
-            'Cache-Control' => 'private, no-store',
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
+        return $pdf->download($certificado);
     }
 }

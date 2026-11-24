@@ -46,6 +46,20 @@ final class PublicEventPagesController extends Controller
         ]);
     }
 
+    public function application(Request $request)
+    {
+        $account = $request->attributes->get('web_account');
+        abort_unless($account->isApprovedVolunteer(), 403);
+
+        $id = $request->query('evento');
+        abort_unless(is_string($id) && ctype_digit($id), 404);
+
+        return view('candidatura', [
+            'publicEvent' => $this->published()->whereKey($id)->firstOrFail(),
+            'candidate' => $account->nm_pessoa,
+        ]);
+    }
+
     private function published(): Builder
     {
         return Evento::query()

@@ -8,11 +8,14 @@ use App\Models\AvaliacaoVoluntario;
 use App\Models\CatEvento;
 use App\Models\Evento;
 use App\Models\Inscricao;
+use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Models\SolicitacaoOrganizador;
 use App\Models\VinculoOngOrganizador;
+use App\Services\AvaliacaoService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -150,7 +153,7 @@ class OrganizadorWorkflowTest extends TestCase
         $this->assertSame('aprovado', $pessoa->status_validacao);
         $this->assertSame(321, $pessoa->xp_pessoa);
         $this->assertSame('4.50', $pessoa->avaliacao_pessoa);
-        $this->assertSame(4.0, app(\App\Services\AvaliacaoService::class)->mediaVoluntario($pessoa));
+        $this->assertSame(4.0, app(AvaliacaoService::class)->mediaVoluntario($pessoa));
         $this->assertTrue($aprovadoEm->equalTo($pessoa->aprovado_em));
         $this->assertSame(5, $pessoa->inscricoes()->count());
 
@@ -292,6 +295,10 @@ class OrganizadorWorkflowTest extends TestCase
             'pessoa_id' => $organizador->pessoa_id,
         ])->assertCreated()->assertJsonPath('data.status', 'convite_pendente')
             ->json('data.vinculo_ong_organizador_id');
+        $this->getJson('/api/v1/ongs/me/organizadores')->assertOk()
+            ->assertJsonPath('data.0.pessoa.nm_pessoa', $organizador->nm_pessoa)
+            ->assertJsonMissingPath('data.0.pessoa.cpf_pessoa')
+            ->assertJsonMissingPath('data.0.pessoa.email_pessoa');
 
         foreach ([$this->pessoa('voluntario'), $this->pessoa('administrador')] as $invalida) {
             $this->postJson('/api/v1/ongs/me/convites-organizador', [
@@ -300,7 +307,8 @@ class OrganizadorWorkflowTest extends TestCase
         }
 
         Sanctum::actingAs($organizador, ['pessoa']);
-        $this->getJson('/api/v1/pessoas/me/convites-ong')->assertJsonFragment(['status' => 'convite_pendente']);
+        $this->getJson('/api/v1/pessoas/me/convites-ong')->assertJsonFragment(['status' => 'convite_pendente'])
+            ->assertJsonMissingPath('data.0.ong.cpf_responsavel_ong');
         $this->postJson('/api/v1/pessoas/eventos', $this->eventoPayload())
             ->assertCreated()
             ->assertJsonPath('data.pessoa_id', $organizador->pessoa_id);
@@ -309,6 +317,75 @@ class OrganizadorWorkflowTest extends TestCase
         $this->assertNull($evento->ong_id);
         $this->assertSame($organizador->pessoa_id, $evento->responsavel_pessoa_id);
         $this->assertNotNull($convite);
+    }
+
+    public function test_vinculos_web_usam_sessao_tipada_e_convite_exato_com_historico_auditado(): void
+    {
+        if (! config('identity.enabled')) {
+            $this->markTestSkipped('Executar com AJUDAE_WEB_AUTH=true.');
+        }
+
+        $ong = $this->ong();
+        $terceira = $this->ong();
+        $organizador = $this->pessoa('organizador');
+        $admin = $this->pessoa('administrador');
+        $convite = route('identity.organizer-links.invite');
+        $listagem = route('identity.organizer-links.index');
+        $this->getJson($listagem)->assertUnauthorized();
+        $this->iniciarSessao($admin);
+        $this->getJson($listagem.'?papel=organizador')->assertForbidden();
+
+        $this->iniciarSessao($ong);
+        $this->postJson($convite, ['identificador' => 'ausente-sintetico'])->assertAccepted();
+        $this->assertDatabaseCount('vinculo_ong_organizador', 0);
+        $this->postJson($convite, ['identificador' => $organizador->email_pessoa])->assertAccepted();
+        $this->postJson($convite, ['identificador' => $organizador->login_pessoa])->assertAccepted();
+        $this->assertDatabaseCount('vinculo_ong_organizador', 1);
+        $this->getJson($listagem)->assertOk()
+            ->assertJsonPath('data.data.0.nome', $organizador->nm_pessoa)
+            ->assertJsonMissingPath('data.data.0.identificador')
+            ->assertJsonMissingPath('data.data.0.email')
+            ->assertJsonPath('data.data.0.responder', null);
+
+        $vinculo = VinculoOngOrganizador::sole();
+        $resposta = route('identity.organizer-links.respond', $vinculo);
+        $encerrar = route('identity.organizer-links.end', $vinculo);
+        $this->iniciarSessao($organizador);
+        $this->getJson($listagem)->assertOk()->assertJsonPath('data.data.0.responder', $resposta);
+        $this->postJson($resposta, ['aceitar' => true])->assertOk();
+        $this->postJson($resposta, ['aceitar' => false])->assertConflict();
+
+        $this->iniciarSessao($terceira);
+        $this->getJson($listagem)->assertOk()->assertJsonCount(0, 'data.data');
+        $this->deleteJson($encerrar)->assertForbidden();
+        $this->iniciarSessao($ong);
+        $this->deleteJson($encerrar)->assertOk();
+
+        $this->assertSame('encerrado', $vinculo->refresh()->status);
+        foreach (['convite_enviado', 'convite_respondido', 'vinculo_encerrado'] as $acao) {
+            $this->assertDatabaseHas('admin_log', [
+                'recurso_id' => $vinculo->getKey(), 'acao' => 'organizador.'.$acao,
+            ]);
+        }
+        $this->assertSame(1, $organizador->notificacoes()->where('tipo_notificacao', 'organizador.convite_recebido')->count());
+        $this->assertSame(1, $ong->notificacoes()->where('tipo_notificacao', 'organizador.convite_respondido')->count());
+    }
+
+    private function iniciarSessao(Pessoa|Ong $ator): void
+    {
+        $this->flushSession();
+        Auth::forgetGuards();
+        $ator->refresh();
+        $tipo = $ator instanceof Ong ? 'ong' : 'pessoa';
+        $guard = Auth::guard('web_'.$tipo);
+        $guard->setUser($ator);
+        $this->withSession([
+            $guard->getName() => $ator->getKey(),
+            'web_identity' => [
+                'type' => $tipo, 'id' => $ator->getKey(), 'version' => $ator->auth_version,
+                'started_at' => now()->timestamp, 'last_activity' => now()->timestamp,
+            ],
+        ]);
     }
 
     public function test_recusa_e_aceite_de_convites_preservam_historico_e_exclusividade(): void

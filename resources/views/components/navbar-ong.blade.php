@@ -20,7 +20,7 @@
             ? match (request()->route()?->getName()) {
                 'ong.painel' => 'dashboard',
                 'feed' => 'explorar',
-                'ong.perfil' => 'perfil',
+                'ong.perfil', 'ong.perfil.editar' => 'perfil',
                 'ong.configuracoes', 'conta' => 'configuracoes',
                 'ong.privacidade' => 'privacidade',
                 'ong.eventos.index' => 'eventos',

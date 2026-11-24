@@ -65,7 +65,8 @@
                             <p class="admin-desc">A consulta de registros ainda está indisponível nesta área.</p>
                             <x-botao-secundario :href="$webDashboard->adminAreaUrl($key)" size="sm">Acompanhar solicitações</x-botao-secundario>
                         @else
-                            <p class="admin-desc">Os registros e as operações desta área ainda estão indisponíveis.</p>
+                            <p class="admin-desc">A disponibilidade de registros e operações é indicada em cada área.</p>
+                            <x-botao-secundario :href="$webDashboard->adminAreaUrl($key)" size="sm">Abrir {{ mb_strtolower($area[0]) }}</x-botao-secundario>
                         @endif
                     </section>
                 @endforeach
@@ -135,6 +136,9 @@
                         <x-botao-secundario :href="$webDashboard ? $webDashboard->adminAreaUrl($key) : route('admin.'.$key, $params)" :texto="$areas[$key][0]" size="sm" />
                     @endforeach
                 </nav>
+                @if($webDashboard)
+                    <x-botao-secundario :href="route('conta')" class="mt-3" size="sm">Gerenciar minha conta</x-botao-secundario>
+                @endif
             </section>
         </aside>
     </div>

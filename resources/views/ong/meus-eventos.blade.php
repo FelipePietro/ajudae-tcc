@@ -1,3 +1,10 @@
+@php
+    $integrated = config('identity.enabled');
+    $organizerManagement = $organizerManagement ?? false;
+    $listRoute = $organizerManagement ? 'organizador.eventos' : 'ong.eventos.index';
+    $managementParams = $integrated ? [] : ['contexto' => request()->query('contexto', 'ong'), 'jornada' => request()->query('jornada')];
+    $workspaceUrl = $organizerManagement ? route('organizador.workspace') : null;
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -13,33 +20,31 @@
 
     @vite([
         'resources/css/app.css',
-        'resources/js/app.js'
+        $integrated ? 'resources/js/identity.js' : 'resources/js/app.js'
     ])
 </head>
 
-<body data-events-page
+<body @unless($integrated) data-events-page @endunless
     class="min-h-screen overflow-x-hidden
            bg-[#f7f5ef]
            font-outfit
            text-[#292820]"
 >
 
-    <x-context-navbar default-context="ong" />
+    <x-context-navbar default-context="ong" :surface="$integrated && !$organizerManagement ? 'institution' : 'context'" />
 
 
     <main
-        class="min-h-screen w-full
-               lg:ml-[230px]
-               lg:w-[calc(100%-230px)]"
+        @class(['min-h-screen w-full', 'lg:ml-[230px] lg:w-[calc(100%-230px)]' => !$organizerManagement])
     >
 
 
-        <x-breadcrumb-ong
+        <x-breadcrumb-ong :raiz-href="$workspaceUrl" :raiz-label="$organizerManagement ? 'Minha atuação' : 'Dashboard'"
             :itens="[
                 ['label' => 'Meus eventos']
             ]"
         />
-<x-event-state :flow="$flow" />
+@unless($integrated)<x-event-state :flow="$flow" />@endunless
 
 
         {{-- ============================================================= --}}
@@ -86,16 +91,20 @@
                 </div>
 
 
-                <x-botao-primario :href="route('ong.eventos.criar',['contexto'=>request()->query('contexto','ong'), 'jornada'=>request()->query('jornada')])" class="w-full md:w-auto">
+                @if($organizerManagement)
+                    <x-botao-secundario :href="$workspaceUrl">Voltar para Minha atuação</x-botao-secundario>
+                @else
+                <x-botao-primario :href="route('ong.eventos.criar', $managementParams)" class="w-full md:w-auto">
                     + Criar evento
                 </x-botao-primario>
+                @endif
 
             </div>
 
 
             {{-- ========================================================= --}}
             {{-- CARDS DE RESUMO --}}
-<x-organizer-scope :flow="$flow" />
+@unless($integrated)<x-organizer-scope :flow="$flow" />@endunless
             {{-- ========================================================= --}}
 
             <section
@@ -135,7 +144,7 @@
                                        font-semibold
                                        text-[#17392a]"
                             >
-                                {{ $resumo['ativos'] }}
+                                {{ $resumo['ativos'] ?? '—' }}
                             </p>
 
                         </div>
@@ -186,7 +195,7 @@
                                        font-semibold
                                        text-[#17392a]"
                             >
-                                {{ $resumo['aguardando'] }}
+                                {{ $resumo['aguardando'] ?? '—' }}
                             </p>
 
                         </div>
@@ -237,7 +246,7 @@
                                        font-semibold
                                        text-[#17392a]"
                             >
-                                {{ $resumo['candidaturas_pendentes'] }}
+                                {{ $resumo['candidaturas_pendentes'] ?? '—' }}
                             </p>
 
                         </div>
@@ -288,7 +297,7 @@
                                        font-semibold
                                        text-[#17392a]"
                             >
-                                {{ $resumo['realizados'] }}
+                                {{ $resumo['realizados'] ?? '—' }}
                             </p>
 
                         </div>
@@ -339,7 +348,7 @@
 
                     <input
                         type="search"
-                        id="busca-eventos-ong"
+                        id="busca-eventos-ong" @disabled($integrated)
                         aria-label="Buscar meus eventos"
                         placeholder="Buscar por evento ou local..."
                         class="w-full
@@ -368,25 +377,25 @@
 
 
                                     <x-botao-secundario as="button" :href="null" type="button"
-                        data-status="todos" class="status-btn" size="sm" aria-pressed="true">
+                        data-status="todos" :disabled="$integrated" class="status-btn" size="sm" aria-pressed="true">
                         Todos
                     </x-botao-secundario>
 
 
                     <x-botao-secundario as="button" :href="null" type="button"
-                        data-status="ativo" class="status-btn" size="sm" aria-pressed="false">
+                        data-status="ativo" :disabled="$integrated" class="status-btn" size="sm" aria-pressed="false">
                         Publicados
                     </x-botao-secundario>
 
 
                     <x-botao-secundario as="button" :href="null" type="button"
-                        data-status="aguardando a confirmação" class="status-btn" size="sm" aria-pressed="false">
+                        data-status="aguardando a confirmação" :disabled="$integrated" class="status-btn" size="sm" aria-pressed="false">
                         Aguardando
                     </x-botao-secundario>
 
 
                     <x-botao-secundario as="button" :href="null" type="button"
-                        data-status="reprovado" class="status-btn" size="sm" aria-pressed="false">
+                        data-status="reprovado" :disabled="$integrated" class="status-btn" size="sm" aria-pressed="false">
                         Recusados
                     </x-botao-secundario>
 
@@ -404,7 +413,7 @@
                 class="mt-6 space-y-4"
             >
 
-                @foreach($eventos as $evento)
+                @foreach(($eventos ?? []) as $evento)
 
                     @php
 
@@ -765,7 +774,7 @@
 
             <div
                 id="sem-eventos-ong"
-                class="mt-6 hidden
+                class="mt-6 {{ $integrated ? '' : 'hidden' }}
                        rounded-2xl
                        border border-[#dedbd1]
                        bg-white
@@ -784,7 +793,7 @@
                            text-sm
                            font-semibold"
                 >
-                    Nenhum evento encontrado
+                    {{ $integrated ? 'A consulta e a gestão de Eventos ainda estão indisponíveis.' : 'Nenhum evento encontrado' }}
                 </p>
 
                 <p
@@ -793,7 +802,7 @@
                            text-xs
                            text-[#817c70]"
                 >
-                    Tente alterar sua busca ou o filtro selecionado.
+                    @unless($integrated)Tente alterar sua busca ou o filtro selecionado.@endunless
                 </p>
 
             </div>
@@ -807,6 +816,7 @@
     {{-- JAVASCRIPT --}}
     {{-- ============================================================= --}}
 
+    @unless($integrated)
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -982,6 +992,7 @@
 
         });
     </script>
+    @endunless
 
 </body>
 

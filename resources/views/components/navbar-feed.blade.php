@@ -38,12 +38,20 @@
                 }
             @endphp
             @foreach($entries as $name => $label)
-                <li><a href="{{ route($name) }}" @if(request()->routeIs($name)) class="nav-active" aria-current="page" @endif>{{ $name === 'feed' && !$webNavigation->organization ? 'Feed' : $label }}</a></li>
+                @php
+                    $activeSection = match ($name) {
+                        'feed' => request()->routeIs('eventos.show'),
+                        'perfil' => request()->routeIs('perfil.editar', 'perfil.preferencias', 'perfil.privacidade', 'participacoes', 'certificados.index'),
+                        'organizador.eventos' => request()->routeIs('organizador.eventos.criar'),
+                        default => false,
+                    };
+                @endphp
+                <li><a href="{{ route($name) }}" @if(request()->routeIs($name)) class="nav-active" aria-current="page" @elseif($activeSection) class="nav-active" aria-current="location" @endif>{{ $name === 'feed' && !$webNavigation->organization ? 'Feed' : $label }}</a></li>
                 @if($name === 'feed' && $webNavigation->volunteer)
-                        <li><a href="{{ route('candidaturas') }}">Candidaturas</a></li>
+                    <li><a href="{{ route('candidaturas') }}" @if(request()->routeIs('candidaturas')) class="nav-active" aria-current="page" @elseif(request()->routeIs('candidatura.form')) class="nav-active" aria-current="location" @endif>Candidaturas</a></li>
                 @endif
                 @if($name === 'perfil' && !$webNavigation->organizer)
-                    <li><a href="{{ route('ranking') }}">Ranking</a></li>
+                    <li><a href="{{ route('ranking') }}" @if(request()->routeIs('ranking')) class="nav-active" aria-current="page" @endif>Ranking</a></li>
                 @endif
             @endforeach
             @unless($webNavigation->restricted)

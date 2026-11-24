@@ -3,7 +3,7 @@
     $webNavigation = $integrated ? \App\Support\WebNavigation::for(request()) : null;
     $publicHeaderNavigation = $integrated ? null : ($navigation ?? \App\Support\NavigationContext::resolve(request()->query('contexto'), 'visitante'));
 @endphp
-@if($webNavigation?->profile || $webNavigation?->restricted)
+@if($webNavigation?->signedIn)
     @include('components.navbar-feed', ['webNavigation' => $webNavigation])
 @elseif($publicHeaderNavigation && $publicHeaderNavigation['key'] !== 'visitante')
     @include('components.navbar-feed', ['navigation' => $publicHeaderNavigation])

@@ -6,6 +6,7 @@ use App\Exceptions\ValidationConflictException;
 use App\Models\Pessoa;
 use App\Services\AccountCredentials;
 use App\Services\AccountDeletion;
+use App\Support\AccountAccess;
 use App\Support\WebNavigation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -78,6 +79,7 @@ class SessionAccountController extends Controller
 
         return view('auth.account', [
             'pendingDeletion' => $account->exclusao_pendente,
+            'canRequestDeletion' => AccountAccess::mayRequestOwnDeletion($account),
             'deadline' => $account->deletar_em,
             'name' => $account->exclusao_pendente ? null : ($account instanceof Pessoa ? $account->nm_pessoa : $account->nome_fantasia),
             'accountStatus' => $account->exclusao_pendente ? null : ($account instanceof Pessoa ? $account->status_validacao : $account->status_ong),
@@ -99,10 +101,13 @@ class SessionAccountController extends Controller
 
     public function scheduleDeletion(Request $request, AccountDeletion $deletions)
     {
+        $account = $request->attributes->get('web_account');
+        abort_unless(AccountAccess::mayRequestOwnDeletion($account), 403);
+
         $request->validate(['confirmar_exclusao' => ['accepted']]);
 
         try {
-            $deletions->schedule($request->attributes->get('web_account'));
+            $deletions->schedule($account);
         } catch (ValidationConflictException $exception) {
             throw ValidationException::withMessages(['exclusao' => $exception->getMessage()]);
         }

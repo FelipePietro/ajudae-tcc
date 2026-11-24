@@ -11,6 +11,8 @@
             @if($ownProfile['place'])<p>{{ $ownProfile['place'] }}</p>@endif
         </div>
         <div class="account-profile-actions" role="group" aria-label="Ações do meu perfil">
+            <x-botao-secundario :href="route('perfil.editar')">Meu cadastro</x-botao-secundario>
+            @if($ownProfile['publicUrl'])<x-botao-secundario :href="$ownProfile['publicUrl']">Ver perfil público</x-botao-secundario>@endif
             <x-botao-secundario :href="route('conta')">Segurança da conta</x-botao-secundario>
         </div>
     </section>
@@ -30,6 +32,7 @@
                 <a href="{{ route('candidaturas') }}">Minhas candidaturas ↗</a>
             @endif
             <a href="{{ route('participacoes') }}">Minhas participações ↗</a>
+            <a href="{{ route('certificados.index') }}">Meus certificados ↗</a>
         </aside>
         <div>
             <section id="resumo" tabindex="-1">
@@ -55,7 +58,7 @@
                         <div><dt>{{ $category }}</dt><dd>{{ $values ? implode(', ', $values) : 'Nenhuma registrada' }}</dd></div>
                     @endforeach
                 </dl>
-                <p class="account-note">A edição de preferências ainda está indisponível.</p>
+                <x-botao-secundario :href="route('perfil.preferencias')">Conferir preferências</x-botao-secundario>
             </section>
             <section id="documentos" tabindex="-1" class="account-card">
                 <span class="account-eyebrow">Área privada</span>

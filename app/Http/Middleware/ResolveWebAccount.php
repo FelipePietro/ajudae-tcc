@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Support\AccountAccess;
+use App\Support\ApiResponse;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,8 @@ class ResolveWebAccount
         abort_if(in_array(config('session.driver'), ['cookie', 'array'], true) && ! app()->environment('testing'), 503);
         $session = $request->session();
         $public = $required === 'public';
+        $personal = $required === 'jornada-pessoa';
+        $requiredType = $personal ? 'pessoa' : $required;
         $identity = $session->get('web_identity');
         $type = $identity['type'] ?? null;
         $pessoa = Auth::guard('web_pessoa');
@@ -43,22 +46,30 @@ class ResolveWebAccount
                     return $this->privateResponse($next($request));
                 }
 
-                return $this->privateResponse(redirect()->route('login')->with('status', 'Sua sessão terminou. Entre novamente.'));
+                return $this->privateResponse($request->expectsJson()
+                    ? ApiResponse::error('Sua sessão terminou. Entre novamente.', status: 401)
+                    : redirect()->route('login')->with('status', 'Sua sessão terminou. Entre novamente.'));
             }
 
             $request->attributes->set('web_account', $account);
 
-            if (! $public && $required !== null && $required !== 'required' && $required !== $type) {
+            if (! $public && $required !== null && $required !== 'required' && $requiredType !== $type) {
                 abort(403);
             }
 
             if (! $public && $account->exclusao_pendente && ! $request->routeIs('login', 'login.store', 'logout', 'conta', 'identity.deletion.cancel')) {
-                return $this->privateResponse(redirect()->route('conta'));
+                return $this->privateResponse($request->expectsJson()
+                    ? ApiResponse::error('Acompanhe a solicitação de exclusão em Minha conta.', status: 403)
+                    : redirect()->route('conta'));
             }
+
+            abort_if($personal && ! AccountAccess::hasPersonalJourney($account), 403);
 
             $authenticated = true;
         } elseif (! $public && $required !== null) {
-            return $this->privateResponse(redirect()->route('login'));
+            return $this->privateResponse($request->expectsJson()
+                ? ApiResponse::error('Não autenticado.', status: 401)
+                : redirect()->route('login'));
         }
 
         $response = $next($request);

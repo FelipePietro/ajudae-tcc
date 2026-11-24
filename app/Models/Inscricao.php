@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Inscricao extends Model
 {
@@ -25,7 +26,11 @@ class Inscricao extends Model
         'presenca_confirmada_em',
         'presenca',
         'carga_horaria',
+        'declarou_estudante',
+        'carta_apresentacao',
     ];
+
+    protected $hidden = ['carta_apresentacao'];
 
     protected $casts = [
         'dt_inscricao' => 'datetime',
@@ -36,6 +41,8 @@ class Inscricao extends Model
         'presenca_confirmada_em' => 'datetime',
         'presenca' => 'boolean',
         'carga_horaria' => 'decimal:2',
+        'declarou_estudante' => 'boolean',
+        'carta_apresentacao' => 'encrypted',
     ];
 
     public function pessoa(): BelongsTo
@@ -56,9 +63,13 @@ class Inscricao extends Model
         );
     }
 
-    public function monitoria()
+    public function monitoria(): HasOne
     {
         return $this->hasOne(Monitoria::class, 'inscricao_id', 'inscricao_id');
     }
 
+    public function justificativaParticipacao(): HasOne
+    {
+        return $this->hasOne(JustificativaParticipacao::class, 'inscricao_id');
+    }
 }

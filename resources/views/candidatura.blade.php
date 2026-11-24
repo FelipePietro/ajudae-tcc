@@ -1,17 +1,22 @@
+@php
+    $integrated = isset($publicEvent);
+    $eventUrl = $integrated ? route('eventos.show', $publicEvent->getKey()) : route('eventos.show', ['id' => $flow['event_id'], 'contexto' => request()->query('contexto', 'pessoa')]);
+@endphp
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidatura — Ajudae</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', $integrated ? 'resources/js/identity.js' : 'resources/js/app.js'])
 </head>
 
-<body data-events-page class="bg-[#f5f5f0] text-[#1a3a2a] font-sans">
+<body @unless($integrated) data-events-page @endunless class="bg-[#f5f5f0] text-[#1a3a2a] font-sans">
 
     {{-- NAVBAR --}}
     <x-context-navbar />
-    <x-event-state :flow="$flow" />
+    @unless($integrated)<x-event-state :flow="$flow" />@endunless
 
     {{-- Original circles/connectors/labels recovered from HEAD, with four functional stages. --}}
     <nav aria-label="Etapas da candidatura" class="flex items-start justify-center py-6 px-4 bg-[#f5f5f0]" data-application-progress>
@@ -24,7 +29,7 @@
         @endforeach
     </nav>
 
-    <div class="max-w-[700px] mx-auto px-4 pt-6"><a href="{{ route('eventos.show', ['id'=>$flow['event_id'], 'contexto'=>request()->query('contexto','pessoa')]) }}" class="text-sm underline">← Ver evento</a></div>
+    <div class="max-w-[700px] mx-auto px-4 pt-6"><a href="{{ $eventUrl }}" class="text-sm underline">← Ver evento</a></div>
 
     {{-- CONTEÚDO --}}
     <main class="max-w-[700px] mx-auto my-8 px-4 flex flex-col gap-5">
@@ -33,11 +38,15 @@
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-[#EEF7F2] border border-[#c8e0d4] rounded-xl px-5 py-4">
             <div class="text-3xl bg-[#d4eddf] p-2.5 rounded-[10px] shrink-0">🌿</div>
             <div>
-                <strong class="text-sm text-[#1a3a2a]">{{ $nome_evento }} — {{ $nome_ong }}</strong>
+                <strong class="text-sm text-[#1a3a2a]">{{ $integrated ? $publicEvent->nm_evento : $nome_evento.' — '.$nome_ong }}</strong>
                 <p class="text-[0.82rem] text-gray-500 mt-1 flex flex-col sm:flex-row sm:gap-2">
-                    <span>📅 {{ $data_evento }}</span>
-                    <span>📍 {{ $endereco_evento }}</span>
-                    <span>👥 Vagas disponíveis por Agenda abaixo</span>
+                    @if($integrated)
+                        <span>{{ implode(', ', array_filter([$publicEvent->cidade_evento, $publicEvent->uf_evento])) }}</span>
+                    @else
+                        <span>📅 {{ $data_evento }}</span>
+                        <span>📍 {{ $endereco_evento }}</span>
+                        <span>👥 Vagas disponíveis por Agenda abaixo</span>
+                    @endif
                 </p>
             </div>
         </div>
@@ -48,15 +57,15 @@
 
             <div class="flex items-center gap-3">
                 <a href="/perfil" class="bg-[#2d6a4f] text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold no-underline uppercase shrink-0">
-                    LP
-                    {{-- Depois trocar por: {{ substr(Auth::user()->nm_pessoa, 0, 2) }} --}}
+                    {{ $integrated ? \App\Support\WebNavigation::for(request())->initials : 'LP' }}
                 </a>
                 <div>
-                    <strong class="text-sm text-[#1a3a2a] block">{{ $nome_user }}</strong>
-                    <p class="text-[0.82rem] text-gray-500 m-0">{{ $cidade_user }}, {{ $uf_user }}</p>
+                    <strong class="text-sm text-[#1a3a2a] block">{{ $integrated ? $candidate : $nome_user }}</strong>
+                    @unless($integrated)<p class="text-[0.82rem] text-gray-500 m-0">{{ $cidade_user }}, {{ $uf_user }}</p>@endunless
                 </div>
             </div>
 
+            @unless($integrated)
             {{-- Badges --}}
             <div class="flex flex-wrap gap-2">
                 <span class="text-xs px-3 py-1 rounded-full font-medium bg-[#fff8e1] text-[#7a5c00]">⭐ {{ $nivel_user }} — {{ $titulo_nivel }}</span>
@@ -72,7 +81,8 @@
                 @endforeach
             </div>
 
-            <x-botao-secundario href="/perfil">
+            @endunless
+            <x-botao-secundario :href="$integrated ? route('perfil.editar') : '/perfil'">
                 Editar perfil antes de enviar →
             </x-botao-secundario>
         </div>
@@ -85,7 +95,11 @@
                 <p class="text-[0.85rem] text-gray-500 m-0 mt-1">Escolha o horário de participação. A seleção será feita pelo responsável.</p>
             </div>
 
-            <x-application-steps :flow="$flow" :candidate="$nome_user" />
+            @if($integrated)
+                @include('components.web-application-steps')
+            @else
+                <x-application-steps :flow="$flow" :candidate="$nome_user" />
+            @endif
 
 
         </div>

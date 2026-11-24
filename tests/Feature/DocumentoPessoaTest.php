@@ -76,6 +76,12 @@ class DocumentoPessoaTest extends TestCase
         ]);
         $this->grantPermission($admin, 'usuarios.validar');
         Sanctum::actingAs($admin, ['pessoa']);
+        $this->getJson("/api/v1/documentos/{$documentoId}/download")->assertForbidden();
+        $dono->forceFill([
+            'status_validacao' => 'em_analise',
+            'admin_analisando_id' => $admin->getKey(),
+            'analise_assumida_em' => now(),
+        ])->save();
         $this->get("/api/v1/documentos/{$documentoId}/download")->assertOk();
 
         $ong = $this->createOng('ativo');
@@ -140,10 +146,17 @@ class DocumentoPessoaTest extends TestCase
         Sanctum::actingAs($ong, ['ong']);
         $this->getJson($rota)->assertForbidden()->assertDontSee('documentos/pessoa/');
 
-        foreach ([$adminValidacao, $adminLgpd, $master] as $admin) {
+        $titular->forceFill([
+            'status_validacao' => 'em_analise',
+            'admin_analisando_id' => $adminValidacao->getKey(),
+            'analise_assumida_em' => now(),
+        ])->save();
+        foreach ([$adminLgpd, $master] as $admin) {
             Sanctum::actingAs($admin, ['pessoa']);
-            $this->get($rota)->assertOk();
+            $this->getJson($rota)->assertForbidden()->assertDontSee('documentos/pessoa/');
         }
+        Sanctum::actingAs($adminValidacao, ['pessoa']);
+        $this->get($rota)->assertOk();
         Sanctum::actingAs($titular, ['pessoa']);
         $this->getJson('/api/v1/documentos/999999999/download')->assertNotFound();
         $ausente = $this->arquivoDe($titular->pessoa_id, 'documentos/pessoa/ausente.pdf', false, false);

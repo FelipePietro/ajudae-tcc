@@ -7,8 +7,14 @@
 @php
     $integratedPrivacy = isset($privateEntry);
     $back = $integratedPrivacy ? route($institution ? 'ong.perfil' : 'perfil') : $privacy['back'];
+    $hasPrivacyRequests = $integratedPrivacy && \Illuminate\Support\Facades\Route::has('identity.privacy.index');
 @endphp
-<section @unless($integratedPrivacy) data-privacy-root data-mode="{{ $mode }}" @endunless>
+<section @unless($integratedPrivacy) data-privacy-root data-mode="{{ $mode }}" @endunless
+    @if($hasPrivacyRequests)
+        data-identity-privacy="{{ route('identity.privacy.index', absolute: false) }}"
+        data-privacy-store="{{ route('identity.privacy.store', absolute: false) }}"
+        data-csrf-token="{{ csrf_token() }}"
+    @endif>
     @unless($integratedPrivacy)
     <script type="application/json" data-privacy-config>{!! json_encode($privacy, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) !!}</script>
     @endunless
@@ -23,11 +29,58 @@
             </section>
             <section class="account-card">
                 <h2>Corrigir meus dados</h2><p>A edição cadastral ainda está indisponível.</p>
+                <x-botao-secundario :href="route($institution ? 'ong.perfil.editar' : 'perfil.editar')">Revisar cadastro</x-botao-secundario>
                 @unless($institution)<x-botao-secundario :href="$back.'#documentos'">Documentos privados</x-botao-secundario>@endunless
             </section>
         </div>
-        <section class="account-card"><h2>Consultar ou obter meus dados</h2><p>O envio de solicitações e a exportação de dados ainda estão indisponíveis nesta área.</p></section>
-        <section class="account-card"><h2>Minhas solicitações</h2><p>O histórico de solicitações ainda está indisponível.</p></section>
+        @if($hasPrivacyRequests)
+            <section class="account-card">
+                <h2>Consultar ou obter meus dados</h2>
+                <p>Registre um pedido para análise e acompanhe a resposta em Minhas solicitações.</p>
+                <form data-identity-privacy-form>
+                    <label for="identity-privacy-type">Tipo de solicitação</label>
+                    <select id="identity-privacy-type" class="account-input" name="tipo" required aria-describedby="identity-privacy-type-error">
+                        <option value="">Selecione</option>
+                        <option value="acesso">Consultar ou obter meus dados</option>
+                        <option value="informacao">Informações sobre o tratamento</option>
+                        <option value="correcao">Solicitar análise de correção</option>
+                        <option value="portabilidade">Consultar portabilidade</option>
+                    </select>
+                    <p id="identity-privacy-type-error" data-privacy-field-error="tipo" hidden></p>
+                    <label for="identity-privacy-description">Descrição opcional</label>
+                    <textarea id="identity-privacy-description" class="account-input" name="descricao" rows="3" maxlength="2000" aria-describedby="identity-privacy-description-help identity-privacy-description-error"></textarea>
+                    <p id="identity-privacy-description-help">Evite incluir documentos ou dados sensíveis no pedido.</p>
+                    <p id="identity-privacy-description-error" data-privacy-field-error="descricao" hidden></p>
+                    <x-botao-primario as="button" type="submit" disabled>Registrar solicitação</x-botao-primario>
+                </form>
+                <p role="status" data-identity-privacy-feedback hidden></p>
+                <noscript><p>Ative o JavaScript para registrar pedidos e consultar o histórico.</p></noscript>
+            </section>
+            <section class="account-card privacy-requests">
+                <h2>Minhas solicitações</h2>
+                <label for="identity-privacy-filter">Situação do pedido</label>
+                <select id="identity-privacy-filter" class="account-input" data-identity-privacy-filter>
+                    <option value="">Todas</option><option value="pendente">Recebida</option><option value="em_analise">Em análise</option>
+                    <option value="concluida">Concluída</option><option value="recusada">Recusada</option>
+                </select>
+                <p role="status" data-identity-privacy-status tabindex="-1">Carregando solicitações…</p>
+                <div data-identity-privacy-list></div>
+                <div class="account-actions notification-pagination" data-identity-privacy-pages hidden>
+                    <x-botao-secundario as="button" data-identity-privacy-previous>Anterior</x-botao-secundario>
+                    <span data-identity-privacy-page></span>
+                    <x-botao-secundario as="button" data-identity-privacy-next>Próxima</x-botao-secundario>
+                </div>
+                <template data-identity-privacy-template>
+                    <article class="account-card">
+                        <h3 tabindex="-1"></h3><p data-privacy-case-status></p><p data-privacy-case-description hidden></p>
+                        <div data-privacy-case-response hidden><h4>Resposta</h4><p></p></div>
+                    </article>
+                </template>
+            </section>
+        @else
+            <section class="account-card"><h2>Consultar ou obter meus dados</h2><p>O envio de solicitações e a exportação de dados ainda estão indisponíveis nesta área.</p></section>
+            <section class="account-card"><h2>Minhas solicitações</h2><p>O histórico de solicitações ainda está indisponível.</p></section>
+        @endif
         <section class="account-card"><h2>Exclusão da conta</h2><p>A solicitação pode ser acompanhada e cancelada em Segurança da conta dentro da janela de sete dias.</p>
             <x-botao-declined :href="route('conta')">Revisar exclusão</x-botao-declined>
         </section>

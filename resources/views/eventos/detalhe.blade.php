@@ -1,6 +1,11 @@
-@if(isset($publicEvent))
-@include('auth.public-event')
-@else
+@php
+    $integrated = isset($publicEvent);
+    $evento = $publicEvent ?? $evento;
+    $place = implode(', ', array_filter([$evento->cidade_evento, $evento->uf_evento]));
+    $mode = match ($evento->modalidade_evento) {
+        'presencial' => 'Presencial', 'online' => 'Online', 'hibrido' => 'Híbrido', default => null,
+    };
+@endphp
 <!DOCTYPE html>
 
 <html lang="pt-BR">
@@ -16,12 +21,12 @@
 
     <title>{{ $evento->nm_evento }} | Ajudae</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', $integrated ? 'resources/js/identity.js' : 'resources/js/app.js'])
 
 </head>
 
 
-<body data-events-page class="bg-[#f7f5ef] text-[#25251f]">
+<body @unless($integrated) data-events-page @endunless class="bg-[#f7f5ef] text-[#25251f]">
 
     <x-context-navbar />
 
@@ -29,16 +34,20 @@
 <main
     class="mx-auto max-w-[1100px] px-6 py-6"
 >
-<x-event-state :flow="$flow" />
+@if($integrated)
+    <x-botao-secundario :href="route('feed')" class="mb-5" size="sm">Voltar aos eventos</x-botao-secundario>
+@else
+    <x-event-state :flow="$flow" />
+@endif
 
     {{-- CAPA --}}
     <div
-        class="relative h-[310px] overflow-hidden
+        class="relative h-44 overflow-hidden sm:h-[310px]
                rounded-3xl bg-gradient-to-br
                from-[#174b36] to-[#4b9c73]"
     >
 
-        @if($evento->imagem_evento_link)
+        @if(!$integrated && $evento->imagem_evento_link)
 
             <img
                 src="{{ $evento->imagem_evento_link }}"
@@ -52,6 +61,11 @@
         <div
             class="absolute bottom-6 left-6 flex gap-2"
         >
+            @if($integrated)
+                @if($mode)
+                    <span class="rounded-full border border-white/30 bg-white/15 px-4 py-2 text-xs text-white">{{ $mode }}</span>
+                @endif
+            @else
 
             <span
                 class="rounded-full border border-white/30
@@ -76,13 +90,14 @@
             >
                 <span @if($flow['scenario'] === 'participacao') data-closure-event-badge="{{ \App\Support\VisualFiveFixtures::storageId($flow['event_id']) }}" @endif>{{ $flow['event_label'] }}</span>
             </span>
+            @endif
 
         </div>
 
     </div>
 
 
-    <h1 class="mt-7 text-3xl font-semibold">
+    <h1 class="mt-7 break-words text-3xl font-semibold">
         {{ $evento->nm_evento }}
     </h1>
 
@@ -93,7 +108,20 @@
     >
 
         {{-- COLUNA ESQUERDA --}}
-        <div class="space-y-6"><div id="agendas-evento"><x-agenda-options :flow="$flow" /></div>
+        <div class="min-w-0 space-y-6">
+            @if($integrated)
+                <section id="agendas-evento" class="rounded-xl border border-[#dedbd1] bg-white p-5">
+                    <h2 class="font-semibold">Agendas e candidaturas</h2>
+                    <p class="mt-2 text-sm">A consulta de Agendas e o envio de candidaturas ainda estão indisponíveis.</p>
+                </section>
+                @if($place)
+                    <section class="grid gap-6 rounded-xl border border-[#dedbd1] bg-white p-6">
+                        <h2 class="text-xs text-neutral-500">📍 Local</h2>
+                        <p class="break-words text-sm font-semibold">{{ $place }}</p>
+                    </section>
+                @endif
+            @else
+            <div id="agendas-evento"><x-agenda-options :flow="$flow" /></div>
 
 
             {{-- ONG --}}
@@ -235,6 +263,8 @@
             @endif
 
 
+            @endif
+
             {{-- SOBRE --}}
             <section>
 
@@ -243,13 +273,14 @@
                 </h2>
 
                 <div
-                    class="mt-4 whitespace-pre-line
+                    class="mt-4 whitespace-pre-line break-words
                            text-sm leading-7 text-neutral-700"
                 >{{ $evento->descricao_evento }}</div>
 
             </section>
 
 
+            @unless($integrated)
             {{-- MAPA --}}
             <div
                 class="flex h-44 items-center justify-center
@@ -273,6 +304,7 @@
                 Após a candidatura, o organizador revisará seu perfil
                 antes de aprovar. Acompanhe a situação em suas candidaturas.
             </div>
+            @endunless
 
         </div>
 
@@ -289,6 +321,15 @@
                     Vagas disponíveis
                 </p>
 
+                @if($integrated)
+                    <p id="agenda-availability" class="mt-2 text-sm">A disponibilidade é consultada por Agenda.</p>
+                    @php($viewer = request()->attributes->get('web_account'))
+                    @if($viewer instanceof \App\Models\Pessoa && $viewer->isApprovedVolunteer() && \App\Support\AccountAccess::canOperate($viewer))
+                        <x-botao-primario :href="route('candidatura.form', ['evento' => $evento->getKey()])" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
+                    @else
+                        <x-botao-primario as="button" disabled aria-describedby="agenda-availability" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
+                    @endif
+                @else
                 <p class="mt-1 text-4xl font-medium">
                     {{ $vagasDisponiveis ?? 0 }}
                 </p>
@@ -336,6 +377,7 @@
                     Candidatura sujeita à aprovação do organizador.
                 </div>
                 @endunless
+                @endif
 
             </div>
 
@@ -372,5 +414,3 @@
 
 </body>
 </html>
-
-@endif

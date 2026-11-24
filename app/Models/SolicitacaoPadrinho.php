@@ -13,7 +13,7 @@ class SolicitacaoPadrinho extends Model
 
     protected $fillable = [
         'padrinho_id', 'apadrinhado_id', 'status', 'solicitada_em',
-        'decidida_em', 'acompanhamento_id',
+        'decidida_em', 'acompanhamento_id', 'codigo_indicacao_id',
     ];
 
     protected $casts = ['solicitada_em' => 'datetime', 'decidida_em' => 'datetime'];

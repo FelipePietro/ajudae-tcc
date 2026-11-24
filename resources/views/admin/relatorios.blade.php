@@ -2,6 +2,7 @@
 
 @section('content')
     @php
+        $integrated = isset($integratedAdmin);
         $eventRows = $queues['fila-eventos'] ?? [];
         $months = [];
         foreach (range(0, 5) as $offset) {
@@ -19,8 +20,8 @@
         <section class="rel-stats">
             @foreach(['fila-eventos|publicado' => ['laranja','Eventos publicados'], 'fila-eventos|finalizado' => ['azul','Eventos finalizados'], 'candidatos|aprovado' => ['amarelo','Cadastros de Pessoa aprovados'], 'cadastros-ong|ativo' => ['claro','ONGs ativas']] as $metric => [$color, $label])
                 <article class="admin-stat admin-stat-{{ $color }}">
-                    <strong data-admin-metric="{{ $metric }}">0</strong><p>{{ $label }}</p>
-                    <small><a href="{{ route('admin.'.explode('|', $metric)[0], $params) }}">Consultar fila<span class="sr-only"> · {{ $label }}</span></a></small>
+                    <strong data-admin-metric="{{ $metric }}">{{ $integrated ? '—' : 0 }}</strong><p>{{ $label }}</p>
+                    @if(!$integrated || isset($pages[explode('|', $metric)[0]]))<small><a href="{{ route('admin.'.explode('|', $metric)[0], $params) }}">Consultar fila<span class="sr-only"> · {{ $label }}</span></a></small>@endif
                 </article>
             @endforeach
         </section>
@@ -31,7 +32,7 @@
                     @foreach($months as $key => $month)
                         <div class="rel-col" data-report-month="{{ $key }}">
                             <div class="rel-track" aria-hidden="true"><div class="rel-bar"></div></div>
-                            <small>{{ $month }} <span data-report-value>0</span></small>
+                            <small>{{ $month }} <span data-report-value>{{ $integrated ? '—' : 0 }}</span></small>
                         </div>
                     @endforeach
                 </div>
@@ -44,7 +45,7 @@
                         <div class="rel-hbar" aria-hidden="true"><span></span></div>
                     </div>
                 @empty
-                    <p>Nenhum Evento disponível.</p>
+                    <p>{{ $integrated ? 'As categorias ainda estão indisponíveis.' : 'Nenhum Evento disponível.' }}</p>
                 @endforelse
             </section>
         </div>
@@ -57,12 +58,12 @@
                         @forelse($organizations as $ong)
                             <tr data-report-ong="{{ $ong['id'] }}"><td><a href="{{ route('admin.cadastros-ong', $params + ['registro' => $ong['id']]) }}">{{ $ong['title'] }}</a></td><td data-report-all>0</td><td data-report-published>0</td><td data-report-finished>0</td></tr>
                         @empty
-                            <tr><td colspan="4">Nenhuma organização com Evento acompanhado.</td></tr>
+                            <tr><td colspan="4">{{ $integrated ? 'A consulta dos indicadores por organização ainda está indisponível.' : 'Nenhuma organização com Evento acompanhado.' }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </section>
     @endif
-    @include('admin.partials.data')
+    @unless($integrated)@include('admin.partials.data')@endunless
 @endsection

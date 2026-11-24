@@ -125,7 +125,7 @@ class AgendaController extends Controller
                 $operations->concederDesistenciaSemPenalidade($agenda);
             }
             $operations->exigirReaprovacao($evento);
-            $operations->notificarAgenda($agenda, 'agenda.alterada', 'A agenda do evento foi alterada.');
+            $operations->notificarAgenda($agenda, 'agenda.alterada', 'A agenda do evento foi alterada.', $dataAlterada);
 
             return $agenda;
         });
@@ -187,8 +187,7 @@ class AgendaController extends Controller
             $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
             Gate::forUser($request->user())->authorize('operate', [$evento, true]);
             $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
-            if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)
-                || $agenda->status_ativo !== 'ativo') {
+            if ($evento->status_evento !== 'ativo' || $agenda->status_ativo !== 'ativo') {
                 throw new ValidationConflictException('A agenda não pode ser finalizada neste estado.');
             }
             if (now()->lessThan($agenda->data_fim)) {
@@ -262,14 +261,18 @@ class AgendaController extends Controller
                 throw new ValidationConflictException('A agenda não está ativa.');
             }
             $ator = $request->user();
+            $statusAnterior = $agenda->status_ativo;
+            $canceladoEm = now();
+            $iniciada = $agenda->data_inicio->lte($canceladoEm);
             $agenda->forceFill([
                 'status_ativo' => 'cancelado',
                 'motivo_cancelamento' => trim($validated['motivo']),
-                'cancelado_em' => now(),
+                'cancelado_em' => $canceladoEm,
                 'cancelado_por_tipo' => $ator instanceof Ong ? 'ong' : 'pessoa',
                 'cancelado_por_id' => $ator->getKey(),
             ])->save();
-            $operations->notificarAgenda($agenda, 'agenda.cancelada', 'Uma agenda do evento foi cancelada.');
+            $operations->registrarCancelamento($agenda, $ator, $statusAnterior, $iniciada);
+            $operations->notificarAgenda($agenda, 'agenda.cancelada', "Uma agenda do evento {$evento->nm_evento} foi cancelada. Sua participação não será penalizada.");
 
             return $agenda;
         });

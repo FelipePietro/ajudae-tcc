@@ -209,6 +209,10 @@ class EventoOperacionalTest extends TestCase
         $this->patchJson("/api/v1/agendas/{$a->agenda_id}", ['vagas_agenda' => 1])->assertStatus(409);
         $this->patchJson("/api/v1/agendas/{$a->agenda_id}", ['vagas_agenda' => 2])->assertOk();
         $this->assertSame(2, $a->fresh()->vagas_agenda);
+        $this->assertSame('aguardando a confirmação', $evento->fresh()->status_evento);
+        $this->patchJson("/api/v1/inscricoes/{$ids[2]}/status", ['status_inscricao' => 'reprovado'])->assertConflict();
+        $this->assertSame('pendente', Inscricao::whereKey($ids[2])->value('status_inscricao'));
+        Evento::whereKey($evento->evento_id)->update(['status_evento' => 'ativo']);
         $this->patchJson("/api/v1/inscricoes/{$ids[2]}/status", ['status_inscricao' => 'aprovado'])->assertStatus(409);
         $this->patchJson("/api/v1/inscricoes/{$ids[2]}/status", ['status_inscricao' => 'reprovado'])->assertOk();
 

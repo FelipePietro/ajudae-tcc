@@ -1,11 +1,46 @@
 @extends('layouts.account')
 @section('title', 'Meus certificados')
 @section('content')
+@php
+    $integrated = config('identity.enabled');
+@endphp
 <header class="mb-6">
     <h1 class="text-2xl font-semibold">Meus certificados</h1>
     <p class="mt-2">Sua participação reconhecida, com as horas de cada Agenda concluída.</p>
-    <x-botao-secundario :href="\App\Support\VisualFiveFixtures::personalUrl()" class="mt-4">Minhas participações</x-botao-secundario>
+    <x-botao-secundario :href="$integrated ? route('participacoes') : \App\Support\VisualFiveFixtures::personalUrl()" class="mt-4">Minhas participações</x-botao-secundario>
 </header>
+@if($integrated)
+<section class="account-card" data-web-certificates data-url="{{ route('identity.certificates.index') }}" data-csrf="{{ csrf_token() }}">
+    <h2 class="text-xl font-semibold">Certificados por Evento</h2>
+    <p class="mt-3" data-web-certificate-status role="status"></p>
+    <div class="mt-4 grid gap-4" data-web-certificate-list></div>
+    <x-botao-secundario as="button" :href="null" type="button" class="mt-4" data-web-certificate-more hidden>Carregar mais</x-botao-secundario>
+    <template data-web-certificate-template>
+        <article class="account-card">
+            <h3 class="text-lg font-semibold" data-web-certificate-title></h3>
+            <p class="mt-3" data-web-certificate-reason role="status"></p>
+            <x-botao-primario as="button" :href="null" type="button" class="mt-4" data-web-certificate-issue hidden>Gerar meu certificado</x-botao-primario>
+            <div data-web-certificate-result hidden class="mt-4">
+                @include('certificados.resumo', ['showModality' => false])
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <x-botao-primario as="button" :href="null" type="button" data-web-certificate-preview>Abrir visualização</x-botao-primario>
+                    <x-botao-secundario data-web-certificate-download>Baixar PDF</x-botao-secundario>
+                    <x-botao-secundario data-web-certificate-verify>Verificar certificado</x-botao-secundario>
+                </div>
+            </div>
+        </article>
+    </template>
+    <dialog class="account-card ajudae-dialog" data-web-certificate-dialog aria-labelledby="web-certificate-dialog-title" style="width:min(860px,calc(100% - 2rem));max-height:90vh;overflow:auto;margin:auto">
+        <h2 id="web-certificate-dialog-title" class="text-xl font-semibold">Certificado de participação</h2>
+        <div class="mt-4">@include('certificados.resumo', ['showModality' => false])</div>
+        <div class="mt-4 flex flex-wrap gap-3">
+            <x-botao-secundario data-web-certificate-download>Baixar PDF</x-botao-secundario>
+            <form method="dialog"><x-botao-secundario as="button" :href="null" type="submit" autofocus>Fechar</x-botao-secundario></form>
+        </div>
+    </dialog>
+    <noscript>Ative o JavaScript para consultar os certificados nesta página.</noscript>
+</section>
+@else
 <section class="account-card" data-certificates="personal" data-verify-url="{{ route('certificados.verificar') }}">
     <h2 class="text-xl font-semibold">{{ $participation['title'] }}</h2>
     <p class="mt-3" data-certificate-reason aria-live="polite">Consultando a situação do certificado…</p>
@@ -40,4 +75,5 @@
     <noscript>Ative o JavaScript para consultar os certificados nesta página.</noscript>
     <script type="application/json" data-certificate-fixture>@json($participation)</script>
 </section>
+@endif
 @endsection

@@ -4,16 +4,18 @@ namespace App\Services;
 
 use App\Exceptions\ValidationConflictException;
 use App\Models\Acompanhamento;
+use App\Models\CodigoIndicacaoPadrinho;
 use App\Models\ConclusaoPadrinho;
 use App\Models\Pessoa;
-use App\Support\AccountAccess;
 use App\Models\SolicitacaoPadrinho;
+use App\Support\AccountAccess;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PadrinhoService
 {
-    public function candidatos(): Builder
+    public function candidatos(bool $comVaga = true): Builder
     {
         $limite60 = now()->subDays(60);
         $limite90 = now()->subDays(90);
@@ -22,6 +24,7 @@ class PadrinhoService
             ->select(['pessoa_id', 'nm_pessoa', 'cidade_pessoa', 'uf_pessoa'])
             ->where('role_pessoa', 'voluntario')
             ->where('status_validacao', 'aprovado')
+            ->where('exclusao_pendente', false)
             ->where('aprovado_em', '<=', $limite60)
             ->where(fn ($query) => $query->whereNull('bloqueado_ate')->orWhere('bloqueado_ate', '<=', now()))
             ->whereRaw("(SELECT COUNT(DISTINCT a.agenda_id) FROM p_ag_inscreve i
@@ -36,6 +39,8 @@ class PadrinhoService
                 JOIN evento e ON e.evento_id = a.evento_id
                 WHERE i.pessoa_id = pessoa.pessoa_id AND i.status_inscricao = 'não participou'
                 AND i.presenca = 0 AND i.presenca_confirmada_em >= ?
+                AND NOT EXISTS (SELECT 1 FROM justificativa_participacao j
+                    WHERE j.inscricao_id = i.inscricao_id AND j.status = 'deferida')
                 AND a.status_ativo <> 'cancelado' AND e.status_evento <> 'cancelado') = 0", [$limite90])
             ->whereRaw("(SELECT COUNT(*) FROM p_ag_inscreve i
                 JOIN agenda a ON a.agenda_id = i.agenda_id
@@ -44,10 +49,114 @@ class PadrinhoService
                 AND i.desistencia_tardia = 1 AND i.desistencia_sem_penalidade = 0
                 AND i.desistiu_em >= ? AND a.status_ativo <> 'cancelado'
                 AND e.status_evento <> 'cancelado') <= 1", [$limite90])
-            ->whereRaw("(SELECT COUNT(*) FROM acompanhamento ac
-                WHERE ac.padrinho_id = pessoa.pessoa_id AND ac.status = 'ativo') < 2")
+            ->when($comVaga, fn (Builder $query) => $query->whereRaw("(SELECT COUNT(*) FROM acompanhamento ac
+                WHERE ac.padrinho_id = pessoa.pessoa_id AND ac.status = 'ativo') < 2"))
             ->whereNotExists(fn ($query) => $query->selectRaw('1')->from('acompanhamento as ac')
                 ->whereColumn('ac.apadrinhado_id', 'pessoa.pessoa_id')->where('ac.status', 'ativo'));
+    }
+
+    public function codigo(Pessoa $padrinho): ?CodigoIndicacaoPadrinho
+    {
+        $this->garantirPadrinho($padrinho, false);
+
+        return $this->codigoAtivo($padrinho)->first();
+    }
+
+    public function emitirCodigo(Pessoa $padrinho): CodigoIndicacaoPadrinho
+    {
+        return DB::transaction(function () use ($padrinho) {
+            $padrinho = $this->bloquearPessoas([$padrinho->getKey()])[$padrinho->getKey()];
+            $codigoAtivo = $this->codigo($padrinho);
+            if ($codigoAtivo) {
+                return $codigoAtivo;
+            }
+
+            $this->garantirPadrinho($padrinho);
+            $codigo = bin2hex(random_bytes(32));
+
+            return CodigoIndicacaoPadrinho::create([
+                'padrinho_id' => $padrinho->getKey(),
+                'digest' => hash('sha256', $codigo),
+                'codigo' => $codigo,
+                'emitido_em' => now(),
+            ]);
+        }, 3);
+    }
+
+    public function revogarCodigo(Pessoa $padrinho): void
+    {
+        DB::transaction(function () use ($padrinho) {
+            $padrinho = $this->bloquearPessoas([$padrinho->getKey()])[$padrinho->getKey()];
+            abort_unless($padrinho->role_pessoa === 'voluntario' && AccountAccess::canOperate($padrinho), 403);
+
+            $this->codigoAtivo($padrinho)->update(['revogado_em' => now(), 'codigo' => null]);
+        }, 3);
+    }
+
+    public function indicar(Pessoa $afilhado, string $codigo, bool $cadastro = false): SolicitacaoPadrinho
+    {
+        $this->garantirPodeIndicar($afilhado, $cadastro);
+        $digest = hash('sha256', strtolower($codigo));
+        $padrinhoId = CodigoIndicacaoPadrinho::query()->where('digest', $digest)->value('padrinho_id');
+        if ($padrinhoId === null || (int) $padrinhoId === $afilhado->pessoa_id) {
+            throw $this->codigoIndisponivel();
+        }
+
+        return DB::transaction(function () use ($afilhado, $padrinhoId, $digest, $cadastro) {
+            $pessoas = $this->bloquearPessoas([$afilhado->getKey(), $padrinhoId]);
+            $afilhado = $pessoas[$afilhado->getKey()];
+            $padrinho = $pessoas[$padrinhoId];
+            $this->garantirPodeIndicar($afilhado, $cadastro);
+
+            $indicacao = $this->codigoAtivo($padrinho)->where('digest', $digest)->lockForUpdate()->first();
+            if ($indicacao === null) {
+                throw $this->codigoIndisponivel();
+            }
+
+            $pedidoAnterior = SolicitacaoPadrinho::where('apadrinhado_id', $afilhado->getKey())
+                ->where('status', 'pendente')->lockForUpdate()->first();
+            if ($pedidoAnterior && $pedidoAnterior->codigo_indicacao_id === $indicacao->getKey()) {
+                return $pedidoAnterior;
+            }
+
+            $this->garantirAfilhado($afilhado, false, $pedidoAnterior?->getKey(), true);
+            try {
+                $this->garantirPadrinho($padrinho);
+            } catch (ValidationConflictException) {
+                throw $this->codigoIndisponivel();
+            }
+
+            if ($pedidoAnterior) {
+                $pedidoAnterior->update(['status' => 'cancelada', 'decidida_em' => now()]);
+                $padrinhoAnterior = Pessoa::findOrFail($pedidoAnterior->padrinho_id);
+                $this->notificar($padrinhoAnterior, 'padrinho.cancelada', 'Uma solicitação de apadrinhamento foi cancelada.');
+            }
+
+            return $this->criarPedido($afilhado, $padrinho, $indicacao->getKey());
+        }, 3);
+    }
+
+    /**
+     * A análise cadastral já deve ter bloqueado a Pessoa avaliada.
+     */
+    public function garantirVinculoParaAprovacao(Pessoa $afilhado): void
+    {
+        $vinculo = Acompanhamento::query()
+            ->where('apadrinhado_id', $afilhado->getKey())
+            ->where('status', 'ativo')
+            ->whereNotNull('aceito_em')
+            ->lockForUpdate()
+            ->first();
+        if ($vinculo === null) {
+            throw new ValidationConflictException('É necessário um vínculo de apadrinhamento aceito e elegível para aprovar o cadastro.');
+        }
+
+        $padrinho = $this->bloquearPessoas([$vinculo->padrinho_id])[$vinculo->padrinho_id];
+        $this->garantirPadrinho($padrinho, false);
+
+        if (Acompanhamento::where('padrinho_id', $padrinho->getKey())->where('status', 'ativo')->count() > 2) {
+            throw new ValidationConflictException('O vínculo de apadrinhamento excede a capacidade do padrinho.');
+        }
     }
 
     public function solicitar(Pessoa $afilhado, int $padrinhoId): SolicitacaoPadrinho
@@ -64,15 +173,7 @@ class PadrinhoService
             $this->garantirAfilhado($afilhado, true);
             $this->garantirPadrinho($padrinho);
 
-            $pedido = SolicitacaoPadrinho::create([
-                'padrinho_id' => $padrinhoId,
-                'apadrinhado_id' => $afilhado->pessoa_id,
-                'status' => 'pendente',
-                'solicitada_em' => now(),
-            ]);
-            $this->notificar($padrinho, 'padrinho.solicitacao', 'Você recebeu uma solicitação de apadrinhamento.');
-
-            return $pedido;
+            return $this->criarPedido($afilhado, $padrinho);
         }, 3);
     }
 
@@ -82,7 +183,7 @@ class PadrinhoService
             abort(404);
         }
 
-        return DB::transaction(function () use ($pedido, $ator, $aceitar) {
+        return DB::transaction(function () use ($pedido, $aceitar) {
             $pessoas = $this->bloquearPessoas([$pedido->padrinho_id, $pedido->apadrinhado_id]);
             $pedido = SolicitacaoPadrinho::whereKey($pedido->getKey())->lockForUpdate()->firstOrFail();
             if ($pedido->status === 'aceita' && $aceitar) {
@@ -96,7 +197,9 @@ class PadrinhoService
                 abort_unless(AccountAccess::canOperate($pessoas[$pedido->padrinho_id])
                     && AccountAccess::canOperate($pessoas[$pedido->apadrinhado_id]), 403);
                 // Ao aceitar, cinco participações obtidas durante a espera não extinguem o pedido.
-                $this->garantirAfilhado($pessoas[$pedido->apadrinhado_id], false, $pedido->getKey());
+                $this->garantirAfilhado(
+                    $pessoas[$pedido->apadrinhado_id], false, $pedido->getKey(), $pedido->codigo_indicacao_id !== null
+                );
                 $this->garantirPadrinho($pessoas[$pedido->padrinho_id]);
                 $vinculo = Acompanhamento::create([
                     'padrinho_id' => $pedido->padrinho_id,
@@ -242,29 +345,78 @@ class PadrinhoService
         ];
     }
 
-    private function garantirAfilhado(Pessoa $pessoa, bool $novaSolicitacao, ?int $pedidoAtual = null): void
-    {
-        if (! $pessoa->isApprovedVolunteer() || $pessoa->bloqueado_ate?->isFuture()) {
+    private function garantirAfilhado(
+        Pessoa $pessoa,
+        bool $novaSolicitacao,
+        ?int $pedidoAtual = null,
+        bool $porIndicacao = false
+    ): void {
+        $cadastroEmValidacao = $porIndicacao && $pessoa->role_pessoa === 'voluntario'
+            && in_array($pessoa->status_validacao, ['aguardando_validacao', 'em_analise', 'correcao_solicitada'], true);
+        if ((! $pessoa->isApprovedVolunteer() && ! $cadastroEmValidacao) || $pessoa->bloqueado_ate?->isFuture()) {
             throw new ValidationConflictException('A pessoa não está elegível ao apadrinhamento.');
         }
         if ($novaSolicitacao && $this->participacoes($pessoa->pessoa_id) >= 5) {
             throw new ValidationConflictException('A pessoa já possui cinco participações confirmadas.');
         }
-        if (Acompanhamento::where('apadrinhado_id', $pessoa->pessoa_id)->where('status', 'ativo')->exists()
-            || Acompanhamento::where('padrinho_id', $pessoa->pessoa_id)->where('status', 'ativo')->exists()) {
+        $vinculoAtivo = Acompanhamento::query()
+            ->where('status', 'ativo')
+            ->where(fn (Builder $query) => $query->where('apadrinhado_id', $pessoa->getKey())
+                ->orWhere('padrinho_id', $pessoa->getKey()))
+            ->lockForUpdate()->first(['acompanhamento_id']);
+        if ($vinculoAtivo) {
             throw new ValidationConflictException('A pessoa já participa de um vínculo ativo.');
         }
         if (SolicitacaoPadrinho::where('apadrinhado_id', $pessoa->pessoa_id)->where('status', 'pendente')
-            ->when($pedidoAtual, fn ($query) => $query->whereKeyNot($pedidoAtual))->exists()) {
+            ->when($pedidoAtual, fn ($query) => $query->whereKeyNot($pedidoAtual))
+            ->lockForUpdate()->first(['solicitacao_padrinho_id'])) {
             throw new ValidationConflictException('A pessoa já possui solicitação pendente.');
         }
     }
 
-    private function garantirPadrinho(Pessoa $pessoa): void
+    private function garantirPadrinho(Pessoa $pessoa, bool $comVaga = true): void
     {
-        if (! $this->candidatos()->whereKey($pessoa->pessoa_id)->exists()) {
+        if (! AccountAccess::canOperate($pessoa) || ! $this->candidatos(false)->whereKey($pessoa->pessoa_id)->exists()) {
             throw new ValidationConflictException('O padrinho não atende aos critérios de elegibilidade ou capacidade.');
         }
+
+        if ($comVaga && Acompanhamento::where('padrinho_id', $pessoa->getKey())
+            ->where('status', 'ativo')->lockForUpdate()->get(['acompanhamento_id'])->count() >= 2) {
+            throw new ValidationConflictException('O padrinho não atende aos critérios de elegibilidade ou capacidade.');
+        }
+    }
+
+    private function codigoAtivo(Pessoa $padrinho): Builder
+    {
+        return CodigoIndicacaoPadrinho::where('padrinho_ativo_id', $padrinho->getKey());
+    }
+
+    private function garantirPodeIndicar(Pessoa $afilhado, bool $cadastro): void
+    {
+        abort_unless($afilhado->role_pessoa === 'voluntario' && AccountAccess::canOperate($afilhado), 403);
+        if ($afilhado->status_validacao !== ($cadastro ? 'aguardando_validacao' : 'correcao_solicitada')
+            || $afilhado->bloqueado_ate?->isFuture()) {
+            throw new ValidationConflictException('A indicação só pode ser alterada durante uma correção cadastral autorizada.');
+        }
+    }
+
+    private function codigoIndisponivel(): ValidationException
+    {
+        return ValidationException::withMessages(['codigo_padrinho' => 'O código de indicação está indisponível.']);
+    }
+
+    private function criarPedido(Pessoa $afilhado, Pessoa $padrinho, ?int $indicacaoId = null): SolicitacaoPadrinho
+    {
+        $pedido = SolicitacaoPadrinho::create([
+            'padrinho_id' => $padrinho->getKey(),
+            'apadrinhado_id' => $afilhado->getKey(),
+            'codigo_indicacao_id' => $indicacaoId,
+            'status' => 'pendente',
+            'solicitada_em' => now(),
+        ]);
+        $this->notificar($padrinho, 'padrinho.solicitacao', 'Você recebeu uma solicitação de apadrinhamento.');
+
+        return $pedido;
     }
 
     private function garantirConclusao(Acompanhamento $vinculo): void

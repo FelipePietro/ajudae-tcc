@@ -70,6 +70,16 @@ class AdminPessoaValidationController extends Controller
         );
     }
 
+    public function exigirPadrinho(Request $request, Pessoa $pessoa, PessoaValidationService $service)
+    {
+        $validated = $request->validate(['motivo' => ['required', 'string', 'max:2000']]);
+
+        return ApiResponse::success(
+            new PessoaAdminResource($service->exigirPadrinho($pessoa, $request->user(), $validated['motivo'])),
+            'Exigência de padrinho registrada.'
+        );
+    }
+
     public function reprovar(Request $request, Pessoa $pessoa, PessoaValidationService $service)
     {
         $validated = $request->validate(['motivo' => ['required', 'string', 'max:2000']]);

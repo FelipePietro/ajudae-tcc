@@ -169,10 +169,11 @@ Este documento consolida as regras de negocio acordadas para o Ajudae. A V1 prio
 *Definir quando uma edicao invalida a aprovacao anterior.*
 
 - Alteracoes sensiveis fazem o Evento voltar para aguardando_aprovacao, removem-no temporariamente das paginas e bloqueiam novas candidaturas.
-- Sao sensiveis: descricao, data, horario, duracao, local/endereco, vagas, Agenda, responsavel, causas, habilidades e recursos.
+- Sao sensiveis: descricao, data, horario, duracao, local/endereco, capacidade operacional de Agenda, estrutura de Agendas, responsavel, causas, habilidades e recursos. O total de vagas do Evento e informativo.
 - Titulo e banner/imagem sao alteracoes simples e nao exigem nova aprovacao.
 - Qualquer alteracao, simples ou sensivel, gera notificacao aos voluntarios ja inscritos.
 - Inscricoes existentes sao mantidas durante nova analise.
+- Durante aprovacao pendente ou reanalise, preservar consultas autorizadas e moderacao. Bloquear novas candidaturas, selecao, presenca, avaliacoes e finalizacao. Cancelamentos, correcoes e medidas legais ou de seguranca seguem suas regras proprias. A nova decisao revalida os estados e prazos vigentes.
 - Quando houver mudanca de data, horario ou local, o inscrito pode desistir sem penalizacao ate o inicio da respectiva Agenda.
 
 ### RN013 — Agenda, horarios e vagas
@@ -194,6 +195,7 @@ Este documento consolida as regras de negocio acordadas para o Ajudae. A V1 prio
 - Somente voluntario aprovado pode candidatar-se.
 - Organizador nao pode candidatar-se como voluntario.
 - Candidatura e feita para uma Agenda especifica.
+- A carta de apresentacao e opcional e privada ao titular e ao responsavel autorizado. Nao e criterio automatico de selecao.
 - Novas candidaturas sao aceitas ate 1 hora antes do inicio da Agenda.
 - Nao existe lista de espera na V1.
 - Quando a quantidade de aprovados atinge o numero de vagas, novas candidaturas sao bloqueadas (resposta recomendada: HTTP 409).
@@ -257,6 +259,7 @@ Este documento consolida as regras de negocio acordadas para o Ajudae. A V1 prio
 - Qualquer pessoa presente no Evento pode exercer fisicamente a funcao de monitor; a V1 nao tenta validar quem estava fisicamente acompanhando o estudante.
 - O sistema deve apenas registrar a confirmacao de monitoria necessaria ao certificado estudantil.
 - Participacoes de estudante sem monitoria confirmada nao liberam o certificado correspondente.
+- O responsavel autorizado pode regularizar a monitoria apos o encerramento da Agenda. Registrar autoria e data, preservar a presenca e exigir justificativa para a decisao posterior ao encerramento.
 > **Observacao:** A V1 deliberadamente nao implementa uma gestao complexa de credenciamento de monitores.
 
 
@@ -280,6 +283,7 @@ Este documento consolida as regras de negocio acordadas para o Ajudae. A V1 prio
 - O voluntario pode avaliar a ONG uma unica vez por Evento.
 - A escala e de 1 a 5.
 - A avaliacao da ONG e opcional e nao bloqueia XP, certificado ou finalizacao.
+- Somente a Pessoa com participacao elegivel pode enviar a propria avaliacao. O envio apos a finalizacao e permitido ate sete dias corridos, inclusive, contados da data e hora efetivas registradas pelo servidor. A avaliacao ja registrada permanece consultavel conforme as permissoes depois do prazo.
 
 ### RN023 — Finalizacao de Agenda
 
@@ -287,7 +291,7 @@ Este documento consolida as regras de negocio acordadas para o Ajudae. A V1 prio
 
 - Agenda sem inscritos pode ser finalizada diretamente.
 - Agenda com inscritos deve ter o estado de participacao resolvido para cada aprovado (presente, ausente, desistente ou equivalente).
-- Quando o participante for estudante, a monitoria da Agenda deve estar resolvida para fins de certificado.
+- Monitoria estudantil pendente permite fechar a Agenda quando a participacao ja estiver resolvida. A emissao de certificado estudantil continua condicionada a confirmacao das monitorias aplicaveis.
 - Uma Agenda cancelada e considerada terminal para permitir o fechamento do Evento.
 - A avaliacao unica do voluntario pertence ao fechamento do Evento e nao precisa ser repetida por Agenda.
 
@@ -295,7 +299,8 @@ Este documento consolida as regras de negocio acordadas para o Ajudae. A V1 prio
 
 *Consolidar as varias Agendas em um unico Evento.*
 
-- O Evento so pode ser finalizado quando todas as suas Agendas estiverem em estado terminal: finalizada ou cancelada.
+- O Evento so pode ser finalizado quando tiver pelo menos uma Agenda e todas estiverem em estado terminal: finalizada ou cancelada.
+- A ONG proprietaria ou o organizador designado com vinculo e atribuicao vigentes pode finalizar. No Evento independente, pode finalizar o organizador proprietario autorizado. Registrar o ator e o instante efetivo da finalizacao.
 - Todos os voluntarios que efetivamente participaram precisam possuir a avaliacao obrigatoria do responsavel antes da finalizacao.
 - Nao existe prazo maximo que autorize um Admin a finalizar o Evento no lugar do responsavel.
 - Se houver pendencia de finalizacao/avaliacao, o sistema deve notificar o organizador ou a ONG responsavel.
@@ -357,7 +362,7 @@ Este documento consolida as regras de negocio acordadas para o Ajudae. A V1 prio
 - Participacao confirmada em pelo menos uma Agenda ja gera direito ao certificado, desde que o Evento seja finalizado e os demais requisitos estejam resolvidos.
 - A carga horaria do certificado e a soma das duracoes declaradas das Agendas em que a Pessoa teve presenca confirmada.
 - Agendas canceladas, ausencias e horas extras reais nao entram na carga horaria.
-- Quando a Pessoa se declarou estudante, a monitoria das Agendas correspondentes precisa estar validada.
+- Quando a Pessoa se declarou estudante, revalidar a confirmacao da monitoria das Agendas correspondentes no momento de emitir o certificado.
 - O certificado deve possuir codigo unico de verificacao publica, no padrao conceitual AJD-AAAA-NNNNNN ou equivalente.
 - O certificado funciona como comprovacao formal; nao e liberado apenas por passagem de tempo ou por ausencia de avaliacao.
 

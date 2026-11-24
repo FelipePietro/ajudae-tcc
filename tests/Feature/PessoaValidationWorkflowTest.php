@@ -314,7 +314,7 @@ class PessoaValidationWorkflowTest extends TestCase
         ])->assertStatus(409);
         $this->postJson("/api/v1/admin/validacoes-pessoa/{$pessoa->pessoa_id}/assumir")->assertStatus(409);
         Sanctum::actingAs($pessoa, ['pessoa']);
-        $this->postJson('/api/v1/pessoas/me/validacao/reenviar')->assertStatus(409);
+        $this->postJson('/api/v1/pessoas/me/validacao/reenviar')->assertForbidden();
         $this->assertSame('reprovado_definitivamente', $pessoa->fresh()->status_validacao);
     }
 }

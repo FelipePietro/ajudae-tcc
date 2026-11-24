@@ -14,7 +14,7 @@
                 @endif
             </li>
         @endforeach
-        @if($navigation->profile || $navigation->restricted)
+        @if($navigation->signedIn)
             <li>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf

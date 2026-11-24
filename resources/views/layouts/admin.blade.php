@@ -8,11 +8,23 @@
 </head>
 <body class="ong-body">
 @isset($integratedAdmin)
+    @php
+        $navigation = \App\Support\WebNavigation::for(request());
+        $showLog = isset($navigation->adminAreas()['log-acoes']) && !request()->routeIs('admin.log-acoes');
+    @endphp
     <a class="account-skip" href="#admin-main">Ir para o conteúdo</a>
     <div class="ong-shell" data-integrated-admin-shell>
-        <x-admin-sidebar :pages="[]" :web-navigation="\App\Support\WebNavigation::for(request())" />
-        <main id="admin-main" tabindex="-1" class="ong-main admin-main admin-review admin-original-layout">
-            <x-breadcrumb-admin :itens="[['label' => $title]]" />
+        <x-admin-sidebar :pages="[]" :web-navigation="$navigation" />
+        <main id="admin-main" tabindex="-1" @class(['ong-main admin-main admin-review', 'admin-original-layout' => request()->routeIs('admin.admin', 'admin.usuarios', 'admin.log-acoes', 'admin.relatorios', 'admin.configuracoes')])>
+            <x-breadcrumb-admin :itens="[['label' => $title]]">
+                @if($showLog)
+                    <x-slot:acoes>
+                        <div class="admin-topo-acoes admin-breadcrumb-log">
+                            <x-botao-secundario :href="route('admin.log-acoes')" texto="Ver log completo" size="sm" class="admin-log-btn" />
+                        </div>
+                    </x-slot:acoes>
+                @endif
+            </x-breadcrumb-admin>
             @yield('content')
         </main>
     </div>

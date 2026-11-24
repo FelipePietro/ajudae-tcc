@@ -13,7 +13,7 @@
     <section class="panel mb-5" aria-labelledby="organizer-events">
         <div class="panel-header">
             <div><h2 class="panel-title" id="organizer-events">Meus eventos</h2><p class="panel-sub">Eventos sob sua responsabilidade</p></div>
-            @unless($organizerLinked)<x-botao-primario as="button" disabled>Criar Evento</x-botao-primario>@endunless
+            @unless($organizerLinked)<x-botao-primario :href="route('organizador.eventos.criar')">Criar Evento</x-botao-primario>@endunless
         </div>
         <div class="organizer-event-grid mt-5">
             <p>Os Eventos sob sua responsabilidade ainda não podem ser consultados nesta página.</p>

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\ValidationConflictException;
 use App\Models\Agenda;
 use App\Models\CatEvento;
 use App\Models\Evento;
@@ -9,6 +10,7 @@ use App\Models\Inscricao;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Models\VinculoOngOrganizador;
+use App\Services\MonitoriaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Laravel\Sanctum\Sanctum;
@@ -30,6 +32,123 @@ class PresencaAusenciaDesistenciaTest extends TestCase
     {
         Carbon::setTestNow();
         parent::tearDown();
+    }
+
+    public function test_reanalise_bloqueia_selecao_presenca_e_encerramento_preservando_consulta(): void
+    {
+        $owner = $this->pessoa('organizador');
+        $evento = $this->evento($owner);
+        $agenda = $this->agenda($evento, now()->subHours(2));
+        $aprovada = $this->inscricao($agenda, $this->pessoa(), 'aprovado');
+        $pendente = $this->inscricao($agenda, $this->pessoa(), 'pendente');
+        $evento->forceFill(['status_evento' => 'aguardando a confirmação'])->save();
+        Sanctum::actingAs($owner, ['pessoa']);
+
+        $this->getJson("/api/v1/agendas/{$agenda->agenda_id}/inscritos")->assertOk();
+        $this->patchJson("/api/v1/inscricoes/{$pendente->inscricao_id}/status", ['status_inscricao' => 'aprovado'])
+            ->assertStatus(409);
+        $presenca = "/api/v1/inscricoes/{$aprovada->inscricao_id}/presenca";
+        $this->patchJson($presenca, ['presenca' => true, 'contexto' => 'ong'])->assertStatus(409);
+        $this->patchJson("/api/v1/agendas/{$agenda->agenda_id}/finalizar")->assertStatus(409);
+        $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertStatus(409);
+        $this->assertNull($aprovada->fresh()->presenca);
+        $this->assertSame('pendente', $pendente->fresh()->status_inscricao);
+
+        $evento->forceFill(['status_evento' => 'ativo'])->save();
+        $this->patchJson($presenca, ['presenca' => true])->assertOk();
+        $this->assertSame($owner->pessoa_id, $aprovada->fresh()->presenca_confirmada_por_id);
+    }
+
+    public function test_monitoria_pendente_permite_encerrar_e_regularizar_sem_alterar_presenca_ou_xp(): void
+    {
+        $owner = $this->pessoa('organizador');
+        $outraPessoa = $this->pessoa();
+        $estudante = $this->pessoa();
+        $evento = $this->evento($owner);
+        $agenda = $this->agenda($evento, now()->addHours(2));
+        Sanctum::actingAs($estudante, ['pessoa']);
+        $id = $this->postJson("/api/v1/agendas/{$agenda->agenda_id}/inscricoes", ['declarou_estudante' => true])
+            ->assertCreated()->assertJsonPath('data.declarou_estudante', true)->json('data.inscricao_id');
+
+        Sanctum::actingAs($owner, ['pessoa']);
+        $this->patchJson("/api/v1/inscricoes/{$id}/status", ['status_inscricao' => 'aprovado'])->assertOk();
+        Carbon::setTestNow($agenda->data_fim);
+        $url = "/api/v1/inscricoes/{$id}/monitoria";
+        $this->patchJson($url, ['confirmada' => true])->assertStatus(409);
+        $this->patchJson("/api/v1/inscricoes/{$id}/presenca", ['presenca' => true])->assertOk();
+        $this->getJson($url)->assertOk()->assertJsonPath('data.status', 'pendente');
+        $this->patchJson("/api/v1/agendas/{$agenda->agenda_id}/finalizar")->assertOk();
+        $this->assertDatabaseCount('xp_transacao', 1);
+        $this->postJson("/api/v1/eventos/{$evento->evento_id}/avaliacoes/{$estudante->pessoa_id}", ['nota' => 5])
+            ->assertCreated();
+        $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertOk();
+        Sanctum::actingAs($estudante, ['pessoa']);
+        $certificadoUrl = "/api/v1/eventos/{$evento->evento_id}/certificado";
+        $this->postJson($certificadoUrl)->assertConflict();
+        $service = app(MonitoriaService::class);
+        try {
+            $service->exigirValidacaoParaCertificado($evento, $estudante);
+            $this->fail('O certificado deveria exigir a monitoria ainda pendente.');
+        } catch (ValidationConflictException $exception) {
+            $this->assertStringContainsString('monitoria estudantil', $exception->getMessage());
+        }
+
+        Sanctum::actingAs($outraPessoa, ['pessoa']);
+        $this->getJson($url)->assertForbidden();
+        $this->patchJson($url, ['confirmada' => true, 'justificativa' => 'Justificativa de teste.'])->assertForbidden();
+        Sanctum::actingAs($owner, ['pessoa']);
+        $this->patchJson($url, ['confirmada' => true])->assertUnprocessable();
+        $dados = ['confirmada' => true, 'justificativa' => 'Conferência sintética da monitoria realizada.'];
+        $this->patchJson($url, $dados)->assertOk()->assertJsonPath('data.status', 'validada')->assertJsonMissingPath('data.justificativa');
+        $this->patchJson($url, $dados)->assertStatus(409);
+        Sanctum::actingAs($estudante, ['pessoa']);
+        $this->getJson($url)->assertOk()->assertJsonPath('data.status', 'validada');
+        $service->exigirValidacaoParaCertificado($evento, $estudante);
+        $codigo = $this->postJson($certificadoUrl)->assertOk()->json('data.codigo_verificacao');
+        $this->postJson($certificadoUrl)->assertOk()->assertJsonPath('data.codigo_verificacao', $codigo);
+        $this->assertDatabaseHas('monitoria', [
+            'inscricao_id' => $id, 'confirmada' => true, 'validado_por_tipo' => 'pessoa',
+            'validado_por_id' => $owner->pessoa_id, 'observacao' => $dados['justificativa'],
+        ]);
+        $this->assertDatabaseHas('p_ag_inscreve', ['inscricao_id' => $id, 'status_inscricao' => 'participou', 'presenca' => true]);
+        $this->assertSame('finalizado', $agenda->fresh()->status_ativo);
+        $this->assertDatabaseCount('xp_transacao', 1);
+    }
+
+    public function test_justificativa_privada_e_decisao_nao_apagam_ausencia(): void
+    {
+        $owner = $this->pessoa('organizador');
+        $titular = $this->pessoa();
+        $terceiro = $this->pessoa();
+        $evento = $this->evento($owner);
+        $agenda = $this->agenda($evento, now()->subHours(2));
+        $inscricao = $this->inscricao($agenda, $titular, 'aprovado');
+        $url = "/api/v1/inscricoes/{$inscricao->inscricao_id}/justificativa";
+        Sanctum::actingAs($owner, ['pessoa']);
+        $this->patchJson("/api/v1/inscricoes/{$inscricao->inscricao_id}/presenca", ['presenca' => false])->assertOk();
+        $this->postJson($url, ['motivo' => 'Justificativa sintética.'])->assertForbidden();
+
+        Sanctum::actingAs($titular, ['pessoa']);
+        $this->postJson($url, ['motivo' => 'Justificativa sintética.'])->assertCreated()->assertJsonPath('data.status', 'pendente');
+        $this->postJson($url, ['motivo' => 'Justificativa repetida.'])->assertStatus(409);
+        $this->patchJson($url, ['deferida' => true, 'motivo' => 'Autodeferimento.'])->assertForbidden();
+        Sanctum::actingAs($terceiro, ['pessoa']);
+        $this->getJson($url)->assertForbidden();
+
+        Sanctum::actingAs($owner, ['pessoa']);
+        $this->getJson($url)->assertOk()->assertJsonPath('data.motivo', 'Justificativa sintética.');
+        $dados = ['deferida' => true, 'motivo' => 'Revisão humana sintética concluída.'];
+        $this->patchJson($url, $dados)->assertOk()->assertJsonPath('data.status', 'deferida');
+        $this->patchJson($url, $dados)->assertStatus(409);
+        $this->assertDatabaseHas('justificativa_participacao', [
+            'inscricao_id' => $inscricao->inscricao_id, 'status' => 'deferida', 'decidido_por_id' => $owner->pessoa_id,
+        ]);
+        $this->assertSame('não participou', $inscricao->fresh()->status_inscricao);
+        $this->assertFalse($inscricao->fresh()->presenca);
+        $ocorrencia = app(\App\Services\ConfiabilidadeService::class)->detalhe($titular)['ocorrencias'][0];
+        $this->assertSame('ausencia', $ocorrencia['tipo']);
+        $this->assertSame(0, $ocorrencia['delta']);
+        $this->assertTrue($ocorrencia['penalidade_revertida']);
     }
 
     public function test_presenca_e_ausencia_sao_fatos_unicos_com_duracao_da_agenda_sem_monitoria(): void
@@ -148,7 +267,7 @@ class PresencaAusenciaDesistenciaTest extends TestCase
 
         $inscricaoDaOng = $this->inscricao($this->agenda($eventoOng, now()->subHour()), $this->pessoa(), 'aprovado');
         Sanctum::actingAs($ong, ['ong']);
-        $this->patchJson("/api/v1/inscricoes/{$inscricaoDaOng->inscricao_id}/presenca", ['presenca' => true])->assertOk();
+        $this->patchJson("/api/v1/inscricoes/{$inscricaoDaOng->inscricao_id}/presenca", ['presenca' => true])->assertForbidden();
     }
 
     public function test_desistencia_registra_limite_de_vinte_e_quatro_horas_sem_perder_historico_e_notifica_responsavel(): void

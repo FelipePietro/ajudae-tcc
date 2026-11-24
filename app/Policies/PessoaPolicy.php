@@ -11,7 +11,9 @@ class PessoaPolicy
     public function viewPrivateHistory(Pessoa|Ong $actor, Pessoa $subject): bool
     {
         return $actor instanceof Pessoa && AccountAccess::canOperate($actor)
-            && ($actor->is($subject) || $this->reviewAssignedCase($actor, $subject));
+            && ($actor->is($subject)
+                ? AccountAccess::hasPersonalJourney($actor)
+                : $this->reviewAssignedCase($actor, $subject));
     }
 
     public function reviewAssignedCase(Pessoa $actor, Pessoa $subject): bool

@@ -1,3 +1,10 @@
+@php
+    $integrated = config('identity.enabled');
+    $organizerManagement = $organizerManagement ?? false;
+    $listRoute = $organizerManagement ? 'organizador.eventos' : 'ong.eventos.index';
+    $managementParams = $integrated ? [] : ['contexto' => request()->query('contexto', 'ong'), 'jornada' => request()->query('jornada')];
+    $workspaceUrl = $organizerManagement ? route('organizador.workspace') : null;
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -13,18 +20,18 @@
 
     @vite([
         'resources/css/app.css',
-        'resources/js/app.js'
+        $integrated ? 'resources/js/identity.js' : 'resources/js/app.js'
     ])
 </head>
 
 
-<body data-events-page
+<body @unless($integrated) data-events-page @endunless
     class="min-h-screen overflow-x-hidden
            bg-[#f7f5ef] font-outfit text-[#26251f]"
 >
 
     {{-- NAVBAR ONG --}}
-    <x-context-navbar default-context="ong" />
+    <x-context-navbar default-context="ong" :surface="$integrated && !$organizerManagement ? 'institution' : 'context'" />
 
 
     {{--
@@ -38,17 +45,15 @@
     --}}
 
     <main
-        class="min-h-screen w-full
-               lg:ml-[230px]
-               lg:w-[calc(100%-230px)]"
+        @class(['min-h-screen w-full', 'lg:ml-[230px] lg:w-[calc(100%-230px)]' => !$organizerManagement])
     >
 
 
-    <x-breadcrumb-ong
+    <x-breadcrumb-ong :raiz-href="$workspaceUrl" :raiz-label="$organizerManagement ? 'Minha atuação' : 'Dashboard'"
     :itens="[
         [
             'label' => 'Meus eventos',
-            'route' => 'ong.eventos.index'
+            'route' => $listRoute
         ],
         [
             'label' => 'Criar evento'
@@ -61,7 +66,13 @@
         {{-- FORMULÁRIO --}}
         {{-- ============================================================= --}}
 
-        @if($flow['management_allowed'] ?? true)
+        @if($integrated || ($flow['management_allowed'] ?? true))
+        @if($integrated)
+            <div>
+            <p class="mx-auto mt-5 max-w-[1450px] px-4 text-sm sm:px-6 lg:px-8" id="event-editor-status">O envio do Evento para aprovação ainda está indisponível.</p>
+            <fieldset disabled class="min-w-0" aria-describedby="event-editor-status">
+            <legend class="sr-only">Campos do evento</legend>
+        @else
         <form data-event-editor onsubmit="return false;"
             action="{{ route('ong.eventos.store') }}"
             method="POST"
@@ -70,6 +81,7 @@
 
 
             @csrf
+        @endif
 
 
             <div
@@ -78,8 +90,8 @@
                        sm:px-6 sm:py-8
                        lg:px-8"
             >
-<x-organizer-scope :flow="$flow" />
-<x-event-state :flow="$flow" :management="true" />
+@unless($integrated)<x-organizer-scope :flow="$flow" />@endunless
+@unless($integrated)<x-event-state :flow="$flow" :management="true" />@endunless
 
                 {{-- ===================================================== --}}
                 {{-- TÍTULO --}}
@@ -107,7 +119,7 @@
                                    font-poppins text-sm leading-6
                                    text-neutral-500"
                         >
-                            Preencha as informações abaixo.
+                            @unless($integrated)Preencha as informações abaixo.@endunless
                             O evento será revisado pelo administrador
                             antes de ser publicado.
                         </p>
@@ -116,7 +128,7 @@
 
 
                     {{-- Salvar rascunho desktop/tablet --}}
-                    <x-botao-secundario :href="route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')])" class="w-full shrink-0 sm:w-auto">Voltar aos eventos</x-botao-secundario>
+                    <x-botao-secundario :href="route($listRoute, $managementParams)" class="w-full shrink-0 sm:w-auto">Voltar aos eventos</x-botao-secundario>
 
                 </div>
 
@@ -300,7 +312,7 @@
                                             name="vagas_evento"
                                             min="1"
                                             required
-                                            value="{{ old('vagas_evento', 30) }}"
+                                            value="{{ $integrated ? '' : old('vagas_evento', 30) }}"
                                             class="w-full min-w-0
                                                    rounded-xl border
                                                    border-[#d8d4ca]
@@ -460,8 +472,8 @@
                                        sm:p-6"
                             >
 
-                                <x-agenda-editor :flow="$flow" />
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><label class="text-sm">Cidade<input name="cidade_evento" value="Guarulhos" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2" maxlength="64"></label><label class="text-sm">Bairro<input name="bairro_evento" value="Bairro Exemplo" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2" maxlength="64"></label><label class="text-sm">UF<input name="uf_evento" value="SP" maxlength="2" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2"></label></div>
+                                <x-agenda-editor :flow="$flow ?? ['catalogs' => []]" :disabled="$integrated" />
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><label class="text-sm">Cidade<input name="cidade_evento" @unless($integrated) value="Guarulhos" @endunless class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2" maxlength="64"></label><label class="text-sm">Bairro<input name="bairro_evento" @unless($integrated) value="Bairro Exemplo" @endunless class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2" maxlength="64"></label><label class="text-sm">UF<input name="uf_evento" @unless($integrated) value="SP" @endunless maxlength="2" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2"></label></div>
                                 {{-- CEP --}}
                                 <div
                                     class="grid grid-cols-1 gap-4
@@ -810,7 +822,7 @@
                                     class="font-poppins
                                            text-xs text-neutral-500"
                                 >
-                                    {{ $flow['owner_label'] }}
+                                    {{ $integrated ? ($organizerManagement ? 'Organizador independente' : $institutionName) : $flow['owner_label'] }}
                                 </p>
 
                                 <h3
@@ -847,7 +859,7 @@
                                         class="rounded-full bg-neutral-100
                                                px-2.5 py-1 text-neutral-600"
                                     >
-                                        30 vagas informativas
+                                        {{ $integrated ? 'Vagas a definir' : '30 vagas informativas' }}
                                     </span>
                                 </div>
 
@@ -1094,7 +1106,7 @@
                                sm:gap-3"
                     >
 
-                        <x-botao-secundario :href="route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')])" class="w-full sm:w-auto">
+                        <x-botao-secundario :href="route($listRoute, $managementParams)" class="w-full sm:w-auto">
                             Cancelar
                         </x-botao-secundario>
 
@@ -1110,9 +1122,9 @@
 
             </div>
 
-        </form>
+        @if($integrated)</fieldset></div>@else</form>@endif
         @else
-        <div class="px-4 py-6"><x-organizer-scope :flow="$flow" /></div>
+        <div class="px-4 py-6">@unless($integrated)<x-organizer-scope :flow="$flow" />@endunless</div>
         @endif
 
     </main>
@@ -1123,6 +1135,7 @@
     {{-- MODAL DE SUCESSO --}}
     {{-- ========================================================= --}}
 
+    @unless($integrated)
     <dialog id="modal-sucesso-evento" class="ajudae-dialog ajudae-dialog--compact ajudae-dialog--legacy" role="dialog" aria-modal="true" aria-labelledby="modal-sucesso-titulo"><x-dialog-close />
         <div
             class="w-full max-w-md
@@ -1170,7 +1183,7 @@
             </div>
 
             <div class="mt-6 flex flex-col gap-3">
-                <x-botao-primario :href="route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')])" class="w-full">
+                <x-botao-primario :href="route($listRoute, $managementParams)" class="w-full">
                     Ir para meus eventos →
                 </x-botao-primario>
             </div>
@@ -1470,7 +1483,7 @@
                 document.getElementById('modal-sucesso-evento');
 
             const urlMeusEventos =
-                @js(route('ong.eventos.index',['contexto'=>request()->query('contexto','ong'),'jornada'=>request()->query('jornada')]));
+                @js(route($listRoute, $managementParams));
 
 
             formularioEvento?.addEventListener('submit', function (event) {
@@ -1499,6 +1512,7 @@
             atualizarPreviewCompleta();
         });
     </script>
+    @endunless
 
 </body>
 

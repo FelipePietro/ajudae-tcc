@@ -11,7 +11,10 @@
         <h1 class="break-words">{{ $ownProfile['name'] }}</h1>
         @if($ownProfile['place'])<p>{{ $ownProfile['place'] }}</p>@endif
     </div>
-    <div class="account-profile-actions"><x-botao-secundario :href="route('conta')">Segurança da conta</x-botao-secundario></div>
+    <div class="account-profile-actions">
+        <x-botao-secundario :href="route('ong.perfil.editar')">Revisar dados</x-botao-secundario>
+        @if($ownProfile['publicUrl'])<x-botao-secundario :href="$ownProfile['publicUrl']">Ver perfil público</x-botao-secundario>@endif
+        <x-botao-secundario :href="route('conta')">Segurança da conta</x-botao-secundario></div>
 </section>
 <x-registration-status :status="$ownProfile['status']" :tone="$ownProfile['statusTone']" description="Acompanhe a situação cadastral da sua organização." />
 <div class="account-two-columns">

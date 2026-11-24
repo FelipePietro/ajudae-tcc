@@ -43,6 +43,37 @@ class PadrinhoController extends Controller
         ]);
     }
 
+    public function codigo(Request $request, PadrinhoService $service)
+    {
+        $indicacao = $service->codigo($this->pessoa($request));
+
+        return ApiResponse::success(['codigo' => $indicacao?->codigo, 'emitido_em' => $indicacao?->emitido_em?->toISOString()])
+            ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function emitirCodigo(Request $request, PadrinhoService $service)
+    {
+        $indicacao = $service->emitirCodigo($this->pessoa($request));
+
+        return ApiResponse::success(['codigo' => $indicacao->codigo, 'emitido_em' => $indicacao->emitido_em->toISOString()])
+            ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function revogarCodigo(Request $request, PadrinhoService $service)
+    {
+        $service->revogarCodigo($this->pessoa($request));
+
+        return ApiResponse::success(null, 'Código revogado.');
+    }
+
+    public function indicar(Request $request, PadrinhoService $service)
+    {
+        $dados = $request->validate(['codigo_padrinho' => ['required', 'string', 'regex:/\A[0-9a-f]{64}\z/i']]);
+        $pedido = $service->indicar($this->pessoa($request), $dados['codigo_padrinho']);
+
+        return ApiResponse::success($this->pedidoPublico($pedido), 'Indicação registrada.');
+    }
+
     public function recebidas(Request $request)
     {
         $pessoa = $this->pessoa($request);
@@ -116,8 +147,8 @@ class PadrinhoController extends Controller
     private function pessoa(Request $request): Pessoa
     {
         $pessoa = $request->user();
-        if (! $pessoa instanceof Pessoa) {
-            throw new AuthorizationException();
+        if (! $pessoa instanceof Pessoa || $pessoa->role_pessoa !== 'voluntario') {
+            throw new AuthorizationException;
         }
 
         return $pessoa;

@@ -9,7 +9,7 @@
         </div>
     @else
         @include('components.navbar')
-        @unless($webNavigation->profile || $webNavigation->restricted)
+        @unless($webNavigation->signedIn)
             <div data-integrated-header-spacer class="h-[68px]" aria-hidden="true"></div>
         @endunless
     @endif

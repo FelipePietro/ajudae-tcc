@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventoResource;
-use App\Models\AdminLog;
 use App\Models\Evento;
 use App\Models\Ong;
 use App\Models\Pessoa;
+use App\Services\EventoModerationService;
 use App\Services\EventoOperationalService;
 use App\Exceptions\ValidationConflictException;
 use App\Support\AccountAccess;
@@ -326,7 +326,7 @@ class EventoController extends Controller
                     $operations->concederDesistenciaSemPenalidade($agenda);
                 }
             }
-            $operations->notificarEvento($evento, 'evento.alterado', "O evento {$evento->nm_evento} foi alterado.");
+            $operations->notificarEvento($evento, 'evento.alterado', "O evento {$evento->nm_evento} foi alterado.", $localizacao);
 
             return $evento;
         });
@@ -366,40 +366,10 @@ class EventoController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $id, EventoModerationService $moderacao)
     {
-        $validated = $request->validate([
-            'status_evento' => [
-                'required',
-                Rule::in(['ativo', 'reprovado']),
-            ],
-        ]);
-
-        $evento = DB::transaction(function () use ($id, $validated, $request) {
-            $evento = Evento::whereKey($id)->lockForUpdate()->firstOrFail();
-            if ($evento->status_evento !== 'aguardando a confirmação') {
-                throw new ValidationConflictException('O evento não está aguardando aprovação.');
-            }
-
-            $status = $validated['status_evento'];
-            $evento->forceFill(['status_evento' => $status])->save();
-            AdminLog::create([
-                'pessoa_id' => $request->user()->pessoa_id,
-                'acao' => $status === 'ativo' ? 'evento.aprovado' : 'evento.reprovado',
-                'recurso_type' => Evento::class,
-                'recurso_id' => $evento->evento_id,
-                'detalhes' => ['de' => 'aguardando a confirmação', 'para' => $status],
-            ]);
-
-            $responsavel = $evento->responsavelPessoa ?? $evento->ong ?? $evento->pessoa;
-            $responsavel?->notificacoes()->create([
-                'tipo_notificacao' => 'evento.status_atualizado',
-                'mensagem_notificacao' => "O status do evento {$evento->nm_evento} foi atualizado.",
-                'evento_id' => $evento->evento_id,
-            ]);
-
-            return $evento;
-        });
+        $dados = $request->validate(EventoModerationService::regras(false));
+        $evento = $moderacao->decidir($request->user(), (int) $id, $dados['status_evento'], $dados['motivo'] ?? null);
 
         return ApiResponse::success(new EventoResource($evento), 'Status do evento atualizado com sucesso.');
     }
@@ -428,21 +398,26 @@ class EventoController extends Controller
             }
             $ator = $request->user();
             $autorTipo = $ator instanceof Ong ? 'ong' : 'pessoa';
+            $statusAnterior = $evento->status_evento;
+            $canceladoEm = now();
+            $iniciado = $evento->agendas()->where('status_ativo', '!=', 'cancelado')
+                ->where('data_inicio', '<=', $canceladoEm)->exists();
             $evento->forceFill([
                 'status_evento' => 'cancelado',
                 'motivo_cancelamento' => trim($validated['motivo']),
-                'cancelado_em' => now(),
+                'cancelado_em' => $canceladoEm,
                 'cancelado_por_tipo' => $autorTipo,
                 'cancelado_por_id' => $ator->getKey(),
             ])->save();
             $evento->agendas()->whereNotIn('status_ativo', ['finalizado', 'cancelado'])->update([
                 'status_ativo' => 'cancelado',
                 'motivo_cancelamento' => trim($validated['motivo']),
-                'cancelado_em' => now(),
+                'cancelado_em' => $canceladoEm,
                 'cancelado_por_tipo' => $autorTipo,
                 'cancelado_por_id' => $ator->getKey(),
             ]);
-            $operations->notificarEvento($evento, 'evento.cancelado', "O evento {$evento->nm_evento} foi cancelado.");
+            $operations->registrarCancelamento($evento, $ator, $statusAnterior, $iniciado);
+            $operations->notificarEvento($evento, 'evento.cancelado', "O evento {$evento->nm_evento} foi cancelado. Sua participação não será penalizada.");
 
             return $evento;
         });
@@ -454,10 +429,13 @@ class EventoController extends Controller
     {
         $evento = DB::transaction(function () use ($request, $id) {
             $evento = Evento::whereKey($id)->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('operate', [$evento, true]);
+            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
 
             if ($evento->status_evento !== 'ativo') {
                 throw new ValidationConflictException('O evento não está ativo para finalização.');
+            }
+            if (! $evento->agendas()->exists()) {
+                throw new ValidationConflictException('O evento precisa ter ao menos uma Agenda para ser finalizado.');
             }
 
             $agendasPendentes = $evento->agendas()
@@ -486,7 +464,13 @@ class EventoController extends Controller
                 throw new ValidationConflictException("O evento possui {$faltantes} {$substantivo} aguardando avaliação.");
             }
 
-            $evento->forceFill(['status_evento' => 'finalizado'])->save();
+            $ator = $request->user();
+            $evento->forceFill([
+                'status_evento' => 'finalizado',
+                'finalizado_em' => now(),
+                'finalizado_por_tipo' => $ator instanceof Ong ? 'ong' : 'pessoa',
+                'finalizado_por_id' => $ator->getKey(),
+            ])->save();
 
             return $evento;
         });

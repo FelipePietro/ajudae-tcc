@@ -1,3 +1,6 @@
+@php
+    $integrated = config('identity.enabled');
+@endphp
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -9,7 +12,7 @@
 
     @vite([
         'resources/css/app.css',
-        'resources/js/app.js'
+        $integrated ? 'resources/js/identity.js' : 'resources/js/app.js'
     ])
 </head>
 
@@ -24,6 +27,7 @@
     {{-- =========================
          CÁLCULOS DO PERFIL
     ========================== --}}
+    @unless($integrated)
     @php
         $xpRestante = max(
             0,
@@ -34,6 +38,7 @@
             ? min(100, max(0, (($xp_user - $xp_inicio_nivel) / ($xp_proximo_nivel - $xp_inicio_nivel)) * 100))
             : 100;
     @endphp
+    @endunless
 
 
     {{-- =========================
@@ -62,11 +67,15 @@
                             class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e5f1d7] md:h-20 md:w-20"
                         >
 
+                            @if($integrated)
+                                <span aria-hidden="true" class="text-xl font-semibold">{{ mb_strtoupper(mb_substr($nome_user, 0, 2)) }}</span>
+                            @else
                             <img
                                 src="{{ $foto_user }}"
                                 alt="Foto de {{ $nome_user }}"
                                 class="h-full w-full object-cover"
                             >
+                            @endif
 
                         </div>
 
@@ -83,7 +92,7 @@
                             <p
                                 class="mt-1 break-words font-poppins text-sm text-neutral-500"
                             >
-                                📍 {{ $cidade_user }}{{ $uf_user ? ', '.$uf_user : '' }}
+                                @unless($integrated)📍 {{ $cidade_user }}{{ $uf_user ? ', '.$uf_user : '' }}@endunless
                             </p>
 
 
@@ -93,8 +102,7 @@
                                 <span
                                     class="rounded-full bg-[#fff0be] px-3 py-1 text-xs font-medium text-[#bd7c00]"
                                 >
-                                    🔥 Nível {{ $nivel_user }}
-                                    · {{ $titulo_nivel }}
+                                    {{ $integrated ? 'Voluntário aprovado' : '🔥 Nível '.$nivel_user.' · '.$titulo_nivel }}
                                 </span>
 
                                 <span
@@ -106,7 +114,7 @@
                                 <span
                                     class="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-600"
                                 >
-                                    {{ $tipo_user }}
+                                    {{ $integrated ? 'Voluntariado' : $tipo_user }}
                                 </span>
 
                             </div>
@@ -154,7 +162,7 @@
                     <p
                         class="mt-2 text-2xl font-bold text-black"
                     >
-                        {{ $eventos_user }}
+                        {{ $integrated ? '—' : $eventos_user }}
                     </p>
 
                     <p
@@ -178,7 +186,7 @@
                     <p
                         class="mt-2 text-2xl font-bold text-black"
                     >
-                        {{ $badges_user }}
+                        {{ $integrated ? '—' : $badges_user }}
                     </p>
 
                     <p
@@ -283,7 +291,7 @@
                             <p
                                 class="mt-2 break-words font-poppins text-sm leading-6 text-neutral-700"
                             >
-                                {{ $bio_user ?: 'Biografia não informada.' }}
+                                {{ $integrated ? 'A biografia ainda não está disponível neste perfil.' : ($bio_user ?: 'Biografia não informada.') }}
                             </p>
 
                         </div>
@@ -335,7 +343,7 @@
                                 class="mt-3 flex flex-wrap gap-2"
                             >
 
-                                @forelse ($habilidades_user as $habilidade)
+                                @forelse (($habilidades_user ?? []) as $habilidade)
 
                                     <span
                                         class="rounded-md bg-neutral-100 px-3 py-1.5 font-poppins text-xs text-neutral-700"
@@ -391,7 +399,7 @@
                                 class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2"
                             >
 
-                                @forelse ($badges as $badge)
+                                @forelse (($badges ?? []) as $badge)
 
                                     <div
                                         class="rounded-xl border border-neutral-200 bg-neutral-50 p-4"
@@ -472,7 +480,7 @@
                                 class="mt-6 space-y-3"
                             >
 
-                                @forelse ($historico as $item)
+                                @forelse (($historico ?? []) as $item)
 
                                     <div
                                         class="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center sm:justify-between"
@@ -554,10 +562,13 @@
                         </h2>
 
 
+                        @unless($integrated)
+                        @unless($integrated)
                         <div
                             class="mt-4 space-y-2"
                         >
 
+                            @if($integrated)<p class="text-sm">A classificação ainda está indisponível.</p>@else
                             @foreach ($ranking as $usuario)
 
                                 <div
@@ -607,6 +618,7 @@
                                 </div>
 
                             @endforeach
+                            @endif
 
 
                             {{-- Usuário atual --}}
@@ -645,6 +657,7 @@
                                 </span>
 
                             </div>
+                        @endunless
 
                         </div>
 
@@ -687,6 +700,7 @@
                             ></div>
 
                         </div>
+                        @endunless
 
 
                         <p
@@ -713,7 +727,7 @@
                                 📜 Certificados
                             </h2>
 
-                            <x-botao-secundario :href="route('certificados.verificar', ['contexto' => request()->query('contexto', 'visitante')])" class="shrink-0" size="sm">
+                            <x-botao-secundario :href="$integrated ? route('certificados.verificar') : route('certificados.verificar', ['contexto' => request()->query('contexto', 'visitante')])" class="shrink-0" size="sm">
                                 Verificar código
                             </x-botao-secundario>
 
@@ -724,7 +738,7 @@
                             class="mt-4 space-y-3"
                         >
 
-                            @forelse ($certificados as $certificado)
+                            @forelse (($certificados ?? []) as $certificado)
 
                                 <div
                                     class="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-neutral-50 px-4 py-3"

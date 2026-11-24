@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SolicitacaoOrganizador;
 use App\Models\VinculoOngOrganizador;
 use App\Services\OrganizadorService;
+use App\Support\AccountAccess;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 
@@ -26,6 +27,8 @@ class OrganizadorController extends Controller
 
     public function status(Request $request)
     {
+        abort_unless(AccountAccess::hasPersonalJourney($request->user()), 403);
+
         $solicitacao = SolicitacaoOrganizador::where('pessoa_id', $request->user()->pessoa_id)
             ->latest('solicitada_em')
             ->first();
@@ -35,8 +38,12 @@ class OrganizadorController extends Controller
 
     public function convites(Request $request)
     {
+        abort_unless(AccountAccess::hasPersonalJourney($request->user()), 403);
+
         return ApiResponse::success(
-            VinculoOngOrganizador::with('ong')
+            VinculoOngOrganizador::with(['ong' => fn ($query) => $query
+                ->select('ong_id', 'nome_fantasia')
+                ->where('exclusao_pendente', false)])
                 ->where('pessoa_id', $request->user()->pessoa_id)
                 ->latest('convidado_em')
                 ->get()

@@ -77,6 +77,9 @@ class Pessoa extends Authenticatable
         'exclusao_pendente',
         'deletar_em',
         'admin_master',
+        'padrinho_exigido_em',
+        'padrinho_exigido_por_id',
+        'padrinho_exigido_motivo',
         'managed_image_disk',
         'managed_image_path',
         'managed_image_mime',
@@ -96,6 +99,8 @@ class Pessoa extends Authenticatable
         'aprovado_em' => 'datetime',
         'reprovado_definitivamente_em' => 'datetime',
         'bloqueado_ate' => 'datetime',
+        'padrinho_exigido_em' => 'datetime',
+        'padrinho_exigido_motivo' => 'encrypted',
     ];
 
     /**

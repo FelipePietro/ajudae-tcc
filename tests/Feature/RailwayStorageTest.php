@@ -74,12 +74,20 @@ class RailwayStorageTest extends TestCase
         ]);
         $this->grantPermission($admin, 'usuarios.validar');
         Sanctum::actingAs($admin, ['pessoa']);
+        $this->getJson($route)->assertForbidden();
+        $owner->forceFill([
+            'status_validacao' => 'em_analise',
+            'admin_analisando_id' => $admin->getKey(),
+            'analise_assumida_em' => now(),
+        ])->save();
         $this->get($route)->assertOk();
         $master = $this->createPessoa('administrador', [
             'cpf_pessoa' => '00000008113', 'email_pessoa' => 's3-master@example.test',
             'login_pessoa' => 's3-master', 'admin_master' => true,
         ]);
         Sanctum::actingAs($master, ['pessoa']);
+        $this->getJson($route)->assertForbidden();
+        $owner->forceFill(['admin_analisando_id' => $master->getKey()])->save();
         $this->get($route)->assertOk();
     }
 

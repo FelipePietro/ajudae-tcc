@@ -1,7 +1,7 @@
-@props(['flow'])
+@props(['flow', 'disabled' => false])
 <section class="event-flow" data-agenda-editor>
     <h3 class="font-semibold">Agendas do evento</h3><p class="text-sm text-neutral-500 mt-1">Informe um ou mais horários, com duração mínima de 30 minutos e vagas por Agenda.</p>
-    <div data-agenda-rows class="space-y-4 mt-4"></div>
+    <div data-agenda-rows class="space-y-4 mt-4">@if($disabled)<p class="text-sm">A configuração de Agendas ainda está indisponível.</p>@endif</div>
     <x-botao-secundario as="button" :href="null" type="button" data-agenda-add class="mt-3">+ Adicionar Agenda</x-botao-secundario>
     <p data-agenda-capacity-summary class="text-sm mt-3" role="status"></p>
     <p data-agenda-error role="alert" class="text-sm text-red-700 mt-3"></p>

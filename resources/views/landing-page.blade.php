@@ -32,7 +32,7 @@
     @php
         $integratedLanding = config('identity.enabled');
         $landingNavigation = $integratedLanding ? \App\Support\WebNavigation::for(request()) : null;
-        $signedIn = $landingNavigation && ($landingNavigation->profile || $landingNavigation->restricted);
+        $signedIn = $landingNavigation?->signedIn;
         $personEntry = $signedIn ? route($landingNavigation->destination()) : ($integratedLanding ? route('cadastro.pessoa') : '/cadastro');
         $ongEntry = $signedIn ? route('feed') : ($integratedLanding ? route('ong.cadastrar.form') : '/cadastro/ong');
         $personLabel = $signedIn

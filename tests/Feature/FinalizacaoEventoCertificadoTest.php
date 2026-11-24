@@ -145,6 +145,9 @@ class FinalizacaoEventoCertificadoTest extends TestCase
         }
         $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertOk();
         $vazio = $this->evento($owner);
+        $this->postJson("/api/v1/eventos/{$vazio->evento_id}/finalizar")
+            ->assertStatus(409)->assertSee('ao menos uma Agenda');
+        $this->assertNull($vazio->fresh()->finalizado_em);
         $this->agenda($vazio);
         $this->postJson("/api/v1/eventos/{$vazio->evento_id}/finalizar")->assertOk();
     }
@@ -153,7 +156,7 @@ class FinalizacaoEventoCertificadoTest extends TestCase
     {
         $ong = $this->ong();
         $responsavel = $this->pessoa('organizador');
-        VinculoOngOrganizador::create([
+        $vinculo = VinculoOngOrganizador::create([
             'ong_id' => $ong->ong_id, 'pessoa_id' => $responsavel->pessoa_id,
             'status' => 'ativo', 'convidado_em' => now(), 'respondido_em' => now(),
         ]);
@@ -163,12 +166,20 @@ class FinalizacaoEventoCertificadoTest extends TestCase
             Sanctum::actingAs($ator, ['pessoa']);
             $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertForbidden();
         }
-        Sanctum::actingAs($ong, ['ong']);
+        Sanctum::actingAs($this->ong(), ['ong']);
+        $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertForbidden();
+        $vinculo->forceFill(['status' => 'encerrado'])->save();
+        Sanctum::actingAs($responsavel, ['pessoa']);
         $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertForbidden();
         $this->assertSame('ativo', $evento->fresh()->status_evento);
-        Sanctum::actingAs($responsavel, ['pessoa']);
-        $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertOk();
         Sanctum::actingAs($ong, ['ong']);
+        $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertOk();
+        $this->assertDatabaseHas('evento', [
+            'evento_id' => $evento->evento_id, 'status_evento' => 'finalizado',
+            'finalizado_por_tipo' => 'ong', 'finalizado_por_id' => $ong->ong_id,
+        ]);
+        $this->assertNotNull($evento->fresh()->finalizado_em);
+        $this->postJson("/api/v1/eventos/{$evento->evento_id}/finalizar")->assertStatus(409);
         $this->patchJson("/api/v1/eventos/{$evento->evento_id}", ['nm_evento' => 'Alterado'])->assertStatus(409);
         $this->assertSame('Mutirão', $evento->fresh()->nm_evento);
     }

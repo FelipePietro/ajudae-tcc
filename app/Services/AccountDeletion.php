@@ -24,6 +24,9 @@ class AccountDeletion
     {
         return DB::transaction(function () use ($actor) {
             $account = $this->lock($actor);
+            if (! AccountAccess::mayRequestOwnDeletion($account)) {
+                throw new AuthorizationException;
+            }
             if ($account->exclusao_pendente) {
                 throw new ValidationConflictException('A exclusão desta conta já está agendada.');
             }
@@ -36,7 +39,7 @@ class AccountDeletion
 
             $account->forceFill(['exclusao_pendente' => true, 'deletar_em' => now()->addDays(7)]);
             $this->credentials->revoke($account);
-            $this->audit($account, 'conta.exclusao_agendada');
+            $this->audit($account, 'conta.exclusao_agendada', null);
 
             return $account;
         }, 3);
@@ -50,9 +53,10 @@ class AccountDeletion
                 throw new ValidationConflictException('A solicitação não pode ser cancelada.');
             }
 
+            $prazoAnterior = $account->deletar_em?->toISOString();
             $account->forceFill(['exclusao_pendente' => false, 'deletar_em' => null]);
             $this->credentials->revoke($account);
-            $this->audit($account, 'conta.exclusao_cancelada');
+            $this->audit($account, 'conta.exclusao_cancelada', $prazoAnterior);
         }, 3);
     }
 
@@ -90,14 +94,19 @@ class AccountDeletion
                 ->where(fn ($query) => $query->where('padrinho_id', $id)->orWhere('apadrinhado_id', $id))->exists();
     }
 
-    private function audit(Pessoa|Ong $account, string $action): void
+    private function audit(Pessoa|Ong $account, string $action, ?string $prazoAnterior): void
     {
         AdminLog::create([
             'pessoa_id' => $account instanceof Pessoa ? $account->getKey() : null,
             'acao' => $action,
             'recurso_type' => $account->getMorphClass(),
             'recurso_id' => $account->getKey(),
-            'detalhes' => ['deletar_em' => $account->deletar_em?->toISOString()],
+            'detalhes' => [
+                'exclusao_pendente_antes' => ! $account->exclusao_pendente,
+                'exclusao_pendente_depois' => (bool) $account->exclusao_pendente,
+                'deletar_em_anterior' => $prazoAnterior,
+                'deletar_em' => $account->deletar_em?->toISOString(),
+            ],
         ]);
     }
 }

@@ -1,13 +1,13 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>@yield('title') · Ajudae</title>@vite(['resources/css/app.css','resources/css/painel_ong.css',isset($organizerEntry) ? 'resources/js/identity.js' : 'resources/js/app.js'])</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>@yield('title') · Ajudae</title>@vite(['resources/css/app.css','resources/css/painel_ong.css',config('identity.enabled') ? 'resources/js/identity.js' : 'resources/js/app.js'])</head>
 <body class="min-h-screen bg-[#F7F6F2]">
 <a class="account-skip" href="#organizer-main">Ir para o conteúdo</a>
-<x-context-navbar :default-context="$work['context'] ?? 'pessoa'" />
-<main id="organizer-main" tabindex="-1" @class(['ong-page-content' => !isset($organizerEntry)])>
+<x-context-navbar :surface="isset($institutionName) ? 'institution' : 'context'" :default-context="$work['context'] ?? 'pessoa'" />
+<main id="organizer-main" tabindex="-1" @class(['ong-page-content' => !config('identity.enabled') || isset($institutionName)])>
 @yield('breadcrumb')
-<div class="px-4 py-6 sm:px-6 lg:px-7 event-flow" @unless(isset($organizerEntry)) data-organizer-root @endunless>
-@if(isset($organizerEntry))
+<div class="px-4 py-6 sm:px-6 lg:px-7 event-flow" @unless(config('identity.enabled')) data-organizer-root @endunless>
+@if(config('identity.enabled'))
     @yield('content')
 @else
 <script type="application/json" data-organizer-state>@json($work)</script>

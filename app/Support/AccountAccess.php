@@ -27,6 +27,16 @@ class AccountAccess
         return ! $account->exclusao_pendente && self::canSignIn($account);
     }
 
+    public static function hasPersonalJourney(Pessoa|Ong $account): bool
+    {
+        return $account instanceof Pessoa && in_array($account->role_pessoa, ['voluntario', 'organizador'], true);
+    }
+
+    public static function mayRequestOwnDeletion(Pessoa|Ong $account): bool
+    {
+        return $account instanceof Ong || $account->role_pessoa !== 'administrador';
+    }
+
     public static function activeOng(Ong $ong): bool
     {
         return $ong->status_ong === 'ativo' && self::canOperate($ong);

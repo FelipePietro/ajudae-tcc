@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\ValidationConflictException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InscricaoResource;
 use App\Models\Agenda;
 use App\Models\Evento;
 use App\Models\Inscricao;
+use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Policies\EventoPolicy;
-use App\Services\EventoOperationalService;
-use App\Services\ConfiabilidadeService;
 use App\Services\AvaliacaoService;
+use App\Services\CandidaturaService;
+use App\Services\ConfiabilidadeService;
+use App\Services\EventoOperationalService;
 use App\Services\MatchService;
-use App\Exceptions\ValidationConflictException;
 use App\Support\AccountAccess;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
@@ -30,55 +32,16 @@ class InscricaoController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function store(Request $request, $id, EventoOperationalService $operations)
+    public function store(Request $request, $id, CandidaturaService $candidaturas)
     {
-        $agenda = Agenda::findOrFail($id);
-
-        if (! $agenda->isAtivo()) {
-            return ApiResponse::error('Esta agenda não está disponível para inscrições.', null, 409);
-        }
-
         $pessoa = $request->user();
 
         if (! ($pessoa instanceof Pessoa) || ! $pessoa->isApprovedVolunteer()) {
             return ApiResponse::error('Apenas voluntários aprovados podem se inscrever em agendas.', null, 403);
         }
 
-        $inscricao = DB::transaction(function () use ($agenda, $pessoa, $operations) {
-            $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
-            $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
-            $candidate = Pessoa::whereKey($pessoa->getKey())->lockForUpdate()->firstOrFail();
-            abort_unless($candidate->isApprovedVolunteer() && AccountAccess::canOperate($candidate)
-                && (int) $candidate->auth_version === (int) $pessoa->auth_version, 403);
-            if ($evento->status_evento !== 'ativo' || ! $agenda->isAtivo()) {
-                throw new ValidationConflictException('O evento ou a agenda não está disponível para candidaturas.');
-            }
-            if (now()->greaterThanOrEqualTo($agenda->data_inicio->copy()->subHour())) {
-                throw new ValidationConflictException('A candidatura fecha uma hora antes do início da agenda.');
-            }
-            if ($agenda->inscricoes()->where('pessoa_id', $pessoa->pessoa_id)->exists()) {
-                throw new ValidationConflictException('Você já possui uma inscrição nesta agenda.');
-            }
-            if ($operations->vagasOcupadas($agenda) >= $agenda->vagas_agenda) {
-                throw new ValidationConflictException('A agenda já está lotada.');
-            }
-            $inscricao = Inscricao::create([
-                'agenda_id' => $agenda->agenda_id,
-                'pessoa_id' => $pessoa->pessoa_id,
-                'status_inscricao' => 'pendente',
-                'dt_inscricao' => now(),
-            ]);
-
-            $responsavel = $evento->responsavelPessoa ?? $evento->ong ?? $evento->pessoa;
-            $responsavel?->notificacoes()->create([
-                'tipo_notificacao' => 'inscricao.criada',
-                'mensagem_notificacao' => "Nova inscrição no evento {$evento->nm_evento}.",
-                'agenda_id' => $agenda->agenda_id,
-                'evento_id' => $agenda->evento_id,
-            ]);
-
-            return $inscricao;
-        });
+        $validated = $request->validate(CandidaturaService::regras());
+        $inscricao = $candidaturas->inscrever($pessoa, (int) $id, $validated);
 
         return ApiResponse::success(new InscricaoResource($inscricao), 'Inscrição realizada com sucesso e enviada para aprovação.', 201);
     }
@@ -126,11 +89,13 @@ class InscricaoController extends Controller
         $ids = $inscricoes->getCollection()->pluck('pessoa_id');
         $resumos = $confiabilidade->resumosPublicosPorPessoas($ids);
         $medias = $avaliacoes->mediasPorPessoas($ids);
+        $mostrarCarta = app(EventoPolicy::class)->operate($request->user(), $agenda->evento);
         foreach ($inscricoes->getCollection() as $inscricao) {
             $inscricao->pessoa->setAttribute('media_avaliacao_calculada', $medias[$inscricao->pessoa_id] ?? null);
             $inscricao->pessoa->setAttribute('confiabilidade_resumo', $resumos[$inscricao->pessoa_id]);
             $inscricao->setAttribute('match', $match->calcular($agenda->evento, $inscricao->pessoa));
             $inscricao->setAttribute('confiabilidade', $resumos[$inscricao->pessoa_id]);
+            $inscricao->setAttribute('carta_visivel', $mostrarCarta);
         }
 
         return ApiResponse::success(InscricaoResource::collection($inscricoes));
@@ -150,10 +115,7 @@ class InscricaoController extends Controller
 
         if (
             ! ($user instanceof Pessoa) ||
-            (
-                $user->pessoa_id !== $pessoa->pessoa_id &&
-                $user->role_pessoa !== 'administrador'
-            )
+            ! Gate::forUser($user)->allows('viewPrivateHistory', $pessoa)
         ) {
             return ApiResponse::error('Você não tem permissão para visualizar estas inscrições.', null, 403);
         }
@@ -169,7 +131,10 @@ class InscricaoController extends Controller
 
     public function minhas(Request $request)
     {
-        return $this->porPessoa($request, $request->user()->pessoa_id);
+        $user = $request->user();
+        abort_unless($user instanceof Pessoa && AccountAccess::hasPersonalJourney($user), 403);
+
+        return $this->porPessoa($request, $user->pessoa_id);
     }
 
     public function show(Request $request, int $id)
@@ -177,7 +142,7 @@ class InscricaoController extends Controller
         $inscricao = Inscricao::with(['agenda.evento', 'pessoa'])->findOrFail($id);
         $user = $request->user();
 
-        if ($user instanceof Pessoa && $user->pessoa_id === $inscricao->pessoa_id) {
+        if ($user instanceof Pessoa && AccountAccess::hasPersonalJourney($user) && $user->pessoa_id === $inscricao->pessoa_id) {
             return ApiResponse::success(new InscricaoResource($inscricao));
         }
 
@@ -233,9 +198,8 @@ class InscricaoController extends Controller
             Gate::forUser($request->user())->authorize('operate', [$evento, true]);
             $agenda = Agenda::whereKey($inscricao->agenda_id)->lockForUpdate()->firstOrFail();
             $locked = Inscricao::whereKey($inscricao->getKey())->lockForUpdate()->firstOrFail();
-            if ($agenda->status_ativo !== 'ativo'
-                || in_array($agenda->evento->status_evento, ['cancelado', 'finalizado'], true)) {
-                throw new ValidationConflictException('Inscrições de agenda terminal não podem ser alteradas.');
+            if ($agenda->status_ativo !== 'ativo' || $evento->status_evento !== 'ativo') {
+                throw new ValidationConflictException('O Evento e a Agenda precisam estar ativos para alterar a seleção.');
             }
             if (! in_array($target, $transitions[$locked->status_inscricao] ?? [], true)) {
                 throw new ValidationConflictException('Transição de inscrição inválida.');
@@ -278,9 +242,8 @@ class InscricaoController extends Controller
             Gate::forUser($request->user())->authorize('operate', [$evento, true]);
             $agenda = Agenda::whereKey($inscricao->agenda_id)->lockForUpdate()->firstOrFail();
             $locked = Inscricao::whereKey($inscricao->getKey())->lockForUpdate()->firstOrFail();
-            if ($agenda->status_ativo !== 'ativo'
-                || in_array($agenda->evento->status_evento, ['cancelado', 'finalizado'], true)) {
-                throw new ValidationConflictException('Agenda terminal não recebe presença ou ausência.');
+            if ($agenda->status_ativo !== 'ativo' || $evento->status_evento !== 'ativo') {
+                throw new ValidationConflictException('O Evento e a Agenda precisam estar ativos para registrar presença ou ausência.');
             }
             if (now()->lessThan($agenda->data_inicio)) {
                 throw new ValidationConflictException('A presença só pode ser registrada após o início da agenda.');
@@ -291,12 +254,15 @@ class InscricaoController extends Controller
             }
 
             $duracao = round($agenda->data_inicio->diffInSeconds($agenda->data_fim, false) / 3600, 2);
-            $locked->update([
+            $autor = $request->user();
+            $locked->forceFill([
                 'presenca' => $validated['presenca'],
                 'presenca_confirmada_em' => now(),
+                'presenca_confirmada_por_tipo' => $autor instanceof Ong ? 'ong' : 'pessoa',
+                'presenca_confirmada_por_id' => $autor->getKey(),
                 'carga_horaria' => $validated['presenca'] ? $duracao : null,
                 'status_inscricao' => $validated['presenca'] ? 'participou' : 'não participou',
-            ]);
+            ])->save();
 
             return $locked;
         });
@@ -310,7 +276,7 @@ class InscricaoController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id, CandidaturaService $candidaturas)
     {
         $inscricao = Inscricao::with('agenda.evento')->findOrFail($id);
 
@@ -318,47 +284,13 @@ class InscricaoController extends Controller
 
         if (
             ! ($user instanceof Pessoa) ||
+            ! AccountAccess::hasPersonalJourney($user) ||
             $user->pessoa_id !== $inscricao->pessoa_id
         ) {
             return ApiResponse::error('Você não tem permissão para cancelar esta inscrição.', null, 403);
         }
 
-        $inscricao = DB::transaction(function () use ($inscricao) {
-            $agenda = Agenda::with('evento')->whereKey($inscricao->agenda_id)->lockForUpdate()->firstOrFail();
-            $locked = Inscricao::whereKey($inscricao->getKey())->lockForUpdate()->firstOrFail();
-            if (now()->greaterThanOrEqualTo($agenda->data_inicio)) {
-                throw new ValidationConflictException('Não é possível desistir após o início da agenda.');
-            }
-            if (! in_array($locked->status_inscricao, ['pendente', 'aprovado', 'participando'], true)
-                || $locked->presenca_confirmada_em !== null) {
-                throw new ValidationConflictException('Esta inscrição não pode mais ser cancelada.');
-            }
-            if ($agenda->status_ativo === 'finalizado' || $agenda->evento->status_evento === 'finalizado') {
-                throw new ValidationConflictException('Inscrição de agenda finalizada não pode ser alterada.');
-            }
-
-            $late = now()->diffInSeconds($agenda->data_inicio, false) < 24 * 3600;
-            $semPenalidade = ($locked->desistencia_sem_penalidade_ate !== null
-                    && now()->lessThanOrEqualTo($locked->desistencia_sem_penalidade_ate))
-                || $agenda->status_ativo === 'cancelado'
-                || $agenda->evento->status_evento === 'cancelado';
-            $locked->update([
-                'status_inscricao' => 'desistente',
-                'desistiu_em' => now(),
-                'desistencia_tardia' => $late,
-                'desistencia_sem_penalidade' => $semPenalidade,
-            ]);
-
-            $responsavel = $agenda->evento->responsavelPessoa ?? $agenda->evento->ong ?? $agenda->evento->pessoa;
-            $responsavel?->notificacoes()->create([
-                'tipo_notificacao' => 'inscricao.desistente',
-                'mensagem_notificacao' => "Uma pessoa desistiu da agenda do evento {$agenda->evento->nm_evento}.",
-                'agenda_id' => $agenda->agenda_id,
-                'evento_id' => $agenda->evento_id,
-            ]);
-
-            return $locked;
-        });
+        $inscricao = $candidaturas->desistir($user, $inscricao);
 
         return ApiResponse::success(new InscricaoResource($inscricao), 'Desistência registrada com sucesso.');
     }

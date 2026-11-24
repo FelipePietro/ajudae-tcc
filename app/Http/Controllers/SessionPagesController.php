@@ -11,12 +11,12 @@ use Illuminate\Http\Request;
 final class SessionPagesController extends Controller
 {
     public const INSTITUTIONAL_AREAS = [
-        'ong.eventos.index' => ['/ong/eventos', 'Meus eventos', 'A consulta e a gestão de Eventos da organização ainda estão indisponíveis.', true],
-        'ong.candidatos' => ['/ong/candidatos', 'Candidatos', 'A consulta e a seleção de candidaturas ainda estão indisponíveis.', true],
-        'ong.organizadores' => ['/ong/organizadores', 'Organizadores', 'A consulta de convites e vínculos da organização ainda está indisponível.', true],
-        'ong.eventos.criar' => ['/ong/eventos/criar', 'Criar evento', 'A criação de Eventos pela organização ainda está indisponível.', true],
-        'ong.notificacoes' => ['/ong/notificacoes', 'Notificações', 'As notificações da organização ainda estão indisponíveis aqui.', false],
-        'ong.configuracoes' => ['/ong/configuracoes', 'Configurações', 'Você pode gerenciar a segurança da sua conta.', false],
+        'ong.eventos.index' => ['/ong/eventos', 'ong.meus-eventos', true],
+        'ong.candidatos' => ['/ong/candidatos', 'ong.candidatos', true],
+        'ong.organizadores' => ['/ong/organizadores', 'organizadores.ong', true],
+        'ong.eventos.criar' => ['/ong/eventos/criar', 'ong.criar', true],
+        'ong.notificacoes' => ['/ong/notificacoes', 'notificacoes.central', false],
+        'ong.configuracoes' => ['/ong/configuracoes', 'ong.editar_ong', false],
     ];
 
     public function privatePrivacy(Request $request)
@@ -31,28 +31,17 @@ final class SessionPagesController extends Controller
     {
         abort_unless(WebNavigation::for($request)->volunteer, 403);
 
-        return view('auth.feature-unavailable', [
-            'title' => 'Minhas candidaturas',
-            'message' => 'O acompanhamento de candidaturas ainda está indisponível.',
-            'backRoute' => 'perfil',
-            'backLabel' => 'Voltar ao perfil',
-        ]);
+        return view('minhas-candidaturas');
     }
 
     public function personNotifications(Request $request)
     {
-        $navigation = WebNavigation::for($request);
-        $title = 'Notificações';
-        $message = 'As notificações da sua conta ainda estão indisponíveis aqui.';
+        $admin = WebNavigation::for($request)->adminPermissions !== [];
 
-        if ($navigation->adminPermissions !== []) {
-            return view('admin.area-indisponivel', [
-                'title' => $title, 'message' => $message, 'integratedAdmin' => true,
-            ]);
-        }
-
-        return view('auth.feature-unavailable', [
-            'title' => $title, 'message' => $message, 'backRoute' => 'perfil', 'backLabel' => 'Voltar ao perfil',
+        return view('notificacoes.central', [
+            'title' => 'Notificações',
+            'notificationContext' => $admin ? 'administrador' : 'pessoa',
+            ...($admin ? ['integratedAdmin' => true] : []),
         ]);
     }
 
@@ -60,26 +49,34 @@ final class SessionPagesController extends Controller
     {
         abort_unless(WebNavigation::for($request)->organizer, 403);
 
-        return view('auth.feature-unavailable', [
-            'title' => 'Meus eventos',
-            'message' => 'A consulta e a gestão de Eventos sob sua responsabilidade ainda estão indisponíveis.',
-            'backRoute' => 'organizador.workspace',
-            'backLabel' => 'Voltar para Minha atuação',
-        ]);
+        return view('ong.meus-eventos', ['organizerManagement' => true]);
+    }
+
+    public function organizerCreate(Request $request)
+    {
+        $navigation = WebNavigation::for($request);
+        abort_unless($navigation->organizer, 403);
+
+        /** @var Pessoa $account */
+        $account = $request->attributes->get('web_account');
+        abort_if($account->vinculoOngAtivo()->exists(), 403);
+
+        return view('ong.criar', ['organizerManagement' => true]);
     }
 
     public function institutionalArea(Request $request)
     {
-        $name = $request->route()->getName();
-        [, $title, $message, $requiresActive] = self::INSTITUTIONAL_AREAS[$name];
+        [, $view, $requiresActive] = self::INSTITUTIONAL_AREAS[$request->route()->getName()];
         $navigation = WebNavigation::for($request);
         abort_if($requiresActive && ! $navigation->institutionalPanel, 403);
 
-        return view('auth.institutional-area', [
-            'title' => $title,
-            'message' => $message,
-            'configuration' => $name === 'ong.configuracoes',
-            'backRoute' => $navigation->institutionalPanel ? 'ong.painel' : 'ong.perfil',
+        if ($request->routeIs('ong.configuracoes')) {
+            return $this->editOrganization($request);
+        }
+
+        return view($view, [
+            'notificationContext' => 'ong',
+            'institutionName' => $navigation->name,
         ]);
     }
 
@@ -88,9 +85,21 @@ final class SessionPagesController extends Controller
         $authorizedArea = WebNavigation::for($request)->adminAreas()[$area] ?? null;
         abort_unless($authorizedArea, 403);
 
-        return view('admin.area-indisponivel', [
+        $view = match ($area) {
+            'responder-lgpd' => 'admin.solicitacoes-lgpd',
+            'campanhas-xp' => 'admin.campanhas-xp',
+            default => 'admin.'.$area,
+        };
+
+        return view($view, [
             'title' => $authorizedArea[0],
+            'page' => $area,
             'integratedAdmin' => true,
+            'pages' => WebNavigation::for($request)->adminAreas(),
+            'params' => [],
+            'queues' => [],
+            'records' => [],
+            'variant' => null,
         ]);
     }
 
@@ -103,6 +112,7 @@ final class SessionPagesController extends Controller
             'webNavigation' => WebNavigation::for($request),
             'ownProfile' => [
                 'name' => $account->nm_pessoa,
+                'publicUrl' => $account->isApprovedVolunteer() ? route('perfil.publico', $account->getKey()) : null,
                 'email' => $account->email_pessoa,
                 'place' => implode(', ', array_filter([$account->cidade_pessoa, $account->uf_pessoa])),
                 'volunteer' => $account->role_pessoa === 'voluntario',
@@ -119,11 +129,7 @@ final class SessionPagesController extends Controller
                     'reprovado' => 'Cadastro reprovado',
                     default => 'Aguardando validação',
                 },
-                'preferences' => [
-                    'Causas' => $account->causas()->orderBy('nome_causa')->pluck('nome_causa')->all(),
-                    'Habilidades' => $account->habilidades()->orderBy('nome_habilidade')->pluck('nome_habilidade')->all(),
-                    'Recursos' => $account->recursos()->orderBy('nome_recurso')->pluck('nome_recurso')->all(),
-                ],
+                'preferences' => $this->personPreferences($account),
             ],
         ]);
     }
@@ -137,6 +143,7 @@ final class SessionPagesController extends Controller
             'webNavigation' => WebNavigation::for($request),
             'ownProfile' => [
                 'name' => $account->nome_fantasia,
+                'publicUrl' => AccountAccess::activeOng($account) ? route('ong.perfil.publico', $account->getKey()) : null,
                 'email' => $account->email_ong,
                 'place' => implode(', ', array_filter([$account->cidade_ong, $account->uf_ong])),
                 'description' => $account->descricao_ong,
@@ -153,6 +160,84 @@ final class SessionPagesController extends Controller
                 },
             ],
         ]);
+    }
+
+    public function publicPerson(string $id)
+    {
+        $person = Pessoa::query()
+            ->select('pessoa_id', 'nm_pessoa', 'role_pessoa', 'status_validacao', 'xp_pessoa', 'login_pessoa', 'exclusao_pendente')
+            ->where('role_pessoa', 'voluntario')->where('status_validacao', 'aprovado')
+            ->whereKey($id)->firstOrFail();
+        abort_unless(AccountAccess::canOperate($person), 404);
+
+        return view('perfil.index-perfil', [
+            'nome_user' => $person->nm_pessoa,
+            'xp_user' => $person->xp_pessoa,
+        ]);
+    }
+
+    public function publicOrganization(string $id)
+    {
+        $organization = Ong::query()
+            ->select('ong_id', 'nome_fantasia', 'descricao_ong', 'cidade_ong', 'uf_ong', 'status_ong', 'login_ong', 'exclusao_pendente')
+            ->whereKey($id)->firstOrFail();
+        abort_unless(AccountAccess::activeOng($organization), 404);
+
+        return view('ong.perfil_ong', [
+            'usuario' => [
+                'iniciais' => mb_strtoupper(mb_substr($organization->nome_fantasia, 0, 2)),
+                'nome' => $organization->nome_fantasia,
+                'cidade' => $organization->cidade_ong,
+                'estado' => $organization->uf_ong,
+                'tipo' => 'ONG',
+                'papel' => 'Organização',
+                'descricao' => $organization->descricao_ong,
+            ],
+        ]);
+    }
+
+    public function editPerson(Request $request)
+    {
+        /** @var Pessoa $account */
+        $account = $request->attributes->get('web_account');
+
+        return view('perfil.editar-perfil', ['accountFields' => [
+            'Nome' => $account->nm_pessoa,
+            'E-mail' => $account->email_pessoa,
+            'Telefone' => $account->tele_pessoa,
+            'Cidade' => $account->cidade_pessoa,
+            'UF' => $account->uf_pessoa,
+        ]]);
+    }
+
+    public function preferences(Request $request)
+    {
+        return view('perfil.preferencias', [
+            'savedPreferences' => $this->personPreferences($request->attributes->get('web_account')),
+        ]);
+    }
+
+    public function editOrganization(Request $request)
+    {
+        /** @var Ong $account */
+        $account = $request->attributes->get('web_account');
+
+        return view('ong.editar_ong', ['accountFields' => [
+            'Nome da organização' => $account->nome_fantasia,
+            'E-mail' => $account->email_ong,
+            'CNPJ' => $account->cnpj_ong,
+            'Localidade' => implode(', ', array_filter([$account->cidade_ong, $account->uf_ong])),
+            'Descrição' => $account->descricao_ong,
+        ]]);
+    }
+
+    private function personPreferences(Pessoa $account): array
+    {
+        return [
+            'Causas' => $account->causas()->orderBy('nome_causa')->pluck('nome_causa')->all(),
+            'Habilidades' => $account->habilidades()->orderBy('nome_habilidade')->pluck('nome_habilidade')->all(),
+            'Recursos' => $account->recursos()->orderBy('nome_recurso')->pluck('nome_recurso')->all(),
+        ];
     }
 
     public function institutionalPanel(Request $request)
@@ -210,6 +295,6 @@ final class SessionPagesController extends Controller
     {
         abort_unless(isset(WebNavigation::for($request)->adminPermissions['lgpd.visualizar']), 403);
 
-        return view('admin.solicitacoes-lgpd', ['title' => 'Solicitações de privacidade', 'integratedAdmin' => true]);
+        return $this->adminArea($request, 'solicitacoes-lgpd');
     }
 }

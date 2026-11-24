@@ -77,6 +77,7 @@ class OrganizadorService
                 'motivo_decisao' => null,
                 'decidida_em' => now(),
             ]);
+            $this->registrarDecisaoPromocao($solicitacao, $admin, $pessoa);
 
             return $solicitacao->refresh();
         });
@@ -94,6 +95,7 @@ class OrganizadorService
                 'motivo_decisao' => trim($motivo),
                 'decidida_em' => now(),
             ]);
+            $this->registrarDecisaoPromocao($solicitacao, $admin, $solicitacao->pessoa);
 
             return $solicitacao->refresh();
         });
@@ -107,6 +109,21 @@ class OrganizadorService
             || ! $this->lockValido($solicitacao)) {
             throw new ValidationConflictException('A análise deve ser concluída pelo Admin que possui o lock válido.');
         }
+    }
+
+    private function registrarDecisaoPromocao(SolicitacaoOrganizador $solicitacao, Pessoa $admin, Pessoa $pessoa): void
+    {
+        AdminLog::create([
+            'pessoa_id' => $admin->getKey(),
+            'acao' => 'organizador.promocao_decidida',
+            'recurso_type' => $solicitacao->getMorphClass(),
+            'recurso_id' => $solicitacao->getKey(),
+            'detalhes' => ['de' => 'em_analise', 'para' => $solicitacao->status],
+        ]);
+        $pessoa->notificacoes()->create([
+            'tipo_notificacao' => 'organizador.promocao_decidida',
+            'mensagem_notificacao' => 'A análise do seu pedido para atuar como organizador foi concluída.',
+        ]);
     }
 
     private function lockValido(SolicitacaoOrganizador $solicitacao): bool
@@ -169,9 +186,10 @@ class OrganizadorService
     {
         return DB::transaction(function () use ($ong, $pessoa) {
             $pessoa = Pessoa::whereKey($pessoa->getKey())->lockForUpdate()->firstOrFail();
+            $versao = $ong->auth_version;
             $ong = Ong::whereKey($ong->getKey())->lockForUpdate()->firstOrFail();
 
-            if (! AccountAccess::activeOng($ong)) {
+            if (! AccountAccess::activeOng($ong) || (int) $ong->auth_version !== (int) $versao) {
                 throw new AuthorizationException('A ONG precisa estar ativa.');
             }
 
@@ -190,22 +208,52 @@ class OrganizadorService
                 throw new ValidationConflictException('Já existe convite pendente para este organizador.');
             }
 
-            return VinculoOngOrganizador::create([
+            $vinculo = VinculoOngOrganizador::create([
                 'ong_id' => $ong->ong_id,
                 'pessoa_id' => $pessoa->pessoa_id,
                 'status' => 'convite_pendente',
                 'convidado_em' => now(),
             ]);
-        });
+            $this->registrarVinculo($vinculo, $ong, null);
+            $pessoa->notificacoes()->create([
+                'tipo_notificacao' => 'organizador.convite_recebido',
+                'mensagem_notificacao' => "Você recebeu um convite de vínculo de {$ong->nome_fantasia}.",
+            ]);
+
+            return $vinculo;
+        }, 3);
+    }
+
+    public function convidarPorIdentificador(Ong $ong, string $identificador): void
+    {
+        abort_unless(AccountAccess::activeOng($ong), 403);
+        $campo = filter_var($identificador, FILTER_VALIDATE_EMAIL) ? 'email_pessoa' : 'login_pessoa';
+        $pessoa = Pessoa::where($campo, $identificador)
+            ->where('role_pessoa', 'organizador')
+            ->where('status_validacao', 'aprovado')
+            ->where('exclusao_pendente', false)
+            ->first();
+        if ($pessoa === null) {
+            return;
+        }
+
+        try {
+            $this->convidar($ong, $pessoa);
+        } catch (ValidationConflictException) {
+            // The sender receives the same response when an invitation is unavailable.
+        }
     }
 
     public function responderConvite(VinculoOngOrganizador $vinculo, Pessoa $pessoa, bool $aceitar): VinculoOngOrganizador
     {
         return DB::transaction(function () use ($vinculo, $pessoa, $aceitar) {
+            $versao = $pessoa->auth_version;
             $pessoa = Pessoa::whereKey($pessoa->getKey())->lockForUpdate()->firstOrFail();
             $vinculo = VinculoOngOrganizador::whereKey($vinculo->getKey())->lockForUpdate()->firstOrFail();
 
-            if ($vinculo->pessoa_id !== $pessoa->pessoa_id) {
+            if ($vinculo->pessoa_id !== $pessoa->pessoa_id
+                || ! AccountAccess::canOperate($pessoa) || $pessoa->role_pessoa !== 'organizador'
+                || $pessoa->status_validacao !== 'aprovado' || (int) $pessoa->auth_version !== (int) $versao) {
                 throw new AuthorizationException('Este convite pertence a outra pessoa.');
             }
 
@@ -215,7 +263,7 @@ class OrganizadorService
 
             if ($aceitar) {
                 $ong = Ong::whereKey($vinculo->ong_id)->lockForUpdate()->firstOrFail();
-                if (! AccountAccess::canOperate($pessoa) || $pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado' || ! AccountAccess::activeOng($ong)) {
+                if (! AccountAccess::activeOng($ong)) {
                     throw new ValidationConflictException('O convite não pode ser aceito no estado atual.');
                 }
 
@@ -238,9 +286,14 @@ class OrganizadorService
                 'status' => $aceitar ? 'ativo' : 'recusado',
                 'respondido_em' => now(),
             ]);
+            $this->registrarVinculo($vinculo, $pessoa, 'convite_pendente');
+            $vinculo->ong->notificacoes()->create([
+                'tipo_notificacao' => 'organizador.convite_respondido',
+                'mensagem_notificacao' => $aceitar ? 'Um convite de vínculo foi aceito.' : 'Um convite de vínculo foi recusado.',
+            ]);
 
             return $vinculo->refresh();
-        });
+        }, 3);
     }
 
     public function encerrarVinculo(VinculoOngOrganizador $vinculo, Pessoa|Ong $ator): VinculoOngOrganizador
@@ -279,16 +332,30 @@ class OrganizadorService
                 'status' => 'encerrado',
                 'encerrado_em' => now(),
             ]);
-            AdminLog::create([
-                'pessoa_id' => $ator instanceof Pessoa ? $ator->getKey() : null,
-                'acao' => 'organizador.vinculo_encerrado',
-                'recurso_type' => $vinculo->getMorphClass(),
-                'recurso_id' => $vinculo->getKey(),
-                'detalhes' => ['ong_id' => $vinculo->ong_id, 'de' => 'ativo', 'para' => 'encerrado'],
+            $this->registrarVinculo($vinculo, $ator, 'ativo');
+            $destinatario = $ator instanceof Ong ? $pessoa : $ong;
+            $destinatario->notificacoes()->create([
+                'tipo_notificacao' => 'organizador.vinculo_encerrado',
+                'mensagem_notificacao' => 'Um vínculo entre organizador e ONG foi encerrado.',
             ]);
 
             return $vinculo->refresh();
         }, 3);
+    }
+
+    private function registrarVinculo(VinculoOngOrganizador $vinculo, Pessoa|Ong $ator, ?string $anterior): void
+    {
+        AdminLog::create([
+            'pessoa_id' => $ator instanceof Pessoa ? $ator->getKey() : null,
+            'acao' => match ($vinculo->status) {
+                'convite_pendente' => 'organizador.convite_enviado',
+                'encerrado' => 'organizador.vinculo_encerrado',
+                default => 'organizador.convite_respondido',
+            },
+            'recurso_type' => $vinculo->getMorphClass(),
+            'recurso_id' => $vinculo->getKey(),
+            'detalhes' => ['ong_id' => $vinculo->ong_id, 'de' => $anterior, 'para' => $vinculo->status],
+        ]);
     }
 
     public function atribuirResponsavel(Evento $evento, Ong $ong, ?Pessoa $pessoa, EventoOperationalService $operations): Evento

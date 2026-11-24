@@ -38,6 +38,8 @@ final class WebNavigation
 
     public readonly ?string $profile;
 
+    public readonly bool $signedIn;
+
     public readonly ?string $name;
 
     public readonly string $initials;
@@ -60,8 +62,14 @@ final class WebNavigation
     {
         $this->restricted = $account?->exclusao_pendente ?? false;
         $this->organization = $account instanceof Ong;
-        $visible = $account !== null && ! $this->restricted;
-        $this->profile = $visible ? ($this->organization ? 'ong.perfil' : 'perfil') : null;
+        $this->signedIn = $account !== null;
+        $visible = $this->signedIn && ! $this->restricted;
+        $this->profile = match (true) {
+            ! $visible => null,
+            $this->organization => 'ong.perfil',
+            AccountAccess::hasPersonalJourney($account) => 'perfil',
+            default => null,
+        };
         $this->name = $visible ? ($this->organization ? $account->nome_fantasia : $account->nm_pessoa) : null;
         $words = Str::of($this->name ?? '')->squish()->explode(' ')->filter();
         $this->initials = mb_strtoupper(mb_substr($words->first() ?? '', 0, 1)
@@ -98,7 +106,7 @@ final class WebNavigation
             $this->adminPermissions !== [] => 'admin.admin',
             $this->organizer => 'organizador.workspace',
             $this->institutionalPanel => 'ong.painel',
-            default => $this->profile ?? 'login',
+            default => $this->profile ?? ($this->signedIn ? 'conta' : 'login'),
         };
     }
 
@@ -110,7 +118,7 @@ final class WebNavigation
 
         $links = ['feed' => 'Explorar eventos'];
 
-        if (! $this->profile) {
+        if (! $this->signedIn) {
             return $links + [
                 'login' => 'Entrar',
                 'cadastro.pessoa' => 'Cadastrar-se como Pessoa',
@@ -118,7 +126,9 @@ final class WebNavigation
             ];
         }
 
-        $links[$this->profile] = $this->organization ? 'Minha organização' : 'Meu perfil';
+        if ($this->profile !== null) {
+            $links[$this->profile] = $this->organization ? 'Minha organização' : 'Meu perfil';
+        }
         if ($this->institutionalPanel) {
             $links['ong.painel'] = 'Painel da ONG';
         }

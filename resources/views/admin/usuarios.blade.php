@@ -1,19 +1,22 @@
 @extends('layouts.admin')
 
 @section('content')
+    @php
+        $integrated = isset($integratedAdmin);
+    @endphp
     @php($people = array_filter($queues['candidatos'] ?? [], fn ($row) => $row['kind'] === 'pessoa'))
     <header class="fila-cabecalho">
         <div><h1>{{ $title }}</h1><p>Acompanhe os cadastros de Pessoa.</p></div>
         @if($variant !== 'falha')
-            <div class="fila-resumo"><div><strong data-admin-people-count>{{ count($people) - (int) array_any($people, fn ($row) => $row['id'] === \App\Support\SponsorshipFixtures::APPLICANT) }}</strong><span>Cadastros</span></div><div><strong data-admin-metric="candidatos|aprovado">0</strong><span>Aprovados</span></div></div>
+            <div class="fila-resumo"><div><strong data-admin-people-count>{{ $integrated ? '—' : count($people) - (int) array_any($people, fn ($row) => $row['id'] === \App\Support\SponsorshipFixtures::APPLICANT) }}</strong><span>Cadastros</span></div><div><strong data-admin-metric="candidatos|aprovado">{{ $integrated ? '—' : 0 }}</strong><span>Aprovados</span></div></div>
         @endif
     </header>
     @if($variant === 'falha')
         <p class="admin-widget" role="alert">Não foi possível carregar a lista. <a href="{{ route('admin.usuarios', ['contexto' => 'administrador']) }}">Tentar novamente</a></p>
     @else
         <div class="cand-toolbar">
-            <label class="cand-busca"><span class="sr-only">Buscar Pessoa por nome</span><input type="search" data-admin-table-search placeholder="Buscar por nome..."></label>
-            <x-botao-secundario :href="route('admin.candidatos', $params)" texto="Abrir fila de validação" />
+            <label class="cand-busca"><span class="sr-only">Buscar Pessoa por nome</span><input type="search" @disabled($integrated) data-admin-table-search placeholder="Buscar por nome..."></label>
+            @if(!$integrated || isset($pages['candidatos']))<x-botao-secundario :href="route('admin.candidatos', $params)" texto="Abrir fila de validação" />@endif
         </div>
         <div class="admin-tabela-wrap"><div class="admin-tabela-scroll" tabindex="0" role="region" aria-label="Usuários">
             <table class="admin-tabela">
@@ -29,8 +32,8 @@
                     @endforeach
                 </tbody>
             </table>
-            <p class="admin-table-empty" data-admin-table-empty @if($people) hidden @endif>Nenhum cadastro encontrado.</p>
+            <p class="admin-table-empty" data-admin-table-empty @if($people) hidden @endif>{{ $integrated ? 'A consulta de usuários ainda está indisponível.' : 'Nenhum cadastro encontrado.' }}</p>
         </div></div>
     @endif
-    @include('admin.partials.data')
+    @unless($integrated)@include('admin.partials.data')@endunless
 @endsection

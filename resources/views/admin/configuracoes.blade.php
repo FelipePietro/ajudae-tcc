@@ -25,7 +25,8 @@
         </section>
         <section class="admin-widget">
             <h3>Segurança</h3>
-            <div class="cfg-row"><div class="cfg-row-info"><strong>Acessos restritos</strong><small>As permissões dependem da atuação selecionada.</small></div></div>
+            @isset($integratedAdmin)<x-botao-secundario :href="route('conta')" size="sm">Segurança da conta</x-botao-secundario>@endisset
+            <div class="cfg-row"><div class="cfg-row-info"><strong>Acessos restritos</strong><small>As permissões são definidas para a conta administrativa.</small></div></div>
             @unless(in_array($variant, ['revisao','privacidade']))
                 <ul class="admin-review-list"><li>Reprovação definitiva de Pessoa</li><li>Conclusão de apadrinhamento</li><li>Resposta a solicitações LGPD</li></ul>
             @endunless
