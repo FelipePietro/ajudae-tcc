@@ -18,6 +18,16 @@ class JustificativaParticipacaoService
 {
     public function __construct(private EventoPolicy $policy) {}
 
+    public static function regrasEnvio(): array
+    {
+        return ['motivo' => ['required', 'string', 'max:2000']];
+    }
+
+    public static function regrasDecisao(): array
+    {
+        return ['deferida' => ['required', 'boolean'], ...self::regrasEnvio()];
+    }
+
     public function consultar(Inscricao $inscricao, Pessoa|Ong $ator): JustificativaParticipacao
     {
         if (! $this->eTitular($inscricao, $ator) && ! $this->policy->operate($ator, $inscricao->agenda->evento)) {

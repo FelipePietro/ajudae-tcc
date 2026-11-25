@@ -61,9 +61,16 @@ final class WebParticipationController extends Controller
 
     public function rate(Request $request, Evento $evento, AvaliacaoService $avaliacoes)
     {
-        $validated = $request->validate(['nota' => ['required', 'integer', 'between:1,5']]);
+        $validated = $request->validate(AvaliacaoService::regrasNota());
         $nota = $avaliacoes->registrarOng($evento, $request->attributes->get('web_account'), (int) $validated['nota']);
 
         return ApiResponse::success(['nota' => $nota->nota], 'Avaliação enviada.', 201);
+    }
+
+    public function showRating(Request $request, Evento $evento, AvaliacaoService $avaliacoes)
+    {
+        $nota = $avaliacoes->consultarOng($evento, $request->attributes->get('web_account'));
+
+        return ApiResponse::success(['nota' => $nota->nota]);
     }
 }

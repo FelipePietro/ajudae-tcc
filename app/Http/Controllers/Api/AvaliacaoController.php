@@ -15,7 +15,7 @@ class AvaliacaoController extends Controller
 {
     public function voluntario(Request $request, int $evento, int $pessoa, AvaliacaoService $service)
     {
-        $validated = $request->validate($this->regrasNota());
+        $validated = $request->validate(AvaliacaoService::regrasNota());
         $avaliacao = $service->registrarVoluntario(
             Evento::findOrFail($evento),
             Pessoa::findOrFail($pessoa),
@@ -33,7 +33,7 @@ class AvaliacaoController extends Controller
 
     public function ong(Request $request, int $evento, AvaliacaoService $service)
     {
-        $validated = $request->validate($this->regrasNota());
+        $validated = $request->validate(AvaliacaoService::regrasNota());
         if (! ($request->user() instanceof Pessoa)) {
             throw new AuthorizationException('Somente voluntários podem avaliar a ONG.');
         }
@@ -60,16 +60,6 @@ class AvaliacaoController extends Controller
             'evento_id' => $avaliacao->evento_id,
             'pessoa_id' => $avaliacao->pessoa_id,
             'nota' => $avaliacao->nota,
-        ];
-    }
-
-    private function regrasNota(): array
-    {
-        return [
-            'nota' => ['required', 'integer', 'between:1,5'],
-            'comentario' => ['prohibited'],
-            'texto' => ['prohibited'],
-            'justificativa' => ['prohibited'],
         ];
     }
 }

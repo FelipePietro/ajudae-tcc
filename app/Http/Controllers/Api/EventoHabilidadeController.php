@@ -22,7 +22,7 @@ class EventoHabilidadeController extends Controller
 
     public function index($id)
     {
-        $evento = Evento::where('status_evento', 'ativo')->findOrFail($id);
+        $evento = Evento::publicado()->findOrFail($id);
 
         return ApiResponse::success($evento->habilidades()->get());
     }

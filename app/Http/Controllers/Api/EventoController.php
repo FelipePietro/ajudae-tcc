@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\ValidationConflictException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventoResource;
 use App\Models\Evento;
 use App\Models\Ong;
-use App\Models\Pessoa;
+use App\Services\EventoManagementService;
 use App\Services\EventoModerationService;
-use App\Services\EventoOperationalService;
-use App\Exceptions\ValidationConflictException;
-use App\Support\AccountAccess;
+use App\Services\EventoParticipationService;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +37,7 @@ class EventoController extends Controller
         ]);
 
         $query = Evento::with(['ong', 'pessoa', 'responsavelPessoa', 'categoria'])
-            ->where('status_evento', 'ativo');
+            ->publicado();
 
         if (isset($filters['categoria'])) {
             $query->where('cat_evento_id', $filters['categoria']);
@@ -83,7 +82,7 @@ class EventoController extends Controller
     public function show($id)
     {
         $evento = Evento::with(['ong', 'pessoa', 'responsavelPessoa', 'categoria', 'habilidades', 'agendas'])
-            ->where('status_evento', 'ativo')
+            ->publicado()
             ->findOrFail($id);
 
         return ApiResponse::success(new EventoResource($evento));
@@ -95,103 +94,12 @@ class EventoController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function store(Request $request)
+    public function store(Request $request, EventoManagementService $service)
     {
-        $isOnline = $request->input('modalidade_evento') === 'online';
-        $validated = $request->validate([
-            'logradouro_evento' => [Rule::requiredIf(! $isOnline), 'nullable', 'string', 'max:64'],
-            'cep_evento' => [Rule::requiredIf(! $isOnline), 'nullable', 'digits:8'],
-            'cidade_evento' => [Rule::requiredIf(! $isOnline), 'nullable', 'string', 'max:64'],
-            'bairro_evento' => [Rule::requiredIf(! $isOnline), 'nullable', 'string', 'max:64'],
-            'uf_evento' => [Rule::requiredIf(! $isOnline), 'nullable', 'string', 'size:2'],
-
-            'nm_evento' => ['required', 'string', 'max:64'],
-            'descricao_evento' => ['required', 'string', 'max:256'],
-            'imagem_evento_link' => ['required', 'string', 'max:255'],
-
-            'cat_evento_id' => [
-                'required',
-                'integer',
-                'exists:cat_evento,cat_evento_id',
-            ],
-
-            'compl_evento' => [
-                'nullable',
-                'string',
-                'max:64',
-            ],
-
-            'vagas_evento' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
-
-            'modalidade_evento' => [
-                'required',
-                'in:presencial,online,hibrido',
-            ],
-        ]);
-
-        $user = $request->user();
-
-        /*
-        |--------------------------------------------------------------------------
-        | ONG CRIANDO EVENTO
-        |--------------------------------------------------------------------------
-        */
-
-        $validated['status_evento'] = 'aguardando a confirmação';
-
-        if ($user instanceof Ong) {
-            $evento = DB::transaction(function () use ($user, $validated) {
-                $ong = Ong::whereKey($user->getKey())->lockForUpdate()->firstOrFail();
-                abort_unless(AccountAccess::activeOng($ong) && (int) $ong->auth_version === (int) $user->auth_version, 403);
-
-                $evento = new Evento($validated);
-                $evento->forceFill(['ong_id' => $ong->ong_id, 'pessoa_id' => null, 'responsavel_pessoa_id' => null])->save();
-
-                return $evento;
-            }, 3);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | ORGANIZADOR SOLO CRIANDO EVENTO
-        |--------------------------------------------------------------------------
-        */
-
-        elseif ($user instanceof Pessoa) {
-            $evento = DB::transaction(function () use ($user, $validated) {
-                $pessoa = Pessoa::whereKey($user->getKey())->lockForUpdate()->firstOrFail();
-
-                if (! AccountAccess::canOperate($pessoa) || (int) $pessoa->auth_version !== (int) $user->auth_version
-                    || $pessoa->role_pessoa !== 'organizador' || $pessoa->status_validacao !== 'aprovado') {
-                    return null;
-                }
-
-                $vinculo = $pessoa->vinculoOngAtivo()->lockForUpdate()->first();
-                if ($vinculo) {
-                    $ong = Ong::whereKey($vinculo->ong_id)->lockForUpdate()->firstOrFail();
-                    abort_unless(AccountAccess::activeOng($ong), 403);
-                }
-
-                $evento = new Evento($validated);
-                $evento->forceFill([
-                    'ong_id' => $vinculo?->ong_id,
-                    'pessoa_id' => $vinculo ? null : $pessoa->pessoa_id,
-                    'responsavel_pessoa_id' => $pessoa->pessoa_id,
-                ])->save();
-
-                return $evento;
-            });
-
-            if ($evento === null) {
-                return ApiResponse::error('Apenas organizadores aprovados podem criar eventos.', null, 403);
-            }
-        } else {
-            return ApiResponse::error('Usuário não autorizado.', null, 403);
-        }
+        $ator = $request->user();
+        Gate::forUser($ator)->authorize('create', Evento::class);
+        $dados = $request->validate(EventoManagementService::regrasCriacao(true, $request->input('modalidade_evento') === 'online'));
+        $evento = $service->criar($ator, $dados);
 
         return ApiResponse::success(new EventoResource($evento), 'Evento criado com sucesso.', 201);
     }
@@ -202,134 +110,13 @@ class EventoController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function update(Request $request, $id, EventoOperationalService $operations)
+    public function update(Request $request, $id, EventoManagementService $service)
     {
         $evento = Evento::findOrFail($id);
         Gate::forUser($request->user())->authorize('update', $evento);
-
-        $isOnline = $request->input('modalidade_evento', $evento->modalidade_evento) === 'online';
-
-        $validated = $request->validate([
-            'logradouro_evento' => [
-                'sometimes',
-                Rule::requiredIf(! $isOnline),
-                'nullable',
-                'string',
-                'max:64',
-            ],
-
-            'cep_evento' => [
-                'sometimes',
-                Rule::requiredIf(! $isOnline),
-                'nullable',
-                'digits:8',
-            ],
-
-            'cidade_evento' => [
-                'sometimes',
-                Rule::requiredIf(! $isOnline),
-                'nullable',
-                'string',
-                'max:64',
-            ],
-
-            'bairro_evento' => [
-                'sometimes',
-                Rule::requiredIf(! $isOnline),
-                'nullable',
-                'string',
-                'max:64',
-            ],
-
-            'uf_evento' => [
-                'sometimes',
-                Rule::requiredIf(! $isOnline),
-                'nullable',
-                'string',
-                'size:2',
-            ],
-
-            'nm_evento' => [
-                'sometimes',
-                'string',
-                'max:64',
-            ],
-
-            'descricao_evento' => [
-                'sometimes',
-                'string',
-                'max:256',
-            ],
-
-            'imagem_evento_link' => [
-                'sometimes',
-                'string',
-                'max:255',
-            ],
-
-            'cat_evento_id' => [
-                'sometimes',
-                'integer',
-                'exists:cat_evento,cat_evento_id',
-            ],
-
-            'compl_evento' => [
-                'sometimes',
-                'nullable',
-                'string',
-                'max:64',
-            ],
-
-            'vagas_evento' => [
-                'sometimes',
-                'integer',
-                'min:1',
-            ],
-
-            'modalidade_evento' => [
-                'sometimes',
-                'in:presencial,online,hibrido',
-            ],
-        ]);
-
-        if ($isOnline) {
-            foreach (['logradouro_evento', 'cep_evento', 'cidade_evento', 'bairro_evento', 'uf_evento', 'compl_evento'] as $field) {
-                $validated[$field] = $validated[$field] ?? null;
-            }
-        }
-
-        $evento = DB::transaction(function () use ($evento, $validated, $operations, $request) {
-            $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
-            if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
-                throw new ValidationConflictException('Evento terminal não pode ser alterado.');
-            }
-            $evento->fill($validated);
-            $alterados = array_keys($evento->getDirty());
-            if ($alterados === []) {
-                return $evento;
-            }
-
-            $sensivel = array_intersect($alterados, [
-                'descricao_evento', 'logradouro_evento', 'cep_evento', 'cidade_evento',
-                'bairro_evento', 'uf_evento', 'compl_evento',
-            ]) !== [];
-            $localizacao = array_intersect($alterados, [
-                'logradouro_evento', 'cep_evento', 'cidade_evento', 'bairro_evento', 'uf_evento', 'compl_evento',
-            ]) !== [];
-            $evento->save();
-            if ($sensivel || $evento->status_evento === 'reprovado') {
-                $operations->exigirReaprovacao($evento);
-            }
-            if ($localizacao) {
-                foreach ($evento->agendas as $agenda) {
-                    $operations->concederDesistenciaSemPenalidade($agenda);
-                }
-            }
-            $operations->notificarEvento($evento, 'evento.alterado', "O evento {$evento->nm_evento} foi alterado.", $localizacao);
-
-            return $evento;
-        });
+        $online = $request->input('modalidade_evento', $evento->modalidade_evento) === 'online';
+        $dados = $request->validate(EventoManagementService::regrasEdicao($online, true));
+        $evento = $service->atualizar($request->user(), $evento, $dados);
 
         return ApiResponse::success(new EventoResource($evento), 'Evento atualizado com sucesso.');
     }
@@ -347,7 +134,7 @@ class EventoController extends Controller
 
         DB::transaction(function () use ($evento, $request) {
             $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
+            Gate::forUser($request->user())->authorize('delete', [$evento, true]);
             if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
                 throw new ValidationConflictException('Evento terminal não pode ser excluído.');
             }
@@ -382,98 +169,19 @@ class EventoController extends Controller
         ));
     }
 
-    public function cancelar(Request $request, int $id, EventoOperationalService $operations)
+    public function cancelar(Request $request, int $id, EventoManagementService $service)
     {
         $evento = Evento::findOrFail($id);
         Gate::forUser($request->user())->authorize('manage', $evento);
-        $validated = $request->validate([
-            'motivo' => ['required', 'string', 'max:2000', 'not_regex:/^\s*$/'],
-        ]);
-
-        $evento = DB::transaction(function () use ($evento, $request, $validated, $operations) {
-            $evento = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
-            if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)) {
-                throw new ValidationConflictException('O evento já está em estado terminal.');
-            }
-            $ator = $request->user();
-            $autorTipo = $ator instanceof Ong ? 'ong' : 'pessoa';
-            $statusAnterior = $evento->status_evento;
-            $canceladoEm = now();
-            $iniciado = $evento->agendas()->where('status_ativo', '!=', 'cancelado')
-                ->where('data_inicio', '<=', $canceladoEm)->exists();
-            $evento->forceFill([
-                'status_evento' => 'cancelado',
-                'motivo_cancelamento' => trim($validated['motivo']),
-                'cancelado_em' => $canceladoEm,
-                'cancelado_por_tipo' => $autorTipo,
-                'cancelado_por_id' => $ator->getKey(),
-            ])->save();
-            $evento->agendas()->whereNotIn('status_ativo', ['finalizado', 'cancelado'])->update([
-                'status_ativo' => 'cancelado',
-                'motivo_cancelamento' => trim($validated['motivo']),
-                'cancelado_em' => $canceladoEm,
-                'cancelado_por_tipo' => $autorTipo,
-                'cancelado_por_id' => $ator->getKey(),
-            ]);
-            $operations->registrarCancelamento($evento, $ator, $statusAnterior, $iniciado);
-            $operations->notificarEvento($evento, 'evento.cancelado', "O evento {$evento->nm_evento} foi cancelado. Sua participação não será penalizada.");
-
-            return $evento;
-        });
+        $dados = $request->validate(EventoManagementService::regrasCancelamento());
+        $evento = $service->cancelar($request->user(), $evento, $dados['motivo']);
 
         return ApiResponse::success(new EventoResource($evento), 'Evento cancelado.');
     }
 
-    public function finalizar(Request $request, int $id)
+    public function finalizar(Request $request, int $id, EventoParticipationService $participacao)
     {
-        $evento = DB::transaction(function () use ($request, $id) {
-            $evento = Evento::whereKey($id)->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
-
-            if ($evento->status_evento !== 'ativo') {
-                throw new ValidationConflictException('O evento não está ativo para finalização.');
-            }
-            if (! $evento->agendas()->exists()) {
-                throw new ValidationConflictException('O evento precisa ter ao menos uma Agenda para ser finalizado.');
-            }
-
-            $agendasPendentes = $evento->agendas()
-                ->whereNotIn('status_ativo', ['finalizado', 'cancelado'])->count();
-            if ($agendasPendentes > 0) {
-                throw new ValidationConflictException("O evento possui {$agendasPendentes} agendas pendentes.");
-            }
-
-            $participantes = DB::table('p_ag_inscreve as inscricao')
-                ->join('agenda', 'agenda.agenda_id', '=', 'inscricao.agenda_id')
-                ->where('agenda.evento_id', $evento->evento_id)
-                ->where('agenda.status_ativo', 'finalizado')
-                ->where('inscricao.status_inscricao', 'participou')
-                ->where('inscricao.presenca', true)
-                ->whereNotNull('inscricao.presenca_confirmada_em')
-                ->distinct()->pluck('inscricao.pessoa_id');
-
-            $avaliados = DB::table('avaliacao_voluntario')
-                ->where('evento_id', $evento->evento_id)
-                ->whereIn('pessoa_id', $participantes)
-                ->whereBetween('nota', [1, 5])
-                ->pluck('pessoa_id');
-            $faltantes = $participantes->diff($avaliados)->count();
-            if ($faltantes > 0) {
-                $substantivo = $faltantes === 1 ? 'pessoa' : 'pessoas';
-                throw new ValidationConflictException("O evento possui {$faltantes} {$substantivo} aguardando avaliação.");
-            }
-
-            $ator = $request->user();
-            $evento->forceFill([
-                'status_evento' => 'finalizado',
-                'finalizado_em' => now(),
-                'finalizado_por_tipo' => $ator instanceof Ong ? 'ong' : 'pessoa',
-                'finalizado_por_id' => $ator->getKey(),
-            ])->save();
-
-            return $evento;
-        });
+        $evento = $participacao->finalizarEvento($id, $request->user());
 
         return ApiResponse::success(new EventoResource($evento), 'Evento finalizado.');
     }
@@ -490,7 +198,7 @@ class EventoController extends Controller
 
         $eventos = Evento::with('categoria')
             ->where('ong_id', $id)
-            ->where('status_evento', 'ativo')
+            ->publicado()
             ->paginate(min(max(request()->integer('per_page', 20), 1), 100));
 
         return ApiResponse::success(EventoResource::collection($eventos));

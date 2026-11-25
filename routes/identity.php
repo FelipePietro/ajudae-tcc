@@ -35,6 +35,8 @@ Route::middleware(ResolveWebAccount::class.':public')->group(function (): void {
     Route::view('/cadastro/ong', 'auth.registration-unavailable', ['institution' => true])->name('ong.cadastrar.form')->block();
 });
 
+require __DIR__.'/web-account-operations.php';
+
 Route::middleware(ResolveWebAccount::class)->group(function (): void {
     Route::get('/login', [SessionAccountController::class, 'loginForm'])->name('login')->block();
     Route::post('/login', [SessionAccountController::class, 'login'])->name('login.store')->block();
@@ -42,6 +44,9 @@ Route::middleware(ResolveWebAccount::class)->group(function (): void {
 });
 
 Route::middleware(ResolveWebAccount::class.':required')->group(function (): void {
+    require __DIR__.'/web-event-management.php';
+    require __DIR__.'/web-event-participation.php';
+
     Route::get('/conta', [SessionAccountController::class, 'account'])->name('conta')->block();
     Route::post('/conta/senha', [SessionAccountController::class, 'password'])->name('identity.password')->block();
     Route::post('/conta/exclusao', [SessionAccountController::class, 'scheduleDeletion'])->name('identity.deletion.schedule')->block();
@@ -80,6 +85,8 @@ Route::middleware(ResolveWebAccount::class.':jornada-pessoa')->group(function ()
         ->whereNumber('inscricao')->name('identity.application.withdraw')->block();
     Route::view('/minhas-participacoes', 'participacoes.pessoal')->name('participacoes')->block();
     Route::get('/minhas-participacoes/dados', [WebParticipationController::class, 'index'])->name('identity.participation.index')->block();
+    Route::get('/minhas-participacoes/{evento}/avaliacao-ong', [WebParticipationController::class, 'showRating'])
+        ->whereNumber('evento')->name('identity.participation.rating')->block();
     Route::post('/minhas-participacoes/{evento}/avaliacao-ong', [WebParticipationController::class, 'rate'])
         ->whereNumber('evento')->name('identity.participation.rate')->block();
     Route::view('/meus-certificados', 'certificados.lista')->name('certificados.index')->block();

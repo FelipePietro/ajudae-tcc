@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\ValidationConflictException;
 use App\Http\Controllers\Controller;
 use App\Models\Agenda;
 use App\Models\Evento;
-use App\Models\Ong;
-use App\Exceptions\ValidationConflictException;
-use App\Services\EventoOperationalService;
+use App\Services\AgendaManagementService;
+use App\Services\EventoManagementService;
+use App\Services\EventoParticipationService;
 use App\Services\XpService;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Gate;
 
 class AgendaController extends Controller
 {
@@ -32,7 +31,7 @@ class AgendaController extends Controller
 
     public function porEvento(Request $request, int $evento)
     {
-        Evento::where('status_evento', 'ativo')->findOrFail($evento);
+        Evento::publicado()->findOrFail($evento);
 
         $agendas = Agenda::where('evento_id', $evento)
             ->orderBy('data_inicio')
@@ -54,33 +53,15 @@ class AgendaController extends Controller
     /**
      * Criar nova agenda
      */
-    public function store(Request $request, EventoOperationalService $operations, ?int $evento = null)
+    public function store(Request $request, AgendaManagementService $service, ?int $evento = null)
     {
-        $validated = $request->validate([
-            'data_inicio' => 'required|date',
-            'data_fim' => 'required|date|after:data_inicio',
-            'vagas_agenda' => 'required|integer|min:1',
+        $dados = $request->validate([
+            ...AgendaManagementService::regras(true),
             'evento_id' => [$evento ? 'nullable' : 'required', 'integer', 'exists:evento,evento_id'],
         ]);
-
-        $this->validarDuracao($validated['data_inicio'], $validated['data_fim']);
-
-        $eventoModel = Evento::findOrFail($evento ?? $validated['evento_id']);
-        Gate::forUser($request->user())->authorize('manage', $eventoModel);
-        $validated['evento_id'] = $eventoModel->evento_id;
-
-        $agenda = DB::transaction(function () use ($eventoModel, $validated, $operations, $request) {
-            $eventoModel = Evento::whereKey($eventoModel->getKey())->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', [$eventoModel, true]);
-            if (in_array($eventoModel->status_evento, ['cancelado', 'finalizado'], true)) {
-                throw new ValidationConflictException('Evento terminal não pode receber nova agenda.');
-            }
-            $agenda = Agenda::create($validated);
-            $operations->exigirReaprovacao($eventoModel);
-            $operations->notificarEvento($eventoModel, 'evento.alterado', "A estrutura de agendas do evento {$eventoModel->nm_evento} foi alterada.");
-
-            return $agenda;
-        });
+        $eventoModel = Evento::findOrFail($evento ?? $dados['evento_id']);
+        Gate::forUser($request->user())->authorize('createAgenda', $eventoModel);
+        $agenda = $service->criar($request->user(), $eventoModel, $dados);
 
         return ApiResponse::success($agenda, 'Agenda criada com sucesso.', 201);
     }
@@ -88,47 +69,12 @@ class AgendaController extends Controller
     /**
      * Atualizar agenda
      */
-    public function update(Request $request, $id, EventoOperationalService $operations)
+    public function update(Request $request, $id, AgendaManagementService $service)
     {
         $agenda = Agenda::with('evento')->findOrFail($id);
         Gate::forUser($request->user())->authorize('update', $agenda);
-
-        $validated = $request->validate([
-            'data_inicio' => 'sometimes|date',
-            'data_fim' => 'sometimes|date',
-            'vagas_agenda' => 'sometimes|integer|min:1',
-        ]);
-
-        $agenda = DB::transaction(function () use ($agenda, $validated, $operations, $request) {
-            $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
-            $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
-            if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)
-                || in_array($agenda->status_ativo, ['cancelado', 'finalizado'], true)) {
-                throw new ValidationConflictException('Agenda terminal não pode ser alterada.');
-            }
-            $this->validarDuracao(
-                $validated['data_inicio'] ?? $agenda->data_inicio,
-                $validated['data_fim'] ?? $agenda->data_fim
-            );
-            $agenda->fill($validated);
-            $alterados = array_keys($agenda->getDirty());
-            if ($alterados === []) {
-                return $agenda;
-            }
-            if (isset($validated['vagas_agenda']) && $validated['vagas_agenda'] < $operations->vagasOcupadas($agenda)) {
-                throw new ValidationConflictException('As vagas não podem ser menores que as já ocupadas.');
-            }
-            $dataAlterada = array_intersect($alterados, ['data_inicio', 'data_fim']) !== [];
-            $agenda->save();
-            if ($dataAlterada) {
-                $operations->concederDesistenciaSemPenalidade($agenda);
-            }
-            $operations->exigirReaprovacao($evento);
-            $operations->notificarAgenda($agenda, 'agenda.alterada', 'A agenda do evento foi alterada.', $dataAlterada);
-
-            return $agenda;
-        });
+        $dados = $request->validate(AgendaManagementService::regras(false));
+        $agenda = $service->atualizar($request->user(), $agenda, $dados);
 
         return ApiResponse::success($agenda, 'Agenda atualizada com sucesso.');
     }
@@ -136,26 +82,10 @@ class AgendaController extends Controller
     /**
      * Deletar agenda
      */
-    public function destroy(Request $request, $id, EventoOperationalService $operations)
+    public function destroy(Request $request, $id, AgendaManagementService $service)
     {
-        $agenda = Agenda::with('evento')->findOrFail($id);
-        Gate::forUser($request->user())->authorize('delete', $agenda);
-
-        DB::transaction(function () use ($agenda, $operations, $request) {
-            $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
-            $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
-            if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)
-                || in_array($agenda->status_ativo, ['cancelado', 'finalizado'], true)) {
-                throw new ValidationConflictException('Agenda terminal não pode ser excluída.');
-            }
-            if ($agenda->inscricoes()->exists()) {
-                throw new ValidationConflictException('A agenda possui inscrições e deve ser cancelada para preservar o histórico.');
-            }
-            $agenda->delete();
-            $operations->exigirReaprovacao($evento);
-            $operations->notificarEvento($evento, 'evento.alterado', "A estrutura de agendas do evento {$evento->nm_evento} foi alterada.");
-        });
+        $agenda = Agenda::findOrFail($id);
+        $service->excluir($request->user(), $agenda);
 
         return response()->noContent();
     }
@@ -178,53 +108,9 @@ class AgendaController extends Controller
     /**
      * Finalizar agenda (alterar status para finalizado)
      */
-    public function finalizar(Request $request, $id, XpService $xp)
+    public function finalizar(Request $request, $id, EventoParticipationService $participacao)
     {
-        $agenda = Agenda::with('evento')->findOrFail($id);
-        Gate::forUser($request->user())->authorize('update', $agenda);
-
-        $agenda = DB::transaction(function () use ($agenda, $xp, $request) {
-            $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('operate', [$evento, true]);
-            $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
-            if ($evento->status_evento !== 'ativo' || $agenda->status_ativo !== 'ativo') {
-                throw new ValidationConflictException('A agenda não pode ser finalizada neste estado.');
-            }
-            if (now()->lessThan($agenda->data_fim)) {
-                throw new ValidationConflictException('A agenda só pode ser finalizada após seu término.');
-            }
-            $pendencias = $agenda->inscricoes()
-                ->where(function ($query) {
-                    $query->whereIn('status_inscricao', ['aprovado', 'participando'])
-                        ->orWhere(function ($query) {
-                            $query->where('status_inscricao', 'participou')
-                                ->where(function ($query) {
-                                    $query->where('presenca', '!=', true)
-                                        ->orWhereNull('presenca')
-                                        ->orWhereNull('presenca_confirmada_em');
-                                });
-                        })
-                        ->orWhere(function ($query) {
-                            $query->where('status_inscricao', 'não participou')
-                                ->where(function ($query) {
-                                    $query->where('presenca', '!=', false)
-                                        ->orWhereNull('presenca')
-                                        ->orWhereNull('presenca_confirmada_em');
-                                });
-                        });
-                })
-                ->count();
-            if ($pendencias > 0) {
-                $substantivo = $pendencias === 1 ? 'inscrição' : 'inscrições';
-                throw new ValidationConflictException(
-                    "A Agenda possui {$pendencias} {$substantivo} aguardando confirmação de presença ou ausência."
-                );
-            }
-            $agenda->finalizar();
-            $xp->concederAgenda($agenda);
-
-            return $agenda;
-        });
+        $agenda = $participacao->finalizarAgenda(Agenda::findOrFail($id), $request->user());
 
         return ApiResponse::success($agenda, 'Agenda finalizada com sucesso.');
     }
@@ -244,46 +130,13 @@ class AgendaController extends Controller
         return ApiResponse::success(['transacoes_criadas' => $created], 'XP da Agenda consolidado.');
     }
 
-    public function cancelar(Request $request, int $id, EventoOperationalService $operations)
+    public function cancelar(Request $request, int $id, AgendaManagementService $service)
     {
         $agenda = Agenda::with('evento')->findOrFail($id);
-        Gate::forUser($request->user())->authorize('manage', $agenda->evento);
-        $validated = $request->validate([
-            'motivo' => ['required', 'string', 'max:2000', 'not_regex:/^\s*$/'],
-        ]);
-
-        $agenda = DB::transaction(function () use ($agenda, $request, $validated, $operations) {
-            $evento = Evento::whereKey($agenda->evento_id)->lockForUpdate()->firstOrFail();
-            Gate::forUser($request->user())->authorize('manage', [$evento, true]);
-            $agenda = Agenda::whereKey($agenda->getKey())->lockForUpdate()->firstOrFail();
-            if (in_array($evento->status_evento, ['cancelado', 'finalizado'], true)
-                || $agenda->status_ativo !== 'ativo') {
-                throw new ValidationConflictException('A agenda não está ativa.');
-            }
-            $ator = $request->user();
-            $statusAnterior = $agenda->status_ativo;
-            $canceladoEm = now();
-            $iniciada = $agenda->data_inicio->lte($canceladoEm);
-            $agenda->forceFill([
-                'status_ativo' => 'cancelado',
-                'motivo_cancelamento' => trim($validated['motivo']),
-                'cancelado_em' => $canceladoEm,
-                'cancelado_por_tipo' => $ator instanceof Ong ? 'ong' : 'pessoa',
-                'cancelado_por_id' => $ator->getKey(),
-            ])->save();
-            $operations->registrarCancelamento($agenda, $ator, $statusAnterior, $iniciada);
-            $operations->notificarAgenda($agenda, 'agenda.cancelada', "Uma agenda do evento {$evento->nm_evento} foi cancelada. Sua participação não será penalizada.");
-
-            return $agenda;
-        });
+        Gate::forUser($request->user())->authorize('manage', $agenda);
+        $dados = $request->validate(EventoManagementService::regrasCancelamento());
+        $agenda = $service->cancelar($request->user(), $agenda, $dados['motivo']);
 
         return ApiResponse::success($agenda, 'Agenda cancelada.');
-    }
-
-    private function validarDuracao(Carbon|string $inicio, Carbon|string $fim): void
-    {
-        if (Carbon::parse($inicio)->diffInMinutes(Carbon::parse($fim), false) < 30) {
-            throw ValidationException::withMessages(['data_fim' => 'A agenda deve durar ao menos 30 minutos.']);
-        }
     }
 }

@@ -20,6 +20,6 @@ class AgendaPolicy
 
     public function delete(Pessoa|Ong $user, Agenda $agenda): bool
     {
-        return $this->manage($user, $agenda);
+        return app(EventoPolicy::class)->deleteAgenda($user, $agenda->evento);
     }
 }

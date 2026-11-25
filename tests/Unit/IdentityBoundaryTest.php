@@ -234,13 +234,15 @@ class IdentityBoundaryTest extends TestCase
         $policy = new EventoPolicy;
 
         $this->assertFalse($policy->manage($ong, $evento));
+        $this->assertFalse($policy->operate($ong, $evento));
         $ong->status_ong = 'ativo';
         $this->assertTrue($policy->manage($ong, $evento));
-        $this->assertFalse($policy->operate($ong, $evento));
+        $this->assertTrue($policy->operate($ong, $evento));
         $evento->responsavel_pessoa_id = null;
         $this->assertTrue($policy->operate($ong, $evento));
         $evento->ong_id = 9;
         $this->assertFalse($policy->manage($ong, $evento));
+        $this->assertFalse($policy->operate($ong, $evento));
     }
 
     public function test_admin_master_only_sees_the_assigned_case_during_review(): void

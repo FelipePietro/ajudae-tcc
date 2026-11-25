@@ -25,7 +25,9 @@ class EventoResource extends JsonResource
             'cancelado_em' => $this->cancelado_em?->toISOString(),
             'cancelado_por_tipo' => $this->cancelado_por_tipo,
             'cancelado_por_id' => $this->cancelado_por_id,
-            'imagem_evento_link' => app(ManagedImageStorage::class)->publicUrl($this->resource),
+            'imagem_evento_link' => $request->routeIs('identity.events.*') && $this->managed_image_path
+                ? route('identity.events.image.show', $this->resource, absolute: false)
+                : app(ManagedImageStorage::class)->publicUrl($this->resource),
             'logradouro_evento' => $this->logradouro_evento,
             'cep_evento' => $this->cep_evento,
             'cidade_evento' => $this->cidade_evento,
@@ -33,11 +35,14 @@ class EventoResource extends JsonResource
             'uf_evento' => $this->uf_evento,
             'compl_evento' => $this->compl_evento,
             'responsavel_pessoa_id' => $this->responsavel_pessoa_id,
+            'cat_evento_id' => $this->cat_evento_id,
             'responsavel' => $this->whenLoaded('responsavelPessoa', fn () => new PessoaPublicResource($this->responsavelPessoa)),
             'categoria' => $this->whenLoaded('categoria'),
             'ong' => $this->whenLoaded('ong', fn () => new OngPublicResource($this->ong)),
             'organizador' => $this->whenLoaded('pessoa', fn () => new PessoaPublicResource($this->pessoa)),
             'habilidades' => $this->whenLoaded('habilidades'),
+            'causas' => $this->whenLoaded('causas'),
+            'recursos' => $this->whenLoaded('recursos'),
             'agendas' => $this->whenLoaded('agendas'),
         ];
     }

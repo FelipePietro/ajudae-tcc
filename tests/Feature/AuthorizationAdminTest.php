@@ -25,7 +25,7 @@ class AuthorizationAdminTest extends TestCase
         $admin = $this->createPessoa('administrador');
         $this->grantPermission($admin, 'ongs.validar');
         $ong = $this->createOng();
-        Sanctum::actingAs($admin, ['pessoa']);
+        Sanctum::actingAs($admin->fresh(), ['pessoa']);
 
         $this->postJson('/api/v1/categorias-evento', ['nome_categoria' => 'Saúde'])
             ->assertCreated();

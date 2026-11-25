@@ -452,11 +452,8 @@ class OrganizadorWorkflowTest extends TestCase
         $vinculado = $this->pessoa('organizador');
         $this->vinculoAtivo($ong->ong_id, $vinculado->pessoa_id);
         Sanctum::actingAs($vinculado, ['pessoa']);
-        $this->postJson('/api/v1/pessoas/eventos', $this->eventoPayload())->assertCreated();
-        $eventoVinculado = Evento::latest('evento_id')->firstOrFail();
-        $this->assertSame($ong->ong_id, $eventoVinculado->ong_id);
-        $this->assertNull($eventoVinculado->pessoa_id);
-        $this->assertSame($vinculado->pessoa_id, $eventoVinculado->responsavel_pessoa_id);
+        $this->postJson('/api/v1/pessoas/eventos', $this->eventoPayload())->assertForbidden();
+        $this->assertDatabaseMissing('evento', ['ong_id' => $ong->ong_id]);
     }
 
     public function test_ong_cria_evento_e_atribui_apenas_organizador_vinculado_antes_do_inicio(): void
@@ -665,16 +662,19 @@ class OrganizadorWorkflowTest extends TestCase
         ])->assertCreated()->json('data.vinculo_ong_organizador_id');
         Sanctum::actingAs($organizador, ['pessoa']);
         $this->postJson("/api/v1/pessoas/me/convites-ong/{$conviteId}/aceitar")->assertOk();
-        $segundoId = $this->postJson('/api/v1/pessoas/eventos', $this->eventoPayload())
+        $this->postJson('/api/v1/pessoas/eventos', $this->eventoPayload())->assertForbidden();
+
+        Sanctum::actingAs($ong, ['ong']);
+        $segundoId = $this->postJson('/api/v1/eventos', $this->eventoPayload())
             ->assertCreated()->json('data.evento_id');
         $this->assertDatabaseHas('evento', [
             'evento_id' => $segundoId,
             'pessoa_id' => null,
             'ong_id' => $ong->ong_id,
-            'responsavel_pessoa_id' => $organizador->pessoa_id,
+            'responsavel_pessoa_id' => null,
         ]);
-        Evento::findOrFail($segundoId)->forceFill(['status_evento' => 'finalizado'])->save();
 
+        Sanctum::actingAs($organizador, ['pessoa']);
         $this->deleteJson("/api/v1/pessoas/me/vinculos-ong/{$conviteId}")->assertOk();
         $terceiroId = $this->postJson('/api/v1/pessoas/eventos', $this->eventoPayload())
             ->assertCreated()->json('data.evento_id');
@@ -710,6 +710,9 @@ class OrganizadorWorkflowTest extends TestCase
         $comResponsavel = $this->eventoOng($ong->ong_id, $organizador->pessoa_id);
         $semResponsavel = $this->eventoOng($ong->ong_id);
         $independente = $this->eventoIndependente($organizador->pessoa_id);
+        foreach ([$comResponsavel, $semResponsavel, $independente] as $publicado) {
+            $publicado->agendas()->create($this->eventoPayload()['agendas'][0]);
+        }
 
         foreach ([$comResponsavel, $independente] as $evento) {
             $response = $this->getJson("/api/v1/eventos/{$evento->evento_id}")
@@ -814,6 +817,11 @@ class OrganizadorWorkflowTest extends TestCase
             'modalidade_evento' => 'online',
             'imagem_evento_link' => 'evento.jpg',
             'cat_evento_id' => $this->categoria()->cat_evento_id,
+            'agendas' => [[
+                'data_inicio' => now()->addDays(2)->toISOString(),
+                'data_fim' => now()->addDays(2)->addHour()->toISOString(),
+                'vagas_agenda' => 20,
+            ]],
         ];
     }
 

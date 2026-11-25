@@ -44,6 +44,11 @@ class Ong extends Authenticatable
         'cnpj_ong',
         'cpf_responsavel_ong',
         'rg_responsavel_ong_link',
+        'rg_responsavel_storage_disk',
+        'rg_responsavel_mime_type',
+        'rg_responsavel_size_bytes',
+        'rg_responsavel_sha256',
+        'rg_responsavel_excluir_em',
         'email_responsavel_ong',
         'tel_responsavel_ong',
         'exclusao_pendente',
@@ -58,6 +63,7 @@ class Ong extends Authenticatable
         'auth_version' => 'integer',
         'exclusao_pendente' => 'boolean',
         'deletar_em' => 'datetime',
+        'rg_responsavel_excluir_em' => 'datetime',
     ];
 
     public function getAuthPasswordName(): string

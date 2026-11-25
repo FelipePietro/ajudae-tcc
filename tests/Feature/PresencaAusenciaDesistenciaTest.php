@@ -10,6 +10,7 @@ use App\Models\Inscricao;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Models\VinculoOngOrganizador;
+use App\Services\ConfiabilidadeService;
 use App\Services\MonitoriaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -145,7 +146,7 @@ class PresencaAusenciaDesistenciaTest extends TestCase
         ]);
         $this->assertSame('não participou', $inscricao->fresh()->status_inscricao);
         $this->assertFalse($inscricao->fresh()->presenca);
-        $ocorrencia = app(\App\Services\ConfiabilidadeService::class)->detalhe($titular)['ocorrencias'][0];
+        $ocorrencia = app(ConfiabilidadeService::class)->detalhe($titular)['ocorrencias'][0];
         $this->assertSame('ausencia', $ocorrencia['tipo']);
         $this->assertSame(0, $ocorrencia['delta']);
         $this->assertTrue($ocorrencia['penalidade_revertida']);
@@ -234,7 +235,7 @@ class PresencaAusenciaDesistenciaTest extends TestCase
         $this->assertNull($inscricao->fresh()->carga_horaria);
     }
 
-    public function test_somente_responsavel_operacional_pode_confirmar_presenca(): void
+    public function test_atores_autorizados_podem_confirmar_presenca(): void
     {
         $owner = $this->pessoa('organizador');
         $voluntario = $this->pessoa();
@@ -267,7 +268,9 @@ class PresencaAusenciaDesistenciaTest extends TestCase
 
         $inscricaoDaOng = $this->inscricao($this->agenda($eventoOng, now()->subHour()), $this->pessoa(), 'aprovado');
         Sanctum::actingAs($ong, ['ong']);
-        $this->patchJson("/api/v1/inscricoes/{$inscricaoDaOng->inscricao_id}/presenca", ['presenca' => true])->assertForbidden();
+        $this->patchJson("/api/v1/inscricoes/{$inscricaoDaOng->inscricao_id}/presenca", ['presenca' => true])->assertOk();
+        $this->assertSame('ong', $inscricaoDaOng->fresh()->presenca_confirmada_por_tipo);
+        $this->assertSame($ong->getKey(), $inscricaoDaOng->fresh()->presenca_confirmada_por_id);
     }
 
     public function test_desistencia_registra_limite_de_vinte_e_quatro_horas_sem_perder_historico_e_notifica_responsavel(): void

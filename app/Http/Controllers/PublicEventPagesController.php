@@ -64,6 +64,6 @@ final class PublicEventPagesController extends Controller
     {
         return Evento::query()
             ->select('evento_id', 'nm_evento', 'descricao_evento', 'cidade_evento', 'uf_evento', 'modalidade_evento')
-            ->where('status_evento', 'ativo');
+            ->publicado();
     }
 }

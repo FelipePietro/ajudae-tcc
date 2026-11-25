@@ -20,6 +20,14 @@ class MonitoriaService
 {
     public function __construct(private EventoPolicy $policy) {}
 
+    public static function regrasDecisao(): array
+    {
+        return [
+            'confirmada' => ['required', 'boolean'],
+            'justificativa' => ['nullable', 'string', 'max:2000'],
+        ];
+    }
+
     public function consultar(Inscricao $inscricao, Pessoa|Ong $ator): array
     {
         $titular = $ator instanceof Pessoa && $ator->pessoa_id === $inscricao->pessoa_id

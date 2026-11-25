@@ -4,14 +4,18 @@ use App\Exceptions\ValidationConflictException;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\EnsureOngApproved;
 use App\Http\Middleware\RequireBearerAccount;
+use App\Http\Middleware\ResolveWebAccount;
+use App\Http\Middleware\UseResolvedWebActor;
 use App\Support\ApiResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
@@ -34,9 +38,12 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->appendToPriorityList(
-            \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+            AuthenticatesRequests::class,
             RequireBearerAccount::class,
         );
+        $middleware->prependToPriorityList(SubstituteBindings::class, ResolveWebAccount::class);
+        $middleware->prependToPriorityList(SubstituteBindings::class, UseResolvedWebActor::class);
+        $middleware->prependToPriorityList(SubstituteBindings::class, AdminMiddleware::class);
 
         $middleware->alias([
             // Middleware do Sanctum

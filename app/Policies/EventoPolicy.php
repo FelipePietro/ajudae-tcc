@@ -9,6 +9,38 @@ use App\Support\AccountAccess;
 
 class EventoPolicy
 {
+    public function viewManagedAny(Pessoa|Ong $user): bool
+    {
+        return $user instanceof Ong
+            ? AccountAccess::activeOng($user)
+            : AccountAccess::canOperate($user) && $user->role_pessoa === 'organizador'
+                && $user->status_validacao === 'aprovado';
+    }
+
+    public function create(Pessoa|Ong $user, bool $lock = false): bool
+    {
+        if ($lock) {
+            $current = $user->newQuery()->whereKey($user->getKey())->lockForUpdate()->first();
+            if (! $current || (int) $current->auth_version !== (int) $user->auth_version) {
+                return false;
+            }
+            $user = $current;
+        }
+
+        return $this->viewManagedAny($user) && ($user instanceof Ong
+            || $user->vinculoOngAtivo()->when($lock, fn ($query) => $query->lockForUpdate())->first() === null);
+    }
+
+    public function createAgenda(Pessoa|Ong $user, Evento $evento, bool $lock = false): bool
+    {
+        return $this->manageOwned($user, $evento, $lock);
+    }
+
+    public function deleteAgenda(Pessoa|Ong $user, Evento $evento, bool $lock = false): bool
+    {
+        return $this->manageOwned($user, $evento, $lock);
+    }
+
     public function manage(Pessoa|Ong $user, Evento $evento, bool $lock = false): bool
     {
         if ($lock) {
@@ -49,8 +81,7 @@ class EventoPolicy
 
     public function operate(Pessoa|Ong $user, Evento $evento, bool $lock = false): bool
     {
-        return (! $user instanceof Ong || $evento->responsavel_pessoa_id === null)
-            && $this->manage($user, $evento, $lock);
+        return $this->manage($user, $evento, $lock);
     }
 
     public function update(Pessoa|Ong $user, Evento $evento): bool
@@ -58,8 +89,13 @@ class EventoPolicy
         return $this->manage($user, $evento);
     }
 
-    public function delete(Pessoa|Ong $user, Evento $evento): bool
+    public function delete(Pessoa|Ong $user, Evento $evento, bool $lock = false): bool
     {
-        return $this->manage($user, $evento);
+        return $this->manageOwned($user, $evento, $lock);
+    }
+
+    private function manageOwned(Pessoa|Ong $user, Evento $evento, bool $lock): bool
+    {
+        return ($evento->ong_id === null || $user instanceof Ong) && $this->manage($user, $evento, $lock);
     }
 }

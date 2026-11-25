@@ -53,11 +53,21 @@ class Bloco81WebParticipationTest extends TestCase
         $this->getJson($index)->assertUnauthorized()->assertHeader('Cache-Control', 'no-store, private');
         $this->postJson($url, ['nota' => 5])->assertUnauthorized();
         $this->sessionFor($pessoa);
+        $evento->forceFill(['status_evento' => 'ativo', 'finalizado_em' => null])->save();
+        $this->getJson($index)->assertOk()->assertJsonPath('data.data.0.avaliacao_url', null);
+        $this->postJson($url, ['nota' => 4])->assertConflict();
+        $evento->forceFill(['status_evento' => 'finalizado', 'finalizado_em' => now()->addDay()])->save();
+        $this->getJson($index)->assertOk()->assertJsonPath('data.data.0.avaliacao_url', null);
+        $this->postJson($url, ['nota' => 4])->assertConflict();
+        $evento->forceFill(['finalizado_em' => now()->subDay()])->save();
         $this->getJson($index)->assertOk()
             ->assertJsonPath('data.data.0.titulo', 'Oficina de teste')
             ->assertJsonPath('data.data.0.avaliacao_url', $url)
             ->assertJsonPath('data.data.0.agendas.0.situacao', 'Presença confirmada');
         $this->postJson($url, ['nota' => 3.5])->assertUnprocessable()->assertJsonValidationErrors('nota');
+        $this->postJson($url, ['nota' => true])->assertUnprocessable()->assertJsonValidationErrors('nota');
+        $this->postJson($url, ['nota' => 4, 'comentario' => 'Teste sintético'])
+            ->assertUnprocessable()->assertJsonValidationErrors('comentario');
         $this->postJson($url, ['nota' => 4, 'pessoa_id' => 0])->assertCreated()->assertJsonPath('data.nota', 4);
         $this->assertDatabaseHas('avaliacao_ong', ['pessoa_id' => $pessoa->getKey(), 'evento_id' => $evento->getKey(), 'nota' => 4]);
         $this->postJson($url, ['nota' => 5])->assertConflict();
@@ -66,6 +76,7 @@ class Bloco81WebParticipationTest extends TestCase
         $this->getJson($index)->assertOk()
             ->assertJsonPath('data.data.0.nota', 4)
             ->assertJsonPath('data.data.0.avaliacao_url', null);
+        $this->getJson($url)->assertOk()->assertJsonPath('data.nota', 4);
     }
 
     private function sessionFor(Pessoa $pessoa): void

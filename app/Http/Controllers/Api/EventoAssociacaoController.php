@@ -15,12 +15,12 @@ class EventoAssociacaoController extends Controller
 {
     public function causas(int $id)
     {
-        return ApiResponse::success(Evento::where('status_evento', 'ativo')->findOrFail($id)->causas()->get());
+        return ApiResponse::success(Evento::publicado()->findOrFail($id)->causas()->get());
     }
 
     public function recursos(int $id)
     {
-        return ApiResponse::success(Evento::where('status_evento', 'ativo')->findOrFail($id)->recursos()->get());
+        return ApiResponse::success(Evento::publicado()->findOrFail($id)->recursos()->get());
     }
 
     public function adicionarCausa(Request $request, int $id, EventoOperationalService $operations)

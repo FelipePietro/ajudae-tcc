@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CampanhaXp;
+use App\Services\CampanhaXpManagement;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class CampanhaXpController extends Controller
 {
@@ -17,40 +17,20 @@ class CampanhaXpController extends Controller
         return ApiResponse::success(CampanhaXp::orderByDesc('campanha_xp_id')->paginate($validated['per_page'] ?? 20));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, CampanhaXpManagement $management)
     {
-        $dados = $this->validar($request->all());
-
-        return ApiResponse::success(CampanhaXp::create($dados), 'Campanha criada.', 201);
+        return ApiResponse::success($management->save($request->user(), $request->all()), 'Campanha criada.', 201);
     }
 
-    public function update(Request $request, CampanhaXp $campanha)
+    public function update(Request $request, CampanhaXp $campanha, CampanhaXpManagement $management)
     {
-        $dados = $this->validar(array_merge($campanha->only([
-            'nome', 'multiplicador', 'inicio', 'fim', 'ativa', 'cat_evento_id',
-        ]), $request->all()));
-        $campanha->update($dados);
-
-        return ApiResponse::success($campanha->refresh(), 'Campanha atualizada.');
+        return ApiResponse::success($management->save($request->user(), $request->all(), $campanha), 'Campanha atualizada.');
     }
 
-    public function status(Request $request, CampanhaXp $campanha)
+    public function status(Request $request, CampanhaXp $campanha, CampanhaXpManagement $management)
     {
         $dados = $request->validate(['ativa' => ['required', 'boolean']]);
-        $campanha->update($dados);
 
-        return ApiResponse::success($campanha->refresh(), 'Status da campanha atualizado.');
-    }
-
-    private function validar(array $dados): array
-    {
-        return Validator::make($dados, [
-            'nome' => ['required', 'string', 'max:120'],
-            'multiplicador' => ['required', 'numeric', 'gt:0'],
-            'inicio' => ['required', 'date'],
-            'fim' => ['required', 'date', 'after_or_equal:inicio'],
-            'ativa' => ['required', 'boolean'],
-            'cat_evento_id' => ['required', 'integer', 'exists:cat_evento,cat_evento_id'],
-        ])->validate();
+        return ApiResponse::success($management->save($request->user(), $dados, $campanha, statusOnly: true), 'Status da campanha atualizado.');
     }
 }

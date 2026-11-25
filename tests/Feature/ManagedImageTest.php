@@ -36,6 +36,9 @@ class ManagedImageTest extends TestCase
             'cat_evento_id' => $category->cat_evento_id, 'status_evento' => $status,
         ]);
         $event->forceFill(['ong_id' => $ongId, 'pessoa_id' => $pessoaId])->save();
+        $event->agendas()->create([
+            'data_inicio' => now()->addDay(), 'data_fim' => now()->addDay()->addHour(), 'vagas_agenda' => 10,
+        ]);
 
         return $event;
     }

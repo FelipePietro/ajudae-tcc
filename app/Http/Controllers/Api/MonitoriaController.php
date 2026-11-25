@@ -19,10 +19,7 @@ class MonitoriaController extends Controller
 
     public function update(Request $request, int $id, MonitoriaService $monitoria)
     {
-        $validated = $request->validate([
-            'confirmada' => ['required', 'boolean'],
-            'justificativa' => ['nullable', 'string', 'max:2000'],
-        ]);
+        $validated = $request->validate(MonitoriaService::regrasDecisao());
 
         $inscricao = Inscricao::with('agenda')->findOrFail($id);
         $resultado = $monitoria->decidir($inscricao, $request->user(), (bool) $validated['confirmada'], $validated['justificativa'] ?? null);

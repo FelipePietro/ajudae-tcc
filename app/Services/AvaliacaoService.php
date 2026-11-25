@@ -20,6 +20,25 @@ class AvaliacaoService
 {
     private const JANELA_AVALIACAO_ONG_DIAS = 7;
 
+    public static function regrasNota(): array
+    {
+        return [
+            'nota' => [
+                'required',
+                'integer',
+                'between:1,5',
+                function (string $attribute, mixed $valor, \Closure $falhar): void {
+                    if (! is_int($valor) && ! is_string($valor)) {
+                        $falhar('A nota deve ser um número inteiro de 1 a 5.');
+                    }
+                },
+            ],
+            'comentario' => ['prohibited'],
+            'texto' => ['prohibited'],
+            'justificativa' => ['prohibited'],
+        ];
+    }
+
     public function mediaVoluntario(Pessoa $pessoa): ?float
     {
         $media = AvaliacaoVoluntario::where('pessoa_id', $pessoa->pessoa_id)->avg('nota');
@@ -80,10 +99,10 @@ class AvaliacaoService
             if ($evento->ong_id === null) {
                 throw new ValidationConflictException('Evento independente não possui ONG para avaliar.');
             }
-            if (! in_array($evento->status_evento, ['ativo', 'finalizado'], true)) {
-                throw new ValidationConflictException('Somente evento ativo recebe avaliações.');
+            if ($evento->status_evento !== 'finalizado') {
+                throw new ValidationConflictException('A ONG só pode ser avaliada após a finalização oficial do Evento.');
             }
-            if ($evento->status_evento === 'finalizado' && ! $this->aceitaAvaliacaoOng($evento)) {
+            if (! $this->aceitaAvaliacaoOng($evento)) {
                 throw new ValidationConflictException('O prazo para avaliar a ONG está encerrado ou não pôde ser confirmado.');
             }
             $this->garantirEventoConcluidoEParticipacao($evento, $voluntario);
@@ -121,10 +140,16 @@ class AvaliacaoService
 
     public function aceitaAvaliacaoOng(Evento $evento): bool
     {
+        if ($evento->status_evento !== 'finalizado') {
+            return false;
+        }
+
         $prazo = $this->prazoAvaliacaoOng($evento);
 
-        return $evento->status_evento === 'ativo'
-            || ($evento->status_evento === 'finalizado' && $prazo !== null && now()->lessThanOrEqualTo($prazo));
+        return $prazo !== null && now()->betweenIncluded(
+            $prazo->copy()->subDays(self::JANELA_AVALIACAO_ONG_DIAS),
+            $prazo,
+        );
     }
 
     private function autorizarResponsavel(Evento $evento, Pessoa|Ong $ator): void

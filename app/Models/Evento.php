@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -52,6 +53,11 @@ class Evento extends Model
                 throw new \DomainException('Um evento deve possuir exatamente um responsável.');
             }
         });
+    }
+
+    public function scopePublicado(Builder $query): Builder
+    {
+        return $query->where('status_evento', 'ativo')->has('agendas');
     }
 
     public function ong(): BelongsTo

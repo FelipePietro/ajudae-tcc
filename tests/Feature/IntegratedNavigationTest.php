@@ -29,6 +29,7 @@ class IntegratedNavigationTest extends TestCase
     public function test_event_pages_expose_only_published_public_fields(): void
     {
         DB::statement('CREATE TABLE evento (evento_id INTEGER PRIMARY KEY, nm_evento TEXT, descricao_evento TEXT, cidade_evento TEXT, uf_evento TEXT, modalidade_evento TEXT, status_evento TEXT, logradouro_evento TEXT)');
+        DB::statement('CREATE TABLE agenda (agenda_id INTEGER PRIMARY KEY, evento_id INTEGER NOT NULL)');
         $this->get('/feed')->assertOk()
             ->assertSeeInOrder(['Encontre eventos', 'busca-eventos', 'btn-filtros', 'filtro-categoria', 'filtro-cidade', 'painel-filtros', 'filtro-modalidade', 'lista-eventos'], false)
             ->assertSee('Nenhum evento publicado está disponível no momento.')
@@ -38,10 +39,12 @@ class IntegratedNavigationTest extends TestCase
             ['evento_id' => 1, 'nm_evento' => 'Mutirão publicado', 'descricao_evento' => 'Cuidado comunitário.', 'cidade_evento' => 'Guarulhos', 'uf_evento' => 'SP', 'modalidade_evento' => 'presencial', 'status_evento' => 'ativo', 'logradouro_evento' => 'Endereço omitido'],
             ['evento_id' => 2, 'nm_evento' => 'Evento em revisão', 'descricao_evento' => '', 'cidade_evento' => 'Cidade reservada', 'uf_evento' => '', 'modalidade_evento' => 'online', 'status_evento' => 'aguardando_aprovacao', 'logradouro_evento' => 'Endereço reservado'],
             ['evento_id' => 3, 'nm_evento' => 'Oficina remota', 'descricao_evento' => '', 'cidade_evento' => 'São Paulo', 'uf_evento' => 'SP', 'modalidade_evento' => 'online', 'status_evento' => 'ativo', 'logradouro_evento' => 'Endereço reservado'],
+            ['evento_id' => 4, 'nm_evento' => 'Registro legado sem Agenda', 'descricao_evento' => '', 'cidade_evento' => 'Guarulhos', 'uf_evento' => 'SP', 'modalidade_evento' => 'online', 'status_evento' => 'ativo', 'logradouro_evento' => ''],
         ]);
+        DB::table('agenda')->insert([['evento_id' => 1], ['evento_id' => 3]]);
 
         $this->get('/feed?contexto=administrador&visao=revisao')->assertOk()
-            ->assertSee('Mutirão publicado')->assertSee('Oficina remota')->assertDontSee('Evento em revisão')
+            ->assertSee('Mutirão publicado')->assertSee('Oficina remota')->assertDontSee('Evento em revisão')->assertDontSee('Registro legado sem Agenda')
             ->assertDontSee('Cidade reservada')->assertDontSee('Endereço reservado')
             ->assertDontSee('aria-label="Administração"', false);
         $this->get('/feed?q=Mutirão&cidade=Guarulhos&modalidade=presencial')
@@ -53,6 +56,7 @@ class IntegratedNavigationTest extends TestCase
         $this->get('/feed?q[]=teste&cidade[]=teste&modalidade[]=online')->assertOk()->assertSee('Mutirão publicado');
         $this->get('/eventos/1')->assertOk()->assertSee('Guarulhos, SP')->assertDontSee('Endereço omitido');
         $this->get('/eventos/2')->assertNotFound();
+        $this->get('/eventos/4')->assertNotFound();
         $this->get('/candidatura?evento=1')->assertRedirect('/login');
 
         $person = (new Pessoa)->forceFill([
@@ -251,7 +255,7 @@ class IntegratedNavigationTest extends TestCase
             ->assertDontSee('data-admin-capability="eventos.aprovar"', false)
             ->assertDontSee('Resposta a solicitações de privacidade');
         $this->get('/admin/solicitacoes-lgpd')->assertOk()->assertSee('A fila de solicitações ainda está indisponível');
-        $this->patch('/admin/solicitacoes-lgpd/1/status')->assertNotFound();
+        $this->patch('/admin/solicitacoes-lgpd/1/status')->assertForbidden();
         DB::table('permissao_pessoa')->where('pessoa_id', 42)->update(['permissao_id' => 2]);
         $this->get('/admin')->assertOk()->assertSee('Resposta a solicitações de privacidade')
             ->assertDontSee('Consulta de solicitações de privacidade')

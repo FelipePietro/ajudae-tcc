@@ -54,7 +54,7 @@ class ManagedImageStorage
             .'?v='.substr(hash('sha256', $owner->managed_image_path), 0, 12);
     }
 
-    public function prepare(UploadedFile $file): array
+    public function prepare(UploadedFile $file, string $field = 'imagem'): array
     {
         $extension = strtolower($file->getClientOriginalExtension());
         $allowed = [
@@ -80,7 +80,7 @@ class ManagedImageStorage
             if ($decoded !== false) {
                 imagedestroy($decoded);
             }
-            throw ValidationException::withMessages(['imagem' => 'Imagem inválida. Use JPEG, PNG ou WebP íntegro, até 8000px por lado e 25 megapixels.']);
+            throw ValidationException::withMessages([$field => 'Imagem inválida. Use JPEG, PNG ou WebP íntegro, até 8000px por lado e 25 megapixels.']);
         }
 
         try {
@@ -93,7 +93,7 @@ class ManagedImageStorage
             imagedestroy($decoded);
         }
         if ($clean === false || strlen($clean) > 5242880) {
-            throw ValidationException::withMessages(['imagem' => 'Não foi possível sanitizar a imagem dentro do limite de 5 MiB.']);
+            throw ValidationException::withMessages([$field => 'Não foi possível sanitizar a imagem dentro do limite de 5 MiB.']);
         }
 
         return ['mime_type' => $mime, 'bytes' => $clean, 'size_bytes' => strlen($clean)];
@@ -255,6 +255,39 @@ class ManagedImageStorage
             && preg_match('~^'.preg_quote($prefix, '~').'[A-Za-z0-9]{40}\.'.preg_quote($extension, '~').'$~', $owner->managed_image_path) === 1
             && is_numeric($owner->managed_image_size)
             && $owner->managed_image_size > 0 && $owner->managed_image_size <= 5242880;
+    }
+
+    public function withNewEventImage(UploadedFile $file, callable $persist): Evento
+    {
+        $prepared = $this->prepare($file, 'imagem_evento');
+        $mime = $prepared['mime_type'];
+        $extension = match ($mime) {
+            'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp',
+        };
+        $path = 'eventos/'.Str::random(40).'.'.$extension;
+        try {
+            $disk = $this->selectedDisk();
+            if (Storage::disk($disk)->put($path, $prepared['bytes'], ['visibility' => 'private']) !== true) {
+                throw new RuntimeException('Falha ao armazenar a imagem.');
+            }
+        } catch (Throwable $exception) {
+            if (isset($disk)) {
+                $this->deleteOrQueue($disk, $path);
+            }
+            throw new ServiceUnavailableHttpException(null, 'Não foi possível armazenar a imagem agora.', $exception);
+        }
+
+        try {
+            return $persist([
+                'managed_image_disk' => $disk,
+                'managed_image_path' => $path,
+                'managed_image_mime' => $mime,
+                'managed_image_size' => $prepared['size_bytes'],
+            ]);
+        } catch (Throwable $exception) {
+            $this->deleteOrQueue($disk, $path);
+            throw $exception;
+        }
     }
 
     public function replace(Model $owner, string $bytes, string $mime, callable $authorize): Model

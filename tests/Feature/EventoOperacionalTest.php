@@ -177,10 +177,11 @@ class EventoOperacionalTest extends TestCase
         $this->patchJson("/api/v1/agendas/{$agendaId}", ['vagas_agenda' => 3])->assertOk();
         $this->assertSame('aguardando a confirmação', $evento->fresh()->status_evento);
         Evento::whereKey($evento->evento_id)->update(['status_evento' => 'ativo']);
+        $this->deleteJson("/api/v1/agendas/{$agendaId}")->assertConflict();
+        $outra = $this->agenda($evento);
         $this->deleteJson("/api/v1/agendas/{$agendaId}")->assertNoContent();
         $this->assertSame('aguardando a confirmação', $evento->fresh()->status_evento);
 
-        $outra = $this->agenda($evento);
         $this->inscricao($outra, $this->pessoa());
         $this->deleteJson("/api/v1/agendas/{$outra->agenda_id}")->assertStatus(409);
     }
@@ -620,6 +621,11 @@ class EventoOperacionalTest extends TestCase
             'vagas_evento' => 10, 'modalidade_evento' => 'online',
             'imagem_evento_link' => 'evento.jpg',
             'cat_evento_id' => CatEvento::firstOrCreate(['nome_categoria' => 'Educação'])->cat_evento_id,
+            'agendas' => [[
+                'data_inicio' => now()->addDays(2)->toISOString(),
+                'data_fim' => now()->addDays(2)->addHour()->toISOString(),
+                'vagas_agenda' => 10,
+            ]],
         ];
     }
 

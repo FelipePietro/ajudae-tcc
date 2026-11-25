@@ -33,6 +33,9 @@ final class EventoModerationService
             if ($evento->status_evento !== self::AGUARDANDO) {
                 throw new ValidationConflictException('O evento não está aguardando aprovação.');
             }
+            if ($status === 'ativo' && ! $evento->agendas()->exists()) {
+                throw new ValidationConflictException('O Evento precisa ter ao menos uma Agenda para ser aprovado.');
+            }
 
             $evento->forceFill(['status_evento' => $status])->save();
             AdminLog::create([

@@ -3,85 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OngRegistrationRequest;
 use App\Http\Resources\OngPrivateResource;
 use App\Http\Resources\OngPublicResource;
-use App\Models\AdminLog;
 use App\Models\Ong;
-use App\Rules\Cnpj;
-use App\Rules\Cpf;
 use App\Services\AccountCredentials;
 use App\Services\AccountDeletion;
+use App\Services\OngRegistrationService;
+use App\Services\OngValidationService;
 use App\Support\AccountAccess;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class OngController extends Controller
 {
-    public function register(Request $request)
+    public function register(OngRegistrationRequest $request, OngRegistrationService $registration)
     {
-        $request->merge([
-            'cnpj_ong' => preg_replace('/\D/', '', (string) $request->input('cnpj_ong')),
-            'cpf_responsavel_ong' => preg_replace('/\D/', '', (string) $request->input('cpf_responsavel_ong')),
-        ]);
-
-        $validated = $request->validate([
-
-            // Dados da ONG
-
-            'login_ong' => ['required', 'string', 'max:64', 'unique:ong,login_ong'],
-            'nome_fantasia' => ['required', 'string', 'max:255'],
-            'cnpj_ong' => ['required', 'digits:14', new Cnpj, 'unique:ong,cnpj_ong'],
-            'email_ong' => ['required', 'email', 'unique:ong,email_ong'],
-            'senha_ong' => ['required', 'string', 'min:8', 'confirmed'],
-            'tel_ong' => ['required', 'digits_between:10,15'],
-
-            // Endereço
-            'cep_ong' => ['required', 'string', 'size:8'],
-            'logradouro_ong' => ['required', 'string'],
-            'bairro_ong' => ['required', 'string'],
-            'cidade_ong' => ['required', 'string'],
-            'uf_ong' => ['required', 'string', 'size:2'],
-
-            // Informações
-            'descricao_ong' => ['required', 'string'],
-            'site_url_ong' => ['nullable', 'url:http,https', 'max:255'],
-            'pfp_ong_link' => ['required', 'string'],
-
-            // Responsável
-            'nome_responsavel_ong' => ['required', 'string'],
-            'cpf_responsavel_ong' => ['required', 'digits:11', new Cpf],
-            'rg_responsavel_ong_link' => ['required', 'string'],
-            'email_responsavel_ong' => ['required', 'email'],
-            'tel_responsavel_ong' => ['required', 'digits_between:10,15'],
-
-            // Termos
-            'aceitou_termos' => ['required', 'accepted'],
-        ]);
-
-        $ong = DB::transaction(function () use ($validated, $request) {
-            unset($validated['aceitou_termos']);
-            $validated['senha_ong'] = Hash::make($validated['senha_ong']);
-
-            $ong = Ong::create($validated);
-            $ong->assinaturas()->create([
-                'tipo_termo' => 'termos_de_uso',
-                'versao_termo' => '1.0',
-                'aceito_em' => now(),
-                'ip_assinatura' => $request->ip(),
-                'user_agent_assinatura' => mb_substr((string) $request->userAgent(), 0, 255),
-                'documento_hash' => hash('sha256', 'termos_de_uso:1.0'),
-            ]);
-
-            return $ong->refresh();
-        });
-
-        // Token Sanctum
-        $token = $ong
-            ->createToken('ong-token', ['ong'])
-            ->plainTextToken;
+        [$ong, $token] = $registration->register($request->validated(), $request->ip(), $request->userAgent(), issueToken: true);
 
         return ApiResponse::success([
             'ong' => new OngPrivateResource($ong),
@@ -237,35 +176,13 @@ class OngController extends Controller
         return ApiResponse::success(new OngPrivateResource($ong->fresh()), 'ONG atualizada com sucesso.');
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $id, OngValidationService $validation)
     {
         $ong = Ong::findOrFail($id);
+        $validated = $request->validate(OngValidationService::STATUS_RULES);
+        $ong = $validation->update($ong, $request->user(), $validated['status_ong']);
 
-        $validated = $request->validate([
-            'status_ong' => [
-                'required',
-                Rule::in([
-                    'ativo',
-                    'aguardando aprovação',
-                    'reprovado',
-                ]),
-            ],
-        ]);
-
-        DB::transaction(function () use ($ong, $validated, $request) {
-            $ong = Ong::whereKey($ong->getKey())->lockForUpdate()->firstOrFail();
-            $statusAnterior = $ong->status_ong;
-            $ong->forceFill(['status_ong' => $validated['status_ong']])->save();
-            AdminLog::create([
-                'pessoa_id' => $request->user()->pessoa_id,
-                'acao' => 'ong.status_atualizado',
-                'recurso_type' => Ong::class,
-                'recurso_id' => $ong->ong_id,
-                'detalhes' => ['de' => $statusAnterior, 'para' => $validated['status_ong']],
-            ]);
-        });
-
-        return ApiResponse::success(new OngPublicResource($ong->fresh()), 'Status da ONG atualizado com sucesso.');
+        return ApiResponse::success(new OngPublicResource($ong), 'Status da ONG atualizado com sucesso.');
     }
 
     public function destroy(Request $request, $id, AccountDeletion $deletions)

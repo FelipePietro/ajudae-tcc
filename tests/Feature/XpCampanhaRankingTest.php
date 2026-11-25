@@ -336,7 +336,7 @@ class XpCampanhaRankingTest extends TestCase
         $this->postJson('/api/v1/admin/campanhas-xp', $payload)->assertForbidden();
         $admin = $this->pessoa('administrador');
         $this->grantPermission($admin, 'xp.campanhas.gerenciar');
-        Sanctum::actingAs($admin, ['pessoa']);
+        Sanctum::actingAs($admin->fresh(), ['pessoa']);
         foreach (['inicio', 'fim'] as $campo) {
             $invalido = $payload;
             unset($invalido[$campo]);
@@ -352,7 +352,7 @@ class XpCampanhaRankingTest extends TestCase
         $this->patchJson("/api/v1/admin/campanhas-xp/{$id}/status", ['ativa' => false])->assertOk();
         $this->assertFalse(CampanhaXp::findOrFail($id)->ativa);
         $master = $this->pessoa('administrador', ['admin_master' => true]);
-        Sanctum::actingAs($master, ['pessoa']);
+        Sanctum::actingAs($master->fresh(), ['pessoa']);
         $this->patchJson("/api/v1/admin/campanhas-xp/{$id}/status", ['ativa' => true])->assertOk();
     }
 

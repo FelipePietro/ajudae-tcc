@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Evento;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Models\VinculoOngOrganizador;
+use App\Services\EventoOperationalService;
 use App\Services\OrganizadorService;
 use App\Support\AccountAccess;
 use App\Support\ApiResponse;
@@ -27,6 +29,8 @@ final class WebOrganizerLinksController extends Controller
                 $nome = $outraParte?->exclusao_pendente ? null : ($instituicao ? $outraParte?->nm_pessoa : $outraParte?->nome_fantasia);
 
                 return [
+                    'id' => $vinculo->getKey(),
+                    'pessoa_id' => $instituicao && $vinculo->status === 'ativo' && $nome !== null ? $outraParte->getKey() : null,
                     'nome' => $nome ?? 'Conta indisponível',
                     'status' => $vinculo->status,
                     'responder' => ! $instituicao && $vinculo->status === 'convite_pendente'
@@ -64,6 +68,16 @@ final class WebOrganizerLinksController extends Controller
         $service->encerrarVinculo($vinculo, $this->operador($request));
 
         return ApiResponse::success(null, 'Vínculo encerrado.');
+    }
+
+    public function assign(Request $request, Evento $evento, OrganizadorService $service, EventoOperationalService $operations)
+    {
+        $ong = $this->operador($request);
+        abort_unless($ong instanceof Ong, 403);
+        $data = $request->validate(['pessoa_id' => ['present', 'nullable', 'integer', 'exists:pessoa,pessoa_id']]);
+        $person = $data['pessoa_id'] === null ? null : Pessoa::findOrFail($data['pessoa_id']);
+
+        return ApiResponse::success($service->atribuirResponsavel($evento, $ong, $person, $operations), 'Responsável operacional atualizado.');
     }
 
     private function operador(Request $request): Pessoa|Ong

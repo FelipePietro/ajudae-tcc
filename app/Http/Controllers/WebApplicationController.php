@@ -15,7 +15,7 @@ final class WebApplicationController extends Controller
     {
         $pessoa = $request->attributes->get('web_account');
         abort_unless($pessoa->isApprovedVolunteer(), 403);
-        abort_unless($evento->status_evento === 'ativo', 404);
+        abort_unless(Evento::publicado()->whereKey($evento->getKey())->exists(), 404);
 
         return ApiResponse::success($service->agendas($evento, $pessoa));
     }

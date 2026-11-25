@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\CatEvento;
 use App\Models\Evento;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -26,12 +28,17 @@ class OngAuthAndEventoTest extends TestCase
             'modalidade_evento' => 'online',
             'imagem_evento_link' => 'imagens/evento.jpg',
             'cat_evento_id' => $categoria->cat_evento_id,
+            'agendas' => [[
+                'data_inicio' => now()->addDays(2)->toISOString(),
+                'data_fim' => now()->addDays(2)->addHour()->toISOString(),
+                'vagas_agenda' => 10,
+            ]],
         ];
     }
 
     public function test_ong_register_login_and_me(): void
     {
-        $register = $this->postJson('/api/v1/ongs/register', $this->ongPayload())
+        $register = $this->registerOng()
             ->assertCreated()
             ->assertJsonPath('data.ong.status_ong', 'aguardando aprovação');
 
@@ -47,20 +54,33 @@ class OngAuthAndEventoTest extends TestCase
 
     public function test_duplicate_cnpj_and_invalid_cnpj_are_rejected(): void
     {
-        $this->postJson('/api/v1/ongs/register', $this->ongPayload())->assertCreated();
+        $this->registerOng()->assertCreated();
 
-        $this->postJson('/api/v1/ongs/register', $this->ongPayload([
+        $this->registerOng([
             'login_ong' => 'segunda.ong',
             'email_ong' => 'segunda@ong.test',
             'cpf_responsavel_ong' => '52998224725',
-        ]))->assertUnprocessable()->assertJsonValidationErrors('cnpj_ong');
+        ])->assertUnprocessable()->assertJsonValidationErrors('cnpj_ong');
 
-        $this->postJson('/api/v1/ongs/register', $this->ongPayload([
+        $this->registerOng([
             'login_ong' => 'terceira.ong',
             'email_ong' => 'terceira@ong.test',
             'cnpj_ong' => '11111111111111',
             'cpf_responsavel_ong' => '52998224725',
-        ]))->assertUnprocessable()->assertJsonValidationErrors('cnpj_ong');
+        ])->assertUnprocessable()->assertJsonValidationErrors('cnpj_ong');
+    }
+
+    private function registerOng(array $overrides = [])
+    {
+        Storage::fake('local');
+        config(['filesystems.document_private_disk' => 'local']);
+        $payload = $this->ongPayload($overrides);
+        unset($payload['rg_responsavel_ong_link']);
+        $payload['documento_identidade'] = UploadedFile::fake()->createWithContent(
+            'identidade.pdf', file_get_contents(resource_path('fixtures/admin-documents/certidao.pdf')),
+        );
+
+        return $this->post('/api/v1/ongs/register', $payload, ['Accept' => 'application/json']);
     }
 
     public function test_pending_ong_cannot_create_event_but_approved_ong_can(): void
