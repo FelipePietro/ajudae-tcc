@@ -27,18 +27,33 @@ final class Bloco9WebOngRegistrationTest extends TestCase
         Storage::fake('local');
     }
 
-    public function test_formulario_institucional_envia_documento_multipart_quando_renderizado(): void
+    public function test_visitante_abre_o_formulario_institucional_multipart(): void
     {
-        $this->get('/cadastro/ong')->assertViewIs('auth.registration-unavailable');
-
-        $this->view('ong.cadastro_ong')
+        $this->get('/cadastro/ong')->assertOk()->assertViewIs('ong.cadastro_ong')
+            ->assertHeaderContains('Cache-Control', 'no-store')
             ->assertSee('action="'.route('identity.ong.registration').'"', false)
+            ->assertSee('data-web-registration', false)
             ->assertSee('enctype="multipart/form-data"', false)
             ->assertSee('name="documento_identidade"', false)
             ->assertSee('name="senha_ong_confirmation"', false)
             ->assertSee('name="aceitou_termos"', false)
             ->assertDontSee('data-demo-seed', false)
             ->assertDontSee('name="rg_responsavel_ong_link"', false);
+    }
+
+    public function test_contas_autenticadas_sao_redirecionadas_e_nao_podem_cadastrar_ong(): void
+    {
+        foreach ([$this->createPessoa(), $this->createOng()] as $account) {
+            $this->sessionFor($account);
+
+            $this->get('/cadastro/ong')->assertRedirect(route('conta'))
+                ->assertHeaderContains('Cache-Control', 'no-store');
+            $this->post('/cadastro/ong', $this->payload(), ['Accept' => 'application/json'])
+                ->assertForbidden();
+        }
+
+        $this->assertDatabaseCount('ong', 1);
+        $this->assertSame([], Storage::disk('local')->allFiles());
     }
 
     public function test_campos_institucionais_invalidos_nao_criam_conta_nem_arquivo(): void
