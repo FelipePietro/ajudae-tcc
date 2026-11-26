@@ -34,8 +34,7 @@ export function initializePersonSponsorship() {
         if (busy) return;
         busy = true;
         root.setAttribute('aria-busy', 'true');
-        const controls = [...root.querySelectorAll('button:not(:disabled)')];
-        controls.forEach(button => { button.disabled = true; });
+        root.querySelectorAll('button').forEach(button => { button.disabled = true; });
         feedback.textContent = loading;
         if (errorSlot !== feedback) errorSlot.textContent = '';
         try {
@@ -44,7 +43,7 @@ export function initializePersonSponsorship() {
             if (errorSlot !== feedback) feedback.textContent = '';
             errorSlot.textContent = error.errors?.codigo_padrinho?.[0] ?? error.errors?.motivo?.[0] ?? error.message;
         } finally {
-            controls.forEach(button => { button.disabled = false; });
+            root.querySelectorAll('button').forEach(button => { button.disabled = false; });
             root.removeAttribute('aria-busy');
             busy = false;
         }
@@ -53,6 +52,7 @@ export function initializePersonSponsorship() {
     function action(container, label, operation) {
         const button = root.querySelector('[data-sponsor-action]').content.firstElementChild.cloneNode(true);
         button.textContent = label;
+        button.disabled = busy;
         button.addEventListener('click', operation);
         container.append(button);
     }
@@ -84,6 +84,7 @@ export function initializePersonSponsorship() {
             completion.querySelector('button').addEventListener('click', () => mutate(`${linkPath}/solicitar-conclusao`));
             const end = content.querySelector('[data-sponsor-end]');
             end.hidden = details.status !== 'ativo';
+            content.querySelectorAll('button').forEach(button => { button.disabled = busy; });
             end.addEventListener('submit', event => {
                 event.preventDefault();
                 mutate(`${linkPath}/encerrar`, {
