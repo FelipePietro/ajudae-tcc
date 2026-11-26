@@ -1,4 +1,5 @@
 import { requestJson } from '../core/http.js';
+import { validatePrivateDocument } from './private-document-file.js';
 
 function fieldError(field, message) {
     const slot = field.closest('.account-field')?.querySelector('[data-field-error]');
@@ -19,16 +20,27 @@ export function initializePessoaRegistration() {
     const error = wizard.querySelector('[data-wizard-error]');
     const progress = wizard.querySelector('[data-step-progress]');
     const count = wizard.querySelector('[data-step-count]');
-    const credentials = steps.findIndex(step => step.contains(form.elements.senha_pessoa));
+    const institution = wizard.dataset.actor === 'ong';
+    const actor = institution ? 'ong' : 'pessoa';
+    const password = form.elements.namedItem(`senha_${actor}`);
+    const confirmationPassword = form.elements.namedItem(`senha_${actor}_confirmation`);
+    const credentials = steps.findIndex(step => step.contains(password));
     const lastStep = steps.length - 1;
     let current = 0;
     let reached = 0;
     let sending = false;
     let completed = false;
 
+    const referral = form.elements.namedItem('codigo_padrinho');
+    if (referral && location.hash.startsWith('#codigo=')) {
+        const value = location.hash.slice('#codigo='.length);
+        if (/^[0-9a-f]{64}$/i.test(value)) referral.value = value;
+        history.replaceState(history.state, '', location.pathname + location.search);
+    }
+
     const clearPasswords = () => {
-        form.elements.senha_pessoa.value = '';
-        form.elements.senha_pessoa_confirmation.value = '';
+        password.value = '';
+        confirmationPassword.value = '';
     };
     window.addEventListener('pagehide', clearPasswords);
 
@@ -45,11 +57,16 @@ export function initializePessoaRegistration() {
     function review() {
         const summary = form.querySelector('[data-review]');
         summary.replaceChildren();
-        for (const [label, value] of [
+        const values = institution ? [
+            ['Organização', form.elements.nome_fantasia.value],
+            ['Localidade', `${form.elements.cidade_ong.value}, ${form.elements.uf_ong.value}`],
+            ['Documentação', 'Documento de identidade selecionado'],
+        ] : [
             ['Nome', form.elements.nm_pessoa.value],
             ['Localidade', `${form.elements.cidade_pessoa.value}, ${form.elements.uf_pessoa.value}`],
             ['Apadrinhamento', form.elements.codigo_padrinho.value ? 'Código de indicação informado' : 'Sem código de indicação'],
-        ]) {
+        ];
+        for (const [label, value] of values) {
             const row = document.createElement('div');
             const term = document.createElement('dt');
             const details = document.createElement('dd');
@@ -88,8 +105,12 @@ export function initializePessoaRegistration() {
             let message = '';
             if (!field.checkValidity()) {
                 message = field.validity.valueMissing ? 'Preencha este campo para continuar.' : 'Confira o formato informado.';
-            } else if (field.name === 'senha_pessoa_confirmation' && field.value !== form.elements.senha_pessoa.value) {
+            } else if (field === password && (new TextEncoder().encode(password.value).length > 72 || password.value.includes('\0'))) {
+                message = 'Informe uma senha de até 72 bytes sem caracteres nulos.';
+            } else if (field === confirmationPassword && field.value !== password.value) {
                 message = 'As senhas precisam coincidir.';
+            } else if (field.type === 'file') {
+                message = validatePrivateDocument(field.files[0]);
             }
             fieldError(field, message);
             if (message) firstInvalid ??= field;
@@ -115,7 +136,8 @@ export function initializePessoaRegistration() {
             const fields = new FormData(form);
             const csrfToken = fields.get('_token');
             fields.delete('_token');
-            await requestJson(form.action, { method: 'POST', body: fields, csrfToken });
+            const body = institution ? fields : Object.fromEntries(fields);
+            await requestJson(form.action, { method: 'POST', body, csrfToken });
             completed = true;
             form.reset();
             form.hidden = true;

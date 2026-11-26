@@ -1,4 +1,14 @@
-@props(['demo', 'registration' => false])
+@props(['demo' => null, 'registration' => false, 'institutionalRegistration' => false])
+@if($institutionalRegistration)
+    <div class="account-document">
+        <div class="account-document-body account-field">
+            <label for="ong-document">Identidade do responsável *</label>
+            <input id="ong-document" name="documento_identidade" type="file" required accept="application/pdf,image/jpeg,image/png" aria-describedby="ong-document-hint ong-document-error">
+            <small id="ong-document-hint">PDF, JPEG ou PNG, até 10 MiB. O documento fica na área privada.</small>
+            <small id="ong-document-error" class="account-error" data-field-error></small>
+        </div>
+    </div>
+@else
 <div class="account-document-list">
     @foreach($demo['documents'] as $document)
         @php $status = $registration ? null : $document['status']; @endphp
@@ -26,3 +36,4 @@
     @endforeach
 </div>
 <div class="account-note"><strong>Documentos pertencem à área privada.</strong><p>A política prevê apagar o arquivo 30 dias após a validação e renovar antecedentes a cada 12 meses. A revisão não envia nem remove arquivos. CNH só é necessária para atividade de direção que a exigir.</p></div>
+@endif

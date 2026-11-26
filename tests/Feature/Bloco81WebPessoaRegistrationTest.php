@@ -61,6 +61,8 @@ final class Bloco81WebPessoaRegistrationTest extends TestCase
             'codigo_padrinho' => 'inválido',
         ]))->assertUnprocessable()->assertJsonValidationErrors(['dt_nasc', 'codigo_padrinho']);
 
+        $this->postJson($route, $this->pessoaPayload(['aceitou_termos' => false]))
+            ->assertUnprocessable()->assertJsonValidationErrors(['aceitou_termos']);
         $this->post($route, $this->pessoaPayload())->assertStatus(406);
         $this->assertDatabaseCount('pessoa', 0);
         $this->assertDatabaseCount('assinatura', 0);

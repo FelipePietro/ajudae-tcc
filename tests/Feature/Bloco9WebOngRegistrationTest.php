@@ -27,6 +27,38 @@ final class Bloco9WebOngRegistrationTest extends TestCase
         Storage::fake('local');
     }
 
+    public function test_formulario_institucional_envia_documento_multipart_quando_renderizado(): void
+    {
+        $this->get('/cadastro/ong')->assertViewIs('auth.registration-unavailable');
+
+        $this->view('ong.cadastro_ong')
+            ->assertSee('action="'.route('identity.ong.registration').'"', false)
+            ->assertSee('enctype="multipart/form-data"', false)
+            ->assertSee('name="documento_identidade"', false)
+            ->assertSee('name="senha_ong_confirmation"', false)
+            ->assertSee('name="aceitou_termos"', false)
+            ->assertDontSee('data-demo-seed', false)
+            ->assertDontSee('name="rg_responsavel_ong_link"', false);
+    }
+
+    public function test_campos_institucionais_invalidos_nao_criam_conta_nem_arquivo(): void
+    {
+        $invalid = array_replace($this->payload(), [
+            'cnpj_ong' => '11111111111111',
+            'cpf_responsavel_ong' => '11111111111',
+            'documento_identidade' => UploadedFile::fake()->create('identidade.txt', 1, 'text/plain'),
+        ]);
+        $this->post('/cadastro/ong', $invalid, ['Accept' => 'application/json'])
+            ->assertUnprocessable()->assertJsonValidationErrors(['cnpj_ong', 'cpf_responsavel_ong', 'documento_identidade']);
+        $oversized = UploadedFile::fake()->createWithContent(
+            'identidade.pdf', file_get_contents(resource_path('fixtures/admin-documents/certidao.pdf')),
+        )->size(10241);
+        $this->post('/cadastro/ong', array_replace($this->payload(), ['documento_identidade' => $oversized]), ['Accept' => 'application/json'])
+            ->assertUnprocessable()->assertJsonValidationErrors('documento_identidade');
+        $this->assertDatabaseEmpty('ong');
+        $this->assertSame([], Storage::disk('local')->allFiles());
+    }
+
     public function test_cadastro_pendente_com_documento_privado_e_aprovacao_auditada(): void
     {
         $this->post('/cadastro/ong', $this->payload(), ['Accept' => 'application/json'])
