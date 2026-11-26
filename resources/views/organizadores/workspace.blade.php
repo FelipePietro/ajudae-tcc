@@ -15,9 +15,7 @@
             <div><h2 class="panel-title" id="organizer-events">Meus eventos</h2><p class="panel-sub">Eventos sob sua responsabilidade</p></div>
             @unless($organizerLinked)<x-botao-primario :href="route('organizador.eventos.criar')">Criar Evento</x-botao-primario>@endunless
         </div>
-        <div class="organizer-event-grid mt-5">
-            <p>Os Eventos sob sua responsabilidade ainda não podem ser consultados nesta página.</p>
-        </div>
+        @include('organizadores.partials.web-events', ['assign' => false])
         <x-botao-secundario :href="route('organizador.eventos')" class="mt-5">Ver gestão de Eventos</x-botao-secundario>
     </section>
     <x-organizer-links integrated :current-organization="$activeInstitution" />

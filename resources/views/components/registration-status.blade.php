@@ -1,8 +1,8 @@
-@props(['demo' => null, 'status' => null, 'tone' => null, 'description' => null])
+@props(['demo' => null, 'status' => null, 'tone' => null, 'description' => null, 'live' => false])
 @php
     [$status, $tone, $description] = $demo['statusMeta'] ?? [$status, $tone, $description];
 @endphp
-<section class="account-status {{ $tone }}"><div><span class="account-eyebrow">Situação cadastral</span><h2>{{ $status }}</h2><p>{{ $description }}</p></div><span class="account-status-symbol" aria-hidden="true">{{ $tone === 'success' ? '✓' : '◷' }}</span></section>
+<section class="account-status {{ $tone }}" @if($live) data-live-validation @endif><div><span class="account-eyebrow">Situação cadastral</span><h2>{{ $status }}</h2><p>{{ $description }}</p></div><span class="account-status-symbol" aria-hidden="true">{{ $tone === 'success' ? '✓' : '◷' }}</span></section>
 @if($demo)
 @if($demo['reason'])<x-feedback kind="error"><strong>O que revisar</strong><p>{{ $demo['reason'] }}</p></x-feedback>@endif
 @if($demo['blocked'])<div class="account-note danger"><strong>Reenvio temporariamente bloqueado.</strong><p>Três reprovações em 30 dias geram bloqueio de 7 dias. Aguarde o fim do período para solicitar nova análise.</p></div>@endif

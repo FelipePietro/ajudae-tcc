@@ -7,7 +7,9 @@ use App\Models\Habilidade;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 final class Bloco9WebAccountOperationsTest extends TestCase
@@ -20,6 +22,35 @@ final class Bloco9WebAccountOperationsTest extends TestCase
         if (! config('identity.enabled')) {
             $this->markTestSkipped('Execute com AJUDAE_WEB_AUTH=true.');
         }
+    }
+
+    public function test_autenticacao_web_limita_tentativas_e_encerra_a_sessao_apos_trocar_senha(): void
+    {
+        $person = $this->createPessoa();
+        $organization = $this->createOng('ativo');
+        $this->get('/conta')->assertRedirect('/login');
+
+        $invalid = ['tipo_login' => 'pessoa', 'login' => 'credencial-inexistente', 'senha' => 'sintetica'];
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->from('/login')->post('/login', $invalid)->assertRedirect('/login')
+                ->assertSessionHasErrors('login')->assertSessionMissing('web_identity');
+        }
+        $this->post('/login', $invalid)->assertTooManyRequests()->assertHeader('Retry-After');
+
+        $this->post('/login', ['tipo_login' => 'pessoa', 'login' => $person->login_pessoa, 'senha' => 'senha-segura'])
+            ->assertRedirect('/perfil')->assertSessionHas('web_identity.type', 'pessoa');
+        $this->get('/conta')->assertOk();
+        $newPassword = ['senha' => 'nova-senha-sintetica', 'senha_confirmation' => 'nova-senha-sintetica'];
+        $this->from('/conta')->post('/conta/senha', $newPassword + ['senha_atual' => 'senha-incorreta'])
+            ->assertRedirect('/conta')->assertSessionHasErrors('senha_atual')->assertSessionHas('web_identity.type', 'pessoa');
+        $this->post('/conta/senha', $newPassword + ['senha_atual' => 'senha-segura'])
+            ->assertRedirect('/login')->assertSessionMissing('web_identity');
+        $this->get('/perfil')->assertRedirect('/login');
+
+        $this->post('/login', ['tipo_login' => 'ong', 'login' => $organization->login_ong, 'senha' => 'senha-segura'])
+            ->assertRedirect('/ong/painel')->assertSessionHas('web_identity.type', 'ong');
+        $this->post('/logout')->assertRedirect('/login')->assertSessionMissing('web_identity');
+        $this->get('/ong/painel')->assertRedirect('/login');
     }
 
     public function test_preferencias_e_dados_usam_a_identidade_da_sessao(): void
@@ -45,6 +76,45 @@ final class Bloco9WebAccountOperationsTest extends TestCase
         $this->sessionFor($this->createOng('ativo'));
         $this->getJson('/conta/pessoa/dados')->assertForbidden();
         $this->getJson('/conta/ong/dados')->assertOk()->assertJsonMissingPath('data.rg_responsavel_ong_link');
+    }
+
+    public function test_documentos_e_reenvio_usam_o_titular_da_sessao_web(): void
+    {
+        config(['filesystems.document_private_disk' => 'local']);
+        Storage::fake('local');
+        $person = $this->createPessoa(overrides: ['status_validacao' => 'correcao_solicitada']);
+        $other = $this->createPessoa(overrides: [
+            'cpf_pessoa' => '11144477735', 'login_pessoa' => 'outra.pessoa', 'email_pessoa' => 'outra@example.test',
+        ]);
+
+        $this->getJson('/conta/pessoa/validacao')->assertUnauthorized();
+        $this->sessionFor($person);
+        $this->get('/perfil')->assertOk()
+            ->assertSee('data-document-upload', false)
+            ->assertSee('data-web-sponsorship', false)
+            ->assertSee('data-web-promotion-form', false);
+        $this->getJson('/conta/pessoa/validacao')->assertOk()
+            ->assertJsonPath('data.status_validacao', 'correcao_solicitada')->assertJsonCount(0, 'data.documentos');
+
+        $path = '/conta/pessoa/documentos/documento_identidade';
+        $this->post($path, ['arquivo' => UploadedFile::fake()->create('sintetico.txt')], ['Accept' => 'application/json'])
+            ->assertUnprocessable()->assertJsonValidationErrors('arquivo');
+        $file = UploadedFile::fake()->createWithContent(
+            'sintetico.pdf', file_get_contents(resource_path('fixtures/admin-documents/certidao.pdf')),
+        );
+        $id = $this->post($path, ['arquivo' => $file], ['Accept' => 'application/json'])
+            ->assertCreated()->assertJsonPath('data.status', 'pendente')->assertJsonMissingPath('data.storage_path')
+            ->json('data.documento_pessoa_id');
+        $this->getJson('/conta/pessoa/validacao')->assertOk()->assertJsonPath('data.documentos.0.documento_pessoa_id', $id);
+        $this->getJson('/conta/pessoa/antecedentes')->assertOk()->assertJsonPath('data.renovacao_necessaria', false);
+        $download = "/conta/documentos/{$id}/download";
+        $this->get($download)->assertOk()->assertHeaderContains('Cache-Control', 'no-store');
+        $this->postJson('/conta/pessoa/validacao/reenviar')->assertOk()
+            ->assertJsonPath('data.status_validacao', 'aguardando_validacao');
+        $this->postJson('/conta/pessoa/validacao/reenviar')->assertConflict();
+
+        $this->sessionFor($other);
+        $this->getJson($download)->assertForbidden();
     }
 
     public function test_admin_web_separa_capacidades_e_audita_campanhas(): void

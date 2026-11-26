@@ -2,7 +2,7 @@
 @section('title', 'Minha jornada')
 @section('content')
 @if(isset($ownProfile))
-<div data-own-profile>
+<div data-own-profile data-csrf="{{ csrf_token() }}" data-person-id="{{ request()->attributes->get('web_account')->getKey() }}">
     <section class="account-profile-hero">
         <div class="account-avatar" aria-hidden="true">{{ $webNavigation->initials }}</div>
         <div>
@@ -36,7 +36,7 @@
         </aside>
         <div>
             <section id="resumo" tabindex="-1">
-                <x-registration-status :status="$ownProfile['status']" :tone="$ownProfile['statusTone']" description="Acompanhe a situação do seu cadastro." />
+                <x-registration-status :status="$ownProfile['status']" :tone="$ownProfile['statusTone']" description="Acompanhe a situação do seu cadastro." live />
                 <div class="account-card">
                     <div class="account-section-heading"><h2>Seu cadastro</h2><span class="account-badge info">Dados pessoais</span></div>
                     <dl class="account-review">
@@ -60,31 +60,9 @@
                 </dl>
                 <x-botao-secundario :href="route('perfil.preferencias')">Conferir preferências</x-botao-secundario>
             </section>
-            <section id="documentos" tabindex="-1" class="account-card">
-                <span class="account-eyebrow">Área privada</span>
-                <h2>Seus documentos</h2>
-                <p class="account-intro">A consulta e o envio de documentos pelo perfil ainda estão indisponíveis.</p>
-                <ul class="account-timeline">
-                    <li><strong>Identidade</strong></li>
-                    <li><strong>Certidão de antecedentes</strong></li>
-                    <li><strong>CNH</strong><p>Exigida somente quando aplicável.</p></li>
-                </ul>
-            </section>
-            <section id="validacao" tabindex="-1">
-                <x-registration-status :status="$ownProfile['status']" :tone="$ownProfile['statusTone']" description="Acompanhe a situação do seu cadastro." />
-                <div class="account-card">
-                    <h2>Acompanhe as próximas etapas</h2>
-                    <ol class="account-timeline">
-                        <li><strong>Cadastro</strong><p>Informações pessoais para validação.</p></li>
-                        <li><strong>Documentação</strong><p>Identidade e antecedentes. CNH somente quando aplicável.</p></li>
-                        <li><strong>{{ $ownProfile['status'] }}</strong><p>Situação atual informada na sua conta.</p></li>
-                    </ol>
-                </div>
-            </section>
+            @include('perfil.partials.web-documents')
             @if($ownProfile['volunteer'])
-                <section id="apadrinhamento" tabindex="-1" class="account-card">
-                    <h2>Apadrinhamento</h2><p>A consulta de elegibilidade e de pedidos ainda está indisponível.</p>
-                </section>
+                @include('perfil.partials.web-sponsorship')
             @endif
             @if($ownProfile['approved'])
                 <section id="confiabilidade" tabindex="-1" class="account-card">

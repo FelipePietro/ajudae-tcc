@@ -174,7 +174,7 @@
 
                 <div class="stat-card">
 
-                    <div class="stat-value stat-orange">
+                    <div class="stat-value stat-orange" @if($integrated) data-active-organizer-count @endif>
                         {{ $integrated ? '—' : (collect($organizerWork['links'])->where('status','ativo')->count()) }}
                     </div>
 

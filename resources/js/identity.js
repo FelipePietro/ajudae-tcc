@@ -10,6 +10,10 @@ import { initializeOrganizerLinks } from './modules/organizer-links.js';
 import { initializeParticipation } from './modules/participation.js';
 import { initializePrivacyRequests } from './modules/privacy-requests.js';
 import { initializePessoaRegistration } from './modules/pessoa-registration.js';
+import { initializePersonValidation } from './modules/person-validation.js';
+import { initializePersonSponsorship } from './modules/person-sponsorship.js';
+import { initializeOrganizerPromotion } from './modules/organizer-promotion.js';
+import { initializeOrganizerEvents } from './modules/organizer-events.js';
 import './navigation-accessibility.js';
 import '../css/components/accessibility.css';
 
@@ -26,6 +30,10 @@ startApplication('identity', () => {
     initializeParticipation();
     initializePrivacyRequests();
     initializePessoaRegistration();
+    initializePersonValidation();
+    initializePersonSponsorship();
+    initializeOrganizerPromotion();
+    initializeOrganizerEvents();
 });
 
 // Conceal a cached document until the server has revalidated the current session.
