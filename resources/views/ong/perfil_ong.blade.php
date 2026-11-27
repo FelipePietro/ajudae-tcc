@@ -67,7 +67,11 @@
                             text-[#1D3F2F]
                         "
                     >
-                        {{ $usuario['iniciais'] ?? '??' }}
+                        @if(!empty($usuario['foto']))
+                            <img src="{{ $usuario['foto'] }}" alt="Foto de {{ $usuario['nome'] ?? 'organização' }}" class="h-full w-full rounded-full object-cover">
+                        @else
+                            {{ $usuario['iniciais'] ?? '??' }}
+                        @endif
                     </div>
 
 

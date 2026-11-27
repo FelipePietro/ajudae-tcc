@@ -10,6 +10,8 @@ import { initializeOrganizerLinks } from './modules/organizer-links.js';
 import { initializeParticipation } from './modules/participation.js';
 import { initializePrivacyRequests } from './modules/privacy-requests.js';
 import { initializePessoaRegistration } from './modules/pessoa-registration.js';
+import { initializeAccountProfile } from './modules/account-profile.js';
+import { initializeAccountPreferences } from './modules/account-preferences.js';
 import './navigation-accessibility.js';
 import '../css/components/accessibility.css';
 
@@ -26,6 +28,8 @@ startApplication('identity', () => {
     initializeParticipation();
     initializePrivacyRequests();
     initializePessoaRegistration();
+    initializeAccountProfile();
+    initializeAccountPreferences();
 });
 
 // Conceal a cached document until the server has revalidated the current session.

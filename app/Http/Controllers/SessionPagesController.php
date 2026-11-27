@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ong;
 use App\Models\Pessoa;
+use App\Services\ManagedImageStorage;
 use App\Support\AccountAccess;
 use App\Support\WebNavigation;
 use Illuminate\Http\Request;
@@ -130,6 +131,7 @@ final class SessionPagesController extends Controller
                     default => 'Aguardando validação',
                 },
                 'preferences' => $this->personPreferences($account),
+                'photoUrl' => app(ManagedImageStorage::class)->publicUrl($account),
             ],
         ]);
     }
@@ -158,6 +160,7 @@ final class SessionPagesController extends Controller
                     'reprovado' => 'Cadastro reprovado',
                     default => 'Aguardando aprovação',
                 },
+                'photoUrl' => app(ManagedImageStorage::class)->publicUrl($account),
             ],
         ]);
     }
@@ -165,7 +168,8 @@ final class SessionPagesController extends Controller
     public function publicPerson(string $id)
     {
         $person = Pessoa::query()
-            ->select('pessoa_id', 'nm_pessoa', 'role_pessoa', 'status_validacao', 'xp_pessoa', 'login_pessoa', 'exclusao_pendente')
+            ->with('habilidades')
+            ->select('pessoa_id', 'nm_pessoa', 'role_pessoa', 'status_validacao', 'xp_pessoa', 'login_pessoa', 'exclusao_pendente', 'managed_image_path', 'pfp_pessoa_link')
             ->where('role_pessoa', 'voluntario')->where('status_validacao', 'aprovado')
             ->whereKey($id)->firstOrFail();
         abort_unless(AccountAccess::canOperate($person), 404);
@@ -173,13 +177,18 @@ final class SessionPagesController extends Controller
         return view('perfil.index-perfil', [
             'nome_user' => $person->nm_pessoa,
             'xp_user' => $person->xp_pessoa,
+            'foto_user' => app(ManagedImageStorage::class)->publicUrl($person),
+            'habilidades_user' => $person->habilidades->map(fn ($habilidade) => [
+                'nome' => $habilidade->nome_habilidade,
+                'nivel' => $habilidade->pivot->nivel_habilidade,
+            ])->all(),
         ]);
     }
 
     public function publicOrganization(string $id)
     {
         $organization = Ong::query()
-            ->select('ong_id', 'nome_fantasia', 'descricao_ong', 'cidade_ong', 'uf_ong', 'status_ong', 'login_ong', 'exclusao_pendente')
+            ->select('ong_id', 'nome_fantasia', 'descricao_ong', 'cidade_ong', 'uf_ong', 'status_ong', 'login_ong', 'exclusao_pendente', 'managed_image_path')
             ->whereKey($id)->firstOrFail();
         abort_unless(AccountAccess::activeOng($organization), 404);
 
@@ -192,6 +201,7 @@ final class SessionPagesController extends Controller
                 'tipo' => 'ONG',
                 'papel' => 'Organização',
                 'descricao' => $organization->descricao_ong,
+                'foto' => app(ManagedImageStorage::class)->publicUrl($organization),
             ],
         ]);
     }
