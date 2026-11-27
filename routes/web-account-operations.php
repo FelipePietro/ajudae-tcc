@@ -43,7 +43,8 @@ Route::middleware(ResolveWebAccount::class.':public')->group(function (): void {
 Route::middleware([ResolveWebAccount::class.':required', UseResolvedWebActor::class])->group(function (): void {
     Route::get('/conta/ong/{ong}/documento-identidade', [WebOngRegistrationController::class, 'document'])
         ->whereNumber('ong')->name('identity.ong.document')->block();
-    Route::get('/conta/documentos/{documento}/download', [DocumentoPessoaController::class, 'download'])->whereNumber('documento')->block();
+    Route::get('/conta/documentos/{documento}/download', [DocumentoPessoaController::class, 'download'])
+        ->name('identity.documents.download')->whereNumber('documento')->block();
     Route::get('/conta/notificacoes/{id}', [NotificationController::class, 'show'])->whereNumber('id')->block();
     Route::delete('/conta/notificacoes/{id}', [NotificationController::class, 'destroy'])->whereNumber('id')->block();
 });
@@ -101,7 +102,7 @@ Route::middleware([ResolveWebAccount::class.':pessoa', UseResolvedWebActor::clas
     });
     Route::middleware('admin:usuarios.validar')->controller(AdminPessoaValidationController::class)->group(function (): void {
         Route::get('/validacoes-pessoa/dados', 'index')->block();
-        Route::get('/validacoes-pessoa/{pessoa}', 'show')->whereNumber('pessoa')->block();
+        Route::get('/validacoes-pessoa/{pessoa}', 'show')->name('identity.admin.person-review')->whereNumber('pessoa')->block();
         Route::post('/validacoes-pessoa/{pessoa}/assumir', 'assumir')->whereNumber('pessoa')->block();
         Route::post('/validacoes-pessoa/{pessoa}/exigir-padrinho', 'exigirPadrinho')->whereNumber('pessoa')->block();
         Route::post('/validacoes-pessoa/{pessoa}/solicitar-correcao', 'solicitarCorrecao')->whereNumber('pessoa')->block();
@@ -109,7 +110,7 @@ Route::middleware([ResolveWebAccount::class.':pessoa', UseResolvedWebActor::clas
         Route::post('/validacoes-pessoa/{pessoa}/reprovar', 'reprovar')->whereNumber('pessoa')->block();
         Route::post('/validacoes-pessoa/{pessoa}/reprovar-definitivamente', 'reprovarDefinitivamente')->whereNumber('pessoa')->block();
         Route::patch('/documentos/{documento}/status', 'validarDocumento')->whereNumber('documento')->block();
-        Route::get('/antecedentes/renovacoes', [AntecedentesController::class, 'renovacoes'])->block();
+        Route::get('/antecedentes/renovacoes', [AntecedentesController::class, 'renovacoes'])->name('identity.admin.background-renewals')->block();
     });
     Route::middleware('admin:organizadores.validar')->controller(AdminOrganizadorController::class)->group(function (): void {
         Route::get('/solicitacoes-organizador/dados', 'index')->block();

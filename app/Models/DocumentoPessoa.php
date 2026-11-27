@@ -55,6 +55,20 @@ class DocumentoPessoa extends Model
         return $this->belongsTo(Pessoa::class, 'validated_by_admin_id', 'pessoa_id');
     }
 
+    public function isPendingBackgroundRenewal(): bool
+    {
+        return $this->tipo === 'antecedentes_criminais' && $this->ativo && $this->status === 'pendente'
+            && $this->pessoa->role_pessoa === 'voluntario'
+            && $this->pessoa->status_validacao === 'aprovado' && ! $this->pessoa->exclusao_pendente;
+    }
+
+    public function hasRetainedFile(): bool
+    {
+        return $this->storage_path !== null
+            && $this->arquivo_excluido_em === null
+            && ($this->delete_after === null || $this->delete_after->isFuture());
+    }
+
     public function isExpired(): bool
     {
         return $this->expires_at?->isPast() ?? false;

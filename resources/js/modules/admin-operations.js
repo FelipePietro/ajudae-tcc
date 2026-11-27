@@ -11,14 +11,16 @@ const states = {
 const state = value => states[value] ?? value;
 const campaignDate = value => value?.slice(0, 19);
 
-function personDocument(document, target, ctx, refresh, canDecide) {
+function personDocument(document, target, refresh, canDecide) {
     const item = card(document.tipo?.replaceAll('_', ' ') ?? 'Certidão de antecedentes', [
         ['Situação', state(document.status)], ['Enviado em', localDate(document.uploaded_at ?? document.enviado_em)],
         ['Motivo da rejeição', document.rejection_reason],
     ]);
     const id = document.documento_pessoa_id;
-    if (!document.arquivo_excluido_em && (!document.delete_after || Date.parse(document.delete_after) > Date.now())) {
-        privateDownload(item, ctx.url('/conta/documentos/' + id + '/download'), 'Baixar documento');
+    if (document.download_url) {
+        privateDownload(item, document.download_url, 'Baixar documento');
+    } else if (document.download_requires_assignment) {
+        item.append(element('p', 'Para baixar, assuma a análise e mantenha a atribuição dentro do prazo.'));
     }
     if (canDecide && document.ativo !== false && !(document.tipo === 'antecedentes_criminais' && document.status !== 'pendente')) {
         target(item, 'Aprovar documento', '/documentos/' + id + '/status', refresh, { method: 'PATCH', body: { status: 'aprovado' } });
@@ -59,7 +61,7 @@ function person(row, refresh, ctx) {
             feedback.tabIndex = -1;
             detail.append(feedback);
             for (const document of documents) {
-                detail.append(personDocument(document, ctx.action, ctx, async message => {
+                detail.append(personDocument(document, ctx.action, async message => {
                     await load();
                     const status = detail.querySelector('[role="status"]');
                     if (status) {
@@ -257,7 +259,7 @@ export function initializeAdminOperations() {
     const auxiliary = [
         ['[data-operation-renewals]', '/antecedentes/renovacoes', (row, refresh) => {
             const item = card(row.nome_pessoa ?? 'Pessoa nº ' + row.pessoa_id);
-            item.append(personDocument(row, ctx.action, ctx, refresh, row.status === 'pendente'));
+            item.append(personDocument(row, ctx.action, refresh, row.status === 'pendente'));
             return item;
         }],
     ];

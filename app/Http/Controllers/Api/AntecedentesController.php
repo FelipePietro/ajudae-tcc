@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DocumentoPessoaResource;
 use App\Models\DocumentoPessoa;
 use App\Models\Pessoa;
 use App\Services\AntecedentesService;
@@ -24,11 +25,13 @@ class AntecedentesController extends Controller
     public function renovacoes(Request $request)
     {
         $validated = $request->validate(['per_page' => ['sometimes', 'integer', 'min:1', 'max:100']]);
+        $web = $request->routeIs('identity.admin.background-renewals');
         $renovacoes = DocumentoPessoa::query()
-            ->with('pessoa:pessoa_id,nm_pessoa')
+            ->with('pessoa:pessoa_id,nm_pessoa,status_validacao,role_pessoa,exclusao_pendente')
             ->where('tipo', 'antecedentes_criminais')
             ->where('ativo', true)->where('status', 'pendente')
-            ->whereHas('pessoa', fn ($query) => $query->where('status_validacao', 'aprovado'))
+            ->whereHas('pessoa', fn ($query) => $query->where('status_validacao', 'aprovado')
+                ->when($web, fn ($query) => $query->where('role_pessoa', 'voluntario')->where('exclusao_pendente', false)))
             ->orderBy('uploaded_at')
             ->paginate($validated['per_page'] ?? 20)
             ->through(fn (DocumentoPessoa $documento) => [
@@ -37,6 +40,7 @@ class AntecedentesController extends Controller
                 'nome_pessoa' => $documento->pessoa?->nm_pessoa,
                 'enviado_em' => $documento->uploaded_at?->toISOString(),
                 'status' => $documento->status,
+                ...($web ? DocumentoPessoaResource::webReviewFields($request, $documento) : []),
             ]);
 
         return ApiResponse::success($renovacoes);

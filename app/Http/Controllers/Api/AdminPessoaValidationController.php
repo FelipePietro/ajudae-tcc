@@ -45,9 +45,13 @@ class AdminPessoaValidationController extends Controller
         ));
     }
 
-    public function show(Pessoa $pessoa)
+    public function show(Request $request, Pessoa $pessoa)
     {
         $pessoa->load(['documentos' => fn ($query) => $query->latest(), 'historicoValidacao' => fn ($query) => $query->latest()]);
+
+        if ($request->routeIs('identity.admin.person-review')) {
+            $pessoa->documentos->each(fn (DocumentoPessoa $documento) => $documento->setRelation('pessoa', $pessoa));
+        }
 
         return ApiResponse::success(new PessoaAdminResource($pessoa));
     }

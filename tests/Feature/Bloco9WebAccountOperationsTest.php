@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Acompanhamento;
+use App\Models\AdminLog;
 use App\Models\CatEvento;
 use App\Models\Habilidade;
 use App\Models\Ong;
@@ -122,6 +123,9 @@ final class Bloco9WebAccountOperationsTest extends TestCase
         ]);
         $this->assertSame('ativo', $vinculo->fresh()->status);
         $this->postJson($reprovacao, $motivo)->assertConflict();
+        $log = AdminLog::where('acao', 'padrinho.conclusao_decidida')->where('recurso_id', $pedido->getKey())->sole();
+        $this->assertSame($admin->getKey(), $log->pessoa_id);
+        $this->assertSame(['de' => 'pendente', 'para' => 'rejeitada', 'motivo' => $motivo['motivo']], $log->detalhes);
     }
 
     private function sessionFor(Pessoa|Ong $account): void

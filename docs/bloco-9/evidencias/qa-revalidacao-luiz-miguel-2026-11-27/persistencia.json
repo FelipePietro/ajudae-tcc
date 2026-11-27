@@ -1,0 +1,59 @@
+{
+  "data": "2026-11-27",
+  "commit": "9fcd085a1342be00141ec36d1fa92d8f726284d1",
+  "banco": "127.0.0.1:34647/ajudae_qa9_independente",
+  "resultados": {
+    "timezoneLaravel": "UTC",
+    "padrinho": {
+      "webLimite": {
+        "status": "rejeitada",
+        "motivoCaracteres": 2000,
+        "atorRegistrado": true,
+        "dataRegistrada": true,
+        "vinculo": "ativo"
+      },
+      "web2": {
+        "status": "rejeitada",
+        "motivoCaracteres": 25,
+        "atorRegistrado": true,
+        "dataRegistrada": true,
+        "vinculo": "ativo"
+      },
+      "bearer": {
+        "status": "rejeitada",
+        "motivoCaracteres": null,
+        "atorRegistrado": true,
+        "dataRegistrada": true,
+        "vinculo": "ativo"
+      }
+    },
+    "justificativas": {
+      "deferida": {
+        "ocorrenciaPreservada": true,
+        "status": "deferida",
+        "atorRegistrado": true,
+        "tipo": "ong",
+        "dataRegistrada": true
+      },
+      "indeferida": {
+        "ocorrenciaPreservada": true,
+        "status": "indeferida",
+        "atorRegistrado": true,
+        "tipo": "ong",
+        "dataRegistrada": true
+      }
+    },
+    "renovacao": {
+      "status": "aprovado",
+      "titular": "aprovado",
+      "validadorRegistrado": true
+    },
+    "downloadCadastro": {
+      "entregaAuditada": true
+    },
+    "fluxoCurso": {
+      "evento": "finalizado",
+      "xpTransacoes": 1
+    }
+  }
+}

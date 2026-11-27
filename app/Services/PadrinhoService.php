@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\ValidationConflictException;
 use App\Models\Acompanhamento;
+use App\Models\AdminLog;
 use App\Models\CodigoIndicacaoPadrinho;
 use App\Models\ConclusaoPadrinho;
 use App\Models\Pessoa;
@@ -320,6 +321,13 @@ class PadrinhoService
                     'concluido_em' => now(), 'concluido_por_id' => $admin->pessoa_id,
                 ]);
             }
+            AdminLog::create([
+                'pessoa_id' => $admin->getKey(),
+                'acao' => 'padrinho.conclusao_decidida',
+                'recurso_type' => 'conclusao_padrinho',
+                'recurso_id' => $pedido->getKey(),
+                'detalhes' => ['de' => 'pendente', 'para' => $pedido->status, 'motivo' => $motivo],
+            ]);
             foreach ($pessoas as $pessoa) {
                 $this->notificar($pessoa, $aprovar ? 'padrinho.conclusao_aprovada' : 'padrinho.conclusao_rejeitada',
                     $aprovar ? 'A conclusão do apadrinhamento foi aprovada.' : 'O pedido de conclusão foi rejeitado.');

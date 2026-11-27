@@ -80,7 +80,8 @@ class DocumentoPessoaController extends Controller
     public function download(Request $request, DocumentoPessoa $documento, DocumentoStorage $documents)
     {
         $user = $request->user();
-        Gate::forUser($user)->authorize('download', $documento);
+        $ability = $request->routeIs('identity.documents.download') ? 'downloadWeb' : 'download';
+        Gate::forUser($user)->authorize($ability, $documento);
 
         if (! $documents->safePath($documento->storage_path)) {
             $this->auditarDownload($user, $documento, 'arquivo_ausente');
