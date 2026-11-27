@@ -121,7 +121,7 @@ Route::middleware([ResolveWebAccount::class.':pessoa', UseResolvedWebActor::clas
     Route::middleware('admin:padrinhos.validar_conclusao')->controller(AdminPadrinhoController::class)->group(function (): void {
         Route::get('/padrinhos/conclusoes/dados', 'conclusoes')->block();
         Route::post('/padrinhos/conclusoes/{pedido}/aprovar', 'aprovar')->whereNumber('pedido')->block();
-        Route::post('/padrinhos/conclusoes/{pedido}/reprovar', 'reprovar')->whereNumber('pedido')->block();
+        Route::post('/padrinhos/conclusoes/{pedido}/reprovar', 'reprovarWeb')->whereNumber('pedido')->block();
     });
     Route::middleware('admin:xp.campanhas.gerenciar')->controller(CampanhaXpController::class)->group(function (): void {
         Route::get('/campanhas-xp/dados', 'index')->block();

@@ -1,9 +1,11 @@
 import { requestJson } from '../core/http.js';
+import { initializeAdminOperations } from './admin-operations.js';
 
 const dateTime = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 const modes = { presencial: 'Presencial', online: 'Online', hibrido: 'Híbrido' };
 
 export function initializeEventModeration() {
+    initializeAdminOperations();
     const root = document.querySelector('[data-event-moderation]');
     if (!root) return;
 

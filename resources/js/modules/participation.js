@@ -1,14 +1,81 @@
 import { requestJson } from '../core/http.js';
+import { initializeParticipationManagement } from './participation-management.js';
+import { controls, element, lazyDetails, localDate } from './web-operations.js';
 
 const formatDate = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
-function renderParticipation(root, event) {
+const eventStatus = {
+    ativo: 'Ativo',
+    finalizado: 'Concluído',
+    cancelado: 'Cancelado',
+    reanalise: 'Em reanálise',
+    reprovado: 'Reprovado',
+    'aguardando a confirmação': 'Aguardando aprovação',
+};
+const monitoringStatus = {
+    pendente: 'Pendente',
+    validada: 'Validada',
+    rejeitada: 'Rejeitada',
+    nao_aplicavel: 'Não se aplica',
+};
+const justificationStatus = { pendente: 'Em análise', deferida: 'Deferida', indeferida: 'Indeferida' };
+
+function justification(agenda, ui) {
+    return lazyDetails('Justificativa da ocorrência', content => {
+        function render(data) {
+            content.append(
+                element('p', `Protocolo nº ${data.justificativa_id} · ${justificationStatus[data.status] ?? data.status}`),
+                element('p', `Enviada em ${localDate(data.enviada_em)}`),
+                element('p', `Motivo enviado · ${data.motivo}`, 'break-words'),
+            );
+            if (data.decidido_em) content.append(element('p', `Decidida em ${localDate(data.decidido_em)}`));
+            if (data.motivo_decisao) content.append(element('p', `Motivo da decisão · ${data.motivo_decisao}`, 'break-words'));
+        }
+
+        function missing() {
+            if (!agenda.enviar_justificativa_url) {
+                content.append(element('p', 'Nenhuma justificativa encontrada. Atualize o histórico para conferir a situação.'));
+                return;
+            }
+            content.append(ui.form({
+                label: 'Enviar justificativa',
+                url: agenda.enviar_justificativa_url,
+                method: 'POST',
+                fields: [{ name: 'motivo', label: 'Motivo', type: 'textarea', attributes: { required: '', maxlength: 2000 } }],
+                complete(message, data) {
+                    const feedback = element('p', message);
+                    feedback.setAttribute('role', 'status');
+                    feedback.tabIndex = -1;
+                    content.replaceChildren(feedback);
+                    render(data);
+                    feedback.focus();
+                },
+            }));
+        }
+
+        ui.read(content, agenda.justificativa_url, render, missing);
+    });
+}
+
+function monitoring(agenda, ui) {
+    return lazyDetails('Monitoria estudantil', content => {
+        ui.read(content, agenda.monitoria_url, data => {
+            content.append(element('p', monitoringStatus[data.status] ?? data.status));
+            if (data.validado_em) content.append(element('p', `Decidida em ${localDate(data.validado_em)}`));
+        });
+    });
+}
+
+function renderParticipation(root, event, ui) {
     const card = root.querySelector('[data-participation-template]').content.cloneNode(true);
     card.querySelector('[data-event-title]').textContent = event.titulo;
+    card.querySelector('[data-event-status]').textContent = eventStatus[event.status_evento] ?? event.status_evento;
     const agendas = card.querySelector('[data-event-agendas]');
     for (const agenda of event.agendas) {
-        const item = document.createElement('li');
-        item.textContent = `${formatDate.format(new Date(agenda.inicio))} · ${agenda.situacao}`;
+        const item = element('li', null, 'border-t border-black/10 pt-2');
+        item.append(element('p', `${localDate(agenda.inicio)} · ${agenda.situacao}`));
+        if (agenda.justificativa_url) item.append(justification(agenda, ui));
+        if (agenda.monitoria_url) item.append(monitoring(agenda, ui));
         agendas.append(item);
     }
 
@@ -48,11 +115,15 @@ function renderParticipation(root, event) {
 }
 
 export function initializeParticipation() {
+    initializeParticipationManagement();
     const root = document.querySelector('[data-web-participation]');
     if (!root) return;
 
     const status = root.querySelector('[data-participation-status]');
     const list = root.querySelector('[data-participation-list]');
+    const groups = new Map(Array.from(list.querySelectorAll('[data-participation-group]'), group => [group.dataset.participationGroup, group]));
+    const ui = controls(root);
+    let hasEvents = false;
     const button = root.querySelector('[data-participation-next]');
     let next = root.dataset.url;
     async function load() {
@@ -62,9 +133,14 @@ export function initializeParticipation() {
         list.setAttribute('aria-busy', 'true');
         try {
             const { data: page } = await requestJson(next);
-            for (const event of page.data) list.append(renderParticipation(root, event));
+            for (const event of page.data) {
+                const group = groups.get(event.status_evento) ?? groups.get('outros');
+                group.querySelector('[data-group-events]').append(renderParticipation(root, event, ui));
+                group.hidden = false;
+                hasEvents = true;
+            }
             next = page.next_page_url;
-            status.textContent = list.children.length ? '' : 'Você ainda não tem participações para acompanhar.';
+            status.textContent = hasEvents ? '' : 'Você ainda não tem participações para acompanhar.';
             button.textContent = 'Carregar mais';
             if (!next && document.activeElement === button) {
                 status.tabIndex = -1;

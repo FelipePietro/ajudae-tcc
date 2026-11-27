@@ -254,14 +254,17 @@ class IntegratedNavigationTest extends TestCase
             ->assertSeeInOrder(['admin-stats', 'admin-corpo', 'admin-tabs', 'data-admin-capability="lgpd.visualizar"', 'Atalhos administrativos'], false)
             ->assertDontSee('data-admin-capability="eventos.aprovar"', false)
             ->assertDontSee('Resposta a solicitações de privacidade');
-        $this->get('/admin/solicitacoes-lgpd')->assertOk()->assertSee('A fila de solicitações ainda está indisponível');
+        $this->get('/admin/solicitacoes-lgpd')->assertOk()->assertSee('data-admin-operations="solicitacoes-lgpd"', false)
+            ->assertSee('data-privacy-read="1" data-privacy-respond="0"', false)
+            ->assertDontSee('href="'.route('admin.conclusoes-padrinho').'"', false);
         $this->patch('/admin/solicitacoes-lgpd/1/status')->assertForbidden();
         DB::table('permissao_pessoa')->where('pessoa_id', 42)->update(['permissao_id' => 2]);
         $this->get('/admin')->assertOk()->assertSee('Resposta a solicitações de privacidade')
             ->assertDontSee('Consulta de solicitações de privacidade')
             ->assertDontSee(route('admin.solicitacoes-lgpd'));
         $this->get('/admin/solicitacoes-lgpd')->assertForbidden();
-        $this->get('/admin/responder-lgpd')->assertOk()->assertSee('Voltar ao painel');
+        $this->get('/admin/responder-lgpd')->assertOk()->assertSee('Voltar ao painel')
+            ->assertSee('data-privacy-read="0" data-privacy-respond="1"', false);
         $this->get('/admin/relatorios?visao=master')->assertForbidden();
         $this->get('/admin/configuracoes?papel=master')->assertForbidden();
 

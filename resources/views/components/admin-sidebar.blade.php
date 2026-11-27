@@ -21,7 +21,7 @@
     <hr class="admin-sidebar-rule">
     <span class="ong-sidebar-org">Administrador</span>
 
-    @foreach(['Moderação' => ['admin','fila-eventos','cadastros-ong','upgrades-org','candidatos','denuncias','solicitacoes-lgpd','responder-lgpd'], 'Plataforma' => ['usuarios','relatorios','log-acoes','configuracoes','campanhas-xp']] as $group => $items)
+    @foreach(['Moderação' => ['admin','fila-eventos','cadastros-ong','upgrades-org','candidatos','conclusoes-padrinho','denuncias','solicitacoes-lgpd','responder-lgpd'], 'Plataforma' => ['usuarios','relatorios','log-acoes','configuracoes','campanhas-xp']] as $group => $items)
         @continue(!array_intersect($items, array_keys($pages)))
         <p class="ong-sidebar-label">{{ $group }}</p>
         <nav class="ong-sidebar-nav" aria-label="{{ $group }}">

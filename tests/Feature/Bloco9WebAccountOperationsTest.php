@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Acompanhamento;
 use App\Models\CatEvento;
 use App\Models\Habilidade;
 use App\Models\Ong;
 use App\Models\Pessoa;
+use Dom\HTMLDocument;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -80,6 +82,46 @@ final class Bloco9WebAccountOperationsTest extends TestCase
         $this->getJson('/admin/log-acoes/dados?acao=xp.campanha_atualizada')->assertOk()
             ->assertJsonPath('data.total', 2)->assertJsonPath('data.data.0.pessoa_id', $admin->getKey())
             ->assertJsonMissingPath('data.data.0.detalhes');
+    }
+
+    public function test_conclusao_de_apadrinhamento_tem_menu_proprio_e_exige_motivo_na_reprovacao_web(): void
+    {
+        $admin = $this->createPessoa('administrador');
+        $padrinho = $this->createPessoa(overrides: [
+            'cpf_pessoa' => '00000000021', 'login_pessoa' => 'padrinho.qa', 'email_pessoa' => 'padrinho@example.test',
+        ]);
+        $apadrinhado = $this->createPessoa(overrides: [
+            'cpf_pessoa' => '00000000022', 'login_pessoa' => 'apadrinhado.qa', 'email_pessoa' => 'apadrinhado@example.test',
+        ]);
+        $vinculo = Acompanhamento::iniciar($padrinho->getKey(), $apadrinhado->getKey());
+        $pedido = $vinculo->conclusoes()->create([
+            'apadrinhado_id' => $apadrinhado->getKey(), 'status' => 'pendente', 'solicitada_em' => now(),
+        ]);
+        $pagina = '/admin/conclusoes-padrinho';
+        $reprovacao = '/admin/padrinhos/conclusoes/'.$pedido->getKey().'/reprovar';
+        $motivo = ['motivo' => 'Documentação sintética pendente.'];
+
+        $this->sessionFor($admin);
+        $this->get($pagina)->assertForbidden();
+        $this->postJson($reprovacao, $motivo)->assertForbidden();
+
+        $this->grantPermission($admin, 'padrinhos.validar_conclusao');
+        $this->sessionFor($admin);
+        $html = $this->withoutVite()->get($pagina)->assertOk()->getContent();
+        $sidebar = HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
+        $activeLink = $sidebar->querySelector('#admin-sidebar nav a[aria-current="page"]');
+        $this->assertNotNull($activeLink);
+        $this->assertSame(route('admin.conclusoes-padrinho'), $activeLink->getAttribute('href'));
+        $this->assertTrue($activeLink->classList->contains('is-active'));
+        $this->get('/admin/candidatos')->assertForbidden();
+        $this->postJson($reprovacao)->assertUnprocessable()->assertJsonValidationErrors('motivo');
+        $this->assertSame('pendente', $pedido->fresh()->status);
+        $this->postJson($reprovacao, $motivo)->assertOk()->assertJsonPath('data.status', 'rejeitada');
+        $this->assertDatabaseHas('conclusao_padrinho', [
+            'conclusao_padrinho_id' => $pedido->getKey(), 'admin_id' => $admin->getKey(), 'motivo_decisao' => $motivo['motivo'],
+        ]);
+        $this->assertSame('ativo', $vinculo->fresh()->status);
+        $this->postJson($reprovacao, $motivo)->assertConflict();
     }
 
     private function sessionFor(Pessoa|Ong $account): void

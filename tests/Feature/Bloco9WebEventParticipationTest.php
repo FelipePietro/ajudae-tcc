@@ -94,10 +94,18 @@ class Bloco9WebEventParticipationTest extends TestCase
         $this->sessionFor($responsavel);
         $this->getJson("$baseAusente/justificativa")->assertOk()->assertJsonPath('data.status', 'pendente');
         $this->patchJson("$baseAusente/justificativa", ['deferida' => true, 'motivo' => 'Ocorrência sintética conferida.'])
-            ->assertOk()->assertJsonPath('data.status', 'deferida');
+            ->assertOk()->assertJsonPath('data.status', 'deferida')
+            ->assertJsonPath('data.decidido_por', ['tipo' => 'pessoa', 'nome' => $responsavel->nm_pessoa]);
         $this->assertSame('não participou', $ausente->fresh()->status_inscricao);
 
+        $this->sessionFor($ausente->pessoa);
+        $this->getJson("$baseAusente/justificativa")->assertOk()
+            ->assertJsonPath('data.motivo_decisao', 'Ocorrência sintética conferida.')
+            ->assertJsonMissingPath('data.decidido_por');
+
         $this->sessionFor($ong);
+        $this->getJson("$baseAusente/justificativa")->assertOk()
+            ->assertJsonPath('data.decidido_por', ['tipo' => 'pessoa', 'nome' => $responsavel->nm_pessoa]);
         $this->postJson("$baseEvento/avaliacoes/{$voluntario->getKey()}", ['nota' => 4])->assertCreated();
         $this->postJson("$baseEvento/finalizar")->assertOk()->assertJsonPath('data.status_evento', 'finalizado');
         $this->assertSame('ong', $evento->fresh()->finalizado_por_tipo);

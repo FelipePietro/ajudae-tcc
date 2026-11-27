@@ -18,7 +18,9 @@
     @endif
 </header>
 
-@if($integrated)
+@if($integrated && in_array($page, ['candidatos', 'cadastros-ong', 'upgrades-org', 'conclusoes-padrinho', 'campanhas-xp', 'solicitacoes-lgpd', 'responder-lgpd', 'log-acoes'], true))
+    @include('admin.partials.web-operations')
+@elseif($integrated)
     <div class="admin-widget admin-review-filters">
         <label>Buscar registro <input type="search" class="cfg-input" disabled></label>
         <label>Situação <select class="cfg-input" disabled><option>Todas</option></select></label>

@@ -37,7 +37,17 @@ class AdminPadrinhoController extends Controller
 
     public function reprovar(Request $request, ConclusaoPadrinho $pedido, PadrinhoService $service)
     {
-        $validated = $request->validate(['motivo' => ['nullable', 'string', 'max:2000']]);
+        return $this->rejeitar($request, $pedido, $service, 'nullable');
+    }
+
+    public function reprovarWeb(Request $request, ConclusaoPadrinho $pedido, PadrinhoService $service)
+    {
+        return $this->rejeitar($request, $pedido, $service, 'required');
+    }
+
+    private function rejeitar(Request $request, ConclusaoPadrinho $pedido, PadrinhoService $service, string $regraMotivo)
+    {
+        $validated = $request->validate(['motivo' => [$regraMotivo, 'string', 'max:2000']]);
         $pedido = $service->decidirConclusao($pedido, $request->user(), false, $validated['motivo'] ?? null);
 
         return ApiResponse::success(['conclusao_padrinho_id' => $pedido->getKey(), 'status' => $pedido->status], 'Conclusão rejeitada.');

@@ -104,16 +104,19 @@ class MonitoriaService
         }
     }
 
+    public function aplicavel(Agenda $agenda, Inscricao $inscricao): bool
+    {
+        return $inscricao->declarou_estudante && $agenda->status_ativo !== 'cancelado'
+            && ! in_array($inscricao->status_inscricao, ['reprovado', 'desistente', 'não participou'], true);
+    }
+
     private function situacao(Agenda $agenda, Inscricao $inscricao, ?Monitoria $monitoria): array
     {
-        $aplicavel = $inscricao->declarou_estudante && $agenda->status_ativo !== 'cancelado'
-            && ! in_array($inscricao->status_inscricao, ['reprovado', 'desistente', 'não participou'], true);
-
         return [
             'inscricao_id' => $inscricao->inscricao_id,
             'declarou_estudante' => (bool) $inscricao->declarou_estudante,
             'status' => match (true) {
-                ! $aplicavel => 'nao_aplicavel',
+                ! $this->aplicavel($agenda, $inscricao) => 'nao_aplicavel',
                 $monitoria?->confirmada === true => 'validada',
                 $monitoria?->confirmada === false => 'rejeitada',
                 default => 'pendente',

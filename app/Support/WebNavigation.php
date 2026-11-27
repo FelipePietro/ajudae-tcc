@@ -18,6 +18,7 @@ final class WebNavigation
         'lgpd.responder' => 'Resposta a solicitações de privacidade',
         'admin.logs.visualizar' => 'Consulta de auditoria',
         'organizadores.validar' => 'Validação de organizadores',
+        'padrinhos.validar_conclusao' => 'Conclusões de apadrinhamento',
         'xp.campanhas.gerenciar' => 'Gestão de campanhas de XP',
     ];
 
@@ -26,6 +27,7 @@ final class WebNavigation
         'cadastros-ong' => ['Cadastros de ONG', 'ongs.validar', '🏢'],
         'upgrades-org' => ['Promoções a organizador', 'organizadores.validar', '⬆'],
         'candidatos' => ['Validação de Pessoas', 'usuarios.validar', '👥'],
+        'conclusoes-padrinho' => ['Conclusões de apadrinhamento', 'padrinhos.validar_conclusao', '🤝'],
         'solicitacoes-lgpd' => ['Solicitações de privacidade', 'lgpd.visualizar', '🔒'],
         'responder-lgpd' => ['Resposta a solicitações de privacidade', 'lgpd.responder', '✎'],
         'denuncias' => ['Ocorrências', 'usuarios.moderar', '🚩'],

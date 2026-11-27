@@ -23,11 +23,19 @@
 @if($integrated)
     <section data-web-participation data-url="{{ route('identity.participation.index') }}" data-csrf="{{ csrf_token() }}" aria-label="Histórico de participações">
         <p data-participation-status role="status"></p>
-        <div data-participation-list class="grid gap-4"></div>
+        <div data-participation-list class="grid gap-6">
+            @foreach(['ativo' => 'Eventos ativos', 'finalizado' => 'Eventos concluídos', 'outros' => 'Outras situações'] as $grupo => $rotulo)
+                <section data-participation-group="{{ $grupo }}" class="space-y-3" hidden>
+                    <h2 class="text-lg font-semibold">{{ $rotulo }}</h2>
+                    <div data-group-events class="grid gap-4"></div>
+                </section>
+            @endforeach
+        </div>
         <x-botao-secundario as="button" type="button" :href="null" data-participation-next hidden>Carregar mais</x-botao-secundario>
         <template data-participation-template>
             <article class="account-card">
-                <h2 class="text-lg font-semibold" data-event-title></h2>
+                <h3 class="text-lg font-semibold" data-event-title></h3>
+                <p class="text-sm" data-event-status></p>
                 <ul class="mt-3 grid gap-2" data-event-agendas></ul>
                 <p class="mt-4" data-event-rating role="status"></p>
                 <form data-event-form class="mt-4 grid gap-3" hidden>
@@ -43,6 +51,7 @@
                 </form>
             </article>
         </template>
+        <x-web-operations-controls />
     </section>
 @elseif($unavailable)
     <div class="account-card" role="alert">

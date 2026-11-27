@@ -1,6 +1,9 @@
 @extends('layouts.admin')
 
 @section('content')
+    @isset($integratedAdmin)
+        @include('admin.partials.queue', ['description' => 'Histórico de decisões administrativas.'])
+    @else
     @php
         $integrated = isset($integratedAdmin);
     @endphp
@@ -32,5 +35,6 @@
             </tr>
         </template>
     @endif
-    @unless($integrated)@include('admin.partials.data')@endunless
+    @include('admin.partials.data')
+    @endisset
 @endsection

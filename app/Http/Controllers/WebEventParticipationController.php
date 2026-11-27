@@ -8,6 +8,7 @@ use App\Http\Resources\JustificativaParticipacaoResource;
 use App\Models\Agenda;
 use App\Models\Evento;
 use App\Models\Inscricao;
+use App\Models\JustificativaParticipacao;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Services\AvaliacaoService;
@@ -86,9 +87,13 @@ final class WebEventParticipationController extends Controller
 
     public function justification(Request $request, Inscricao $inscricao, JustificativaParticipacaoService $service)
     {
-        $justificativa = $service->consultar($inscricao, $this->actor($request));
+        $ator = $this->actor($request);
+        $justificativa = $service->consultar($inscricao, $ator);
+        if ($ator instanceof Pessoa && $ator->getKey() === $inscricao->pessoa_id) {
+            return ApiResponse::success(new JustificativaParticipacaoResource($justificativa));
+        }
 
-        return ApiResponse::success(new JustificativaParticipacaoResource($justificativa));
+        return ApiResponse::success($this->justificativaGerencial($request, $justificativa));
     }
 
     public function submitJustification(Request $request, Inscricao $inscricao, JustificativaParticipacaoService $service)
@@ -104,7 +109,23 @@ final class WebEventParticipationController extends Controller
         $data = $request->validate(JustificativaParticipacaoService::regrasDecisao());
         $justificativa = $service->decidir($inscricao, $this->actor($request), (bool) $data['deferida'], $data['motivo']);
 
-        return ApiResponse::success(new JustificativaParticipacaoResource($justificativa), 'Decisão da justificativa registrada.');
+        return ApiResponse::success($this->justificativaGerencial($request, $justificativa), 'Decisão da justificativa registrada.');
+    }
+
+    private function justificativaGerencial(Request $request, JustificativaParticipacao $justificativa): array
+    {
+        $tipo = $justificativa->decidido_por_tipo;
+        $id = $justificativa->decidido_por_id;
+        $nome = match ($tipo) {
+            'pessoa' => Pessoa::query()->whereKey($id)->value('nm_pessoa'),
+            'ong' => Ong::query()->whereKey($id)->value('nome_fantasia'),
+            default => null,
+        };
+
+        return [
+            ...(new JustificativaParticipacaoResource($justificativa))->resolve($request),
+            'decidido_por' => $tipo === null ? null : ['tipo' => $tipo, 'nome' => $nome],
+        ];
     }
 
     public function finishAgenda(Request $request, Agenda $agenda, EventoParticipationService $service)

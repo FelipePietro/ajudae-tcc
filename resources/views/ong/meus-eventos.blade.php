@@ -104,7 +104,11 @@
 
             {{-- ========================================================= --}}
             {{-- CARDS DE RESUMO --}}
-@unless($integrated)<x-organizer-scope :flow="$flow" />@endunless
+@if($integrated)
+    @include('participacoes.web-gestao')
+@else
+    <x-organizer-scope :flow="$flow" />
+@endif
             {{-- ========================================================= --}}
 
             <section
@@ -793,7 +797,7 @@
                            text-sm
                            font-semibold"
                 >
-                    {{ $integrated ? 'A consulta e a gestão de Eventos ainda estão indisponíveis.' : 'Nenhum evento encontrado' }}
+                    {{ $integrated ? 'A edição de Eventos ainda está indisponível.' : 'Nenhum evento encontrado' }}
                 </p>
 
                 <p

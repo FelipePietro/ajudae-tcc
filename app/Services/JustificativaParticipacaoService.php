@@ -28,6 +28,11 @@ class JustificativaParticipacaoService
         return ['deferida' => ['required', 'boolean'], ...self::regrasEnvio()];
     }
 
+    public function podeSubmeter(Evento $evento, Agenda $agenda, Inscricao $inscricao, Pessoa $titular): bool
+    {
+        return $this->eTitular($inscricao, $titular) && $this->impedimentoOcorrencia($evento, $agenda, $inscricao) === null;
+    }
+
     public function consultar(Inscricao $inscricao, Pessoa|Ong $ator): JustificativaParticipacao
     {
         if (! $this->eTitular($inscricao, $ator) && ! $this->policy->operate($ator, $inscricao->agenda->evento)) {
@@ -102,8 +107,16 @@ class JustificativaParticipacaoService
 
     private function garantirOcorrenciaElegivel(Evento $evento, Agenda $agenda, Inscricao $inscricao): void
     {
+        $impedimento = $this->impedimentoOcorrencia($evento, $agenda, $inscricao);
+        if ($impedimento !== null) {
+            throw new ValidationConflictException($impedimento);
+        }
+    }
+
+    private function impedimentoOcorrencia(Evento $evento, Agenda $agenda, Inscricao $inscricao): ?string
+    {
         if (! in_array($evento->status_evento, ['ativo', 'finalizado'], true) || $agenda->status_ativo === 'cancelado') {
-            throw new ValidationConflictException('O estado do Evento ou da Agenda não permite alterar a justificativa.');
+            return 'O estado do Evento ou da Agenda não permite alterar a justificativa.';
         }
 
         $elegivel = match ($inscricao->status_inscricao) {
@@ -111,8 +124,6 @@ class JustificativaParticipacaoService
             'desistente' => $inscricao->desistiu_em !== null && ! $inscricao->desistencia_sem_penalidade,
             default => false,
         };
-        if (! $elegivel) {
-            throw new ValidationConflictException('A inscrição não possui ausência ou desistência sujeita a justificativa.');
-        }
+        return $elegivel ? null : 'A inscrição não possui ausência ou desistência sujeita a justificativa.';
     }
 }

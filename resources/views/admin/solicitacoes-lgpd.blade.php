@@ -16,7 +16,7 @@
     @include('admin.partials.queue', [
         'description' => $description,
         'queueLabel' => 'Solicitações de titulares',
-        'queueMessage' => $page === 'responder-lgpd' ? 'A resposta a solicitações ainda está indisponível.' : 'A fila de solicitações ainda está indisponível.',
+
     ])
     @if($canRespond && $page === 'solicitacoes-lgpd')
         <x-botao-secundario :href="route('admin.responder-lgpd')" class="mt-4">Área de resposta</x-botao-secundario>
