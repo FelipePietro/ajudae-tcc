@@ -14,7 +14,7 @@ As rotas em `routes/web-event-management.php` usam sessão tipada Laravel em `AJ
 | POST `/gestao/eventos/{evento}/imagem` | Gestor do registro | Multipart com `imagem`. 201 no primeiro upload gerenciado, 200 na substituição. `data` contém `url`, `mime_type` e `size_bytes`. |
 | DELETE `/gestao/eventos/{evento}/imagem` | Gestor do registro | 200. `url`, `mime_type` e `size_bytes` retornam nulos. |
 | POST `/gestao/eventos/{evento}/agendas` | ONG proprietária ou proprietário independente | `data_inicio`, `data_fim`, `vagas_agenda`. 201 com a Agenda e reanálise do Evento quando aplicável. |
-| PATCH `/gestao/agendas/{agenda}` | Gestor do Evento associado | `data_inicio`, `data_fim` e `vagas_agenda` são parciais. O par resultante deve durar pelo menos 30 minutos. 200 com dados persistidos. |
+| PATCH `/gestao/agendas/{agenda}` | Gestor do Evento associado | Envie somente alterações em `data_inicio`, `data_fim` ou `vagas_agenda`. O par resultante deve durar pelo menos 30 minutos. O editor preserva a precisão dos horários que não mudaram e evita o PATCH se nada mudou. 200 com dados persistidos. |
 | DELETE `/gestao/agendas/{agenda}` | ONG proprietária ou proprietário independente | 204 para Agenda fora de estado terminal, sem inscrições e com outra Agenda remanescente. |
 | POST `/gestao/agendas/{agenda}/cancelar` | Gestor do Evento associado | `motivo` obrigatório. 200 com estado `cancelado` e histórico preservado. |
 
@@ -75,7 +75,23 @@ Exemplo abreviado do 201 em sessão de ONG
 }
 ```
 
-Para incluir banner na criação, use multipart com os mesmos campos, `agendas[0][data_inicio]`, `agendas[0][data_fim]`, `agendas[0][vagas_agenda]` e `imagem_evento`. Aceita JPEG, PNG ou WebP íntegros até 5 MiB, 8.000 px por lado e 25 megapixels. Na gestão, `imagem_evento_link` aponta à leitura privada enquanto a imagem estiver no armazenamento gerenciado. A leitura pública da imagem gerenciada é liberada com a publicação.
+Para incluir banner na criação, use multipart com os mesmos campos, `agendas[0][data_inicio]`, `agendas[0][data_fim]`, `agendas[0][vagas_agenda]` e `imagem_evento`. Aceita JPEG, PNG ou WebP íntegros até 5 MiB, 8.000 px por lado e 25 megapixels. Na gestão, `imagem_evento_link` aponta à leitura privada enquanto a imagem estiver no armazenamento gerenciado. A leitura pública da imagem gerenciada é liberada com a publicação. No detalhe publicado, essa capa tem prioridade. Eventos sem referência gerenciada válida podem exibir a imagem legada pública. O detalhe não publica referências do disco privado.
+
+## Repetição da criação Web
+
+Na criação por `POST /gestao/eventos`, o cliente pode enviar o cabeçalho `Idempotency-Key` em JSON ou multipart. A chave aceita de 1 a 128 caracteres ASCII entre letras, números, ponto, sublinhado, hífen e dois-pontos. O editor integrado gera a chave e reaproveita a mesma tentativa ao reenviar uma solicitação sem confirmação.
+
+A operação e o tipo e ID do ator delimitam a chave. Após gravação, a mesma chave com os mesmos dados validados, incluindo as Agendas na mesma ordem e o conteúdo binário do banner, devolve 201 com o ID e a projeção atual do Evento. Dados validados diferentes para a mesma chave retornam 409. Uma chave nova pode criar outro Evento com os mesmos dados. Se o Evento associado à tentativa tiver sido removido, o reenvio retorna 409. Uma falha antes do commit permite repetir a tentativa.
+
+A chave é opcional para clientes Web existentes. O contrato Bearer mantém seu formato anterior.
+
+Quando o navegador não consegue persistir a chave, o editor usa a sessão Laravel. Os endpoints da tabela abaixo exigem a mesma permissão de criação e as escritas usam CSRF. A sessão conserva somente a chave por ator. Ao reabrir o formulário, o gestor pode reenviar os mesmos dados e o mesmo banner ou escolher iniciar outro Evento. A tentativa continua disponível na mesma sessão até o cliente confirmar o sucesso ou cancelar essa tentativa.
+
+| Método e URI Web | Comportamento |
+| --- | --- |
+| GET `/gestao/eventos/intencao` | 200 com `data.chave`, nula quando não há tentativa na sessão. |
+| POST `/gestao/eventos/intencao` | 200 com a chave existente ou uma nova. Prepare a tentativa antes de enviar o Evento. |
+| DELETE `/gestao/eventos/intencao` | Recebe `chave`. Retorna 204 e encerra a tentativa somente se a chave corresponde à atual. |
 
 ## Erros e compatibilidade
 

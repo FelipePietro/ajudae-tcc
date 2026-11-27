@@ -18,6 +18,7 @@ use App\Services\ManagedImageStorage;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 final class WebEventManagementController extends Controller
 {
@@ -42,6 +43,44 @@ final class WebEventManagementController extends Controller
         ]);
     }
 
+    public function creationIntent(Request $request)
+    {
+        $ator = $this->ator($request);
+        Gate::forUser($ator)->authorize('create', Evento::class);
+
+        $sessao = $request->session();
+        $campo = $this->creationIntentSessionKey($ator);
+        $chave = $sessao->get($campo);
+        if ($chave === null && $request->isMethod('POST')) {
+            $chave = bin2hex(random_bytes(16));
+            $sessao->put($campo, $chave);
+        }
+
+        return ApiResponse::success(['chave' => $chave]);
+    }
+
+    public function clearCreationIntent(Request $request)
+    {
+        $ator = $this->ator($request);
+        Gate::forUser($ator)->authorize('create', Evento::class);
+        $dados = $request->validate(['chave' => ['required', 'string', 'regex:/\\A[a-f0-9]{32}\\z/']]);
+
+        $sessao = $request->session();
+        $campo = $this->creationIntentSessionKey($ator);
+        if ($sessao->get($campo) === $dados['chave']) {
+            $sessao->forget($campo);
+        }
+
+        return response()->noContent();
+    }
+
+    private function creationIntentSessionKey(Pessoa|Ong $ator): string
+    {
+        $tipo = $ator instanceof Ong ? 'ong' : 'pessoa';
+
+        return "web_event_creation_intents.{$tipo}.{$ator->getKey()}";
+    }
+
     public function show(Request $request, Evento $evento, EventoManagementService $service)
     {
         return ApiResponse::success(new EventoResource($service->consultar($this->ator($request), $evento)));
@@ -52,7 +91,11 @@ final class WebEventManagementController extends Controller
         $ator = $this->ator($request);
         Gate::forUser($ator)->authorize('create', Evento::class);
         $dados = $request->validate(EventoManagementService::regrasCriacao(false, $request->input('modalidade_evento') === 'online'));
-        $evento = $service->criar($ator, $dados, $dados['imagem_evento'] ?? null);
+        $chave = $request->header('Idempotency-Key');
+        if ($chave !== null && ! preg_match('/\A[A-Za-z0-9._:-]{1,128}\z/', $chave)) {
+            throw ValidationException::withMessages(['idempotency_key' => 'A chave de criação é inválida.']);
+        }
+        $evento = $service->criar($ator, $dados, $dados['imagem_evento'] ?? null, $chave);
 
         return ApiResponse::success(new EventoResource($evento), 'Evento criado com sucesso.', 201);
     }

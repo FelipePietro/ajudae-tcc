@@ -107,6 +107,7 @@
 @unless($integrated)<x-organizer-scope :flow="$flow" />@endunless
             {{-- ========================================================= --}}
 
+            @if($integrated)<x-managed-events :organizer="$organizerManagement" />@else
             <section
                 class="mt-7 grid
                        grid-cols-1 gap-4
@@ -807,6 +808,7 @@
 
             </div>
 
+        @endif
         </div>
 
     </main>

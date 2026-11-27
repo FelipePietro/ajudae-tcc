@@ -1,5 +1,6 @@
 import { startApplication } from './bootstrap/app.js';
 import { initializeIdentityNavigation } from './modules/identity-navigation.js';
+import { initializeManagedEvents } from './modules/managed-events.js';
 import { initializePublicFeed } from './modules/public-feed.js';
 import { initializeRanking } from './modules/ranking.js';
 import { initializeApplication, initializeApplicationHistory } from './modules/application.js';
@@ -16,6 +17,7 @@ import '../css/components/accessibility.css';
 startApplication('identity', () => {
     initializeIdentityNavigation();
     initializePublicFeed();
+    initializeManagedEvents();
     initializeRanking();
     initializeApplication();
     initializeApplicationHistory();

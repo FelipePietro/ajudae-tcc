@@ -25,7 +25,7 @@ export class HttpError extends Error {
     }
 }
 
-export async function requestJson(url, { method = 'GET', body, signal, csrfToken } = {}) {
+export async function requestJson(url, { method = 'GET', body, signal, csrfToken, idempotencyKey } = {}) {
     const destination = new URL(url, window.location.href);
     if (destination.origin !== window.location.origin || destination.username || destination.password) {
         throw new TypeError('O endereço deve pertencer à origem da página.');
@@ -39,6 +39,9 @@ export async function requestJson(url, { method = 'GET', body, signal, csrfToken
             throw new HttpError(419);
         }
         headers.set('X-CSRF-TOKEN', token);
+        if (idempotencyKey !== undefined) {
+            headers.set('Idempotency-Key', idempotencyKey);
+        }
     }
 
     let payload = body;

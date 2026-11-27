@@ -1,6 +1,10 @@
 @php
     $integrated = isset($publicEvent);
     $evento = $publicEvent ?? $evento;
+    $viewer = $integrated ? request()->attributes->get('web_account') : null;
+    $canApply = $viewer instanceof \App\Models\Pessoa
+        && $viewer->isApprovedVolunteer() && \App\Support\AccountAccess::canOperate($viewer);
+    $hasOpenAgenda = $integrated && collect($publicAgendas)->contains(fn ($agenda) => $agenda['impedimento'] === null);
     $place = implode(', ', array_filter([$evento->cidade_evento, $evento->uf_evento]));
     $mode = match ($evento->modalidade_evento) {
         'presencial' => 'Presencial', 'online' => 'Online', 'hibrido' => 'Híbrido', default => null,
@@ -47,7 +51,11 @@
                from-[#174b36] to-[#4b9c73]"
     >
 
-        @if(!$integrated && $evento->imagem_evento_link)
+        @if($integrated)
+            @if($publicEventCover)
+                <img data-public-event-image src="{{ $publicEventCover }}" alt="" referrerpolicy="no-referrer" class="h-full w-full object-cover" hidden>
+            @endif
+        @elseif($evento->imagem_evento_link)
 
             <img
                 src="{{ $evento->imagem_evento_link }}"
@@ -112,7 +120,21 @@
             @if($integrated)
                 <section id="agendas-evento" class="rounded-xl border border-[#dedbd1] bg-white p-5">
                     <h2 class="font-semibold">Agendas e candidaturas</h2>
-                    <p class="mt-2 text-sm">A consulta de Agendas e o envio de candidaturas ainda estão indisponíveis.</p>
+                    <div class="mt-3 space-y-2"
+                        @if($canApply)
+                            data-personalized-agendas="{{ route('identity.application.agendas', $evento) }}" role="status"
+                        @endif>
+                        @forelse($publicAgendas as $agenda)
+                            <p class="text-sm rounded-xl border border-[#dedbd1] p-3">
+                                <time data-public-agenda-time datetime="{{ $agenda['inicio']->toIso8601String() }}">{{ $agenda['inicio']->utc()->format('d/m/Y, H:i') }} UTC</time>
+                                –
+                                <time data-public-agenda-time datetime="{{ $agenda['fim']->toIso8601String() }}">{{ $agenda['fim']->utc()->format('d/m/Y, H:i') }} UTC</time>
+                                · {{ $agenda['impedimento'] ?? ($agenda['disponiveis'] === 1 ? '1 vaga disponível' : $agenda['disponiveis'].' vagas disponíveis') }}
+                            </p>
+                        @empty
+                            <p class="text-sm">Nenhuma Agenda disponível.</p>
+                        @endforelse
+                    </div>
                 </section>
                 @if($place)
                     <section class="grid gap-6 rounded-xl border border-[#dedbd1] bg-white p-6">
@@ -322,13 +344,14 @@
                 </p>
 
                 @if($integrated)
-                    <p id="agenda-availability" class="mt-2 text-sm">A disponibilidade é consultada por Agenda.</p>
-                    @php($viewer = request()->attributes->get('web_account'))
-                    @if($viewer instanceof \App\Models\Pessoa && $viewer->isApprovedVolunteer() && \App\Support\AccountAccess::canOperate($viewer))
-                        <x-botao-primario :href="route('candidatura.form', ['evento' => $evento->getKey()])" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
-                    @else
-                        <x-botao-primario as="button" disabled aria-describedby="agenda-availability" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
+                    <p id="agenda-availability" class="mt-2 text-sm" role="status">
+                        <span data-agenda-open @if(!$hasOpenAgenda) hidden @endif>A disponibilidade é consultada por Agenda.</span>
+                        <span data-agenda-unavailable @if($hasOpenAgenda) hidden @endif>Nenhuma Agenda disponível para candidatura.</span>
+                    </p>
+                    @if($canApply)
+                        <x-botao-primario :href="route('candidatura.form', ['evento' => $evento->getKey()])" data-agenda-choice="available" :hidden="!$hasOpenAgenda" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
                     @endif
+                    <x-botao-primario as="button" disabled aria-describedby="agenda-availability" data-agenda-choice="unavailable" :hidden="$canApply && $hasOpenAgenda" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
                 @else
                 <p class="mt-1 text-4xl font-medium">
                     {{ $vagasDisponiveis ?? 0 }}
