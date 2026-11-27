@@ -1,0 +1,312 @@
+[
+  {
+    "label": "Visitante no histórico",
+    "actor": "visitor",
+    "method": "GET",
+    "path": "/minhas-participacoes/dados",
+    "expected": 401,
+    "status": 401,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Histórico titular página 1",
+    "actor": "person",
+    "method": "GET",
+    "path": "/minhas-participacoes/dados",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Histórico titular página 2",
+    "actor": "person",
+    "method": "GET",
+    "path": "/minhas-participacoes/dados?page=2",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Terceiro sem inscrições do titular",
+    "actor": "other",
+    "method": "GET",
+    "path": "/minhas-participacoes/dados",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Histórico vazio",
+    "actor": "empty",
+    "method": "GET",
+    "path": "/minhas-participacoes/dados",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Apadrinhamento exclusivo e destaque",
+    "actor": "sponsor",
+    "method": "GET",
+    "path": "/admin/conclusoes-padrinho",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Sem capacidade: sidebar oculta",
+    "actor": "viewer",
+    "method": "GET",
+    "path": "/admin",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Sem capacidade: acesso direto à fila",
+    "actor": "viewer",
+    "method": "GET",
+    "path": "/admin/padrinhos/conclusoes/dados",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Diretório de moderação distinto",
+    "actor": "viewer",
+    "method": "GET",
+    "path": "/admin/usuarios",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Moderador não acessa fila de validação pessoal",
+    "actor": "viewer",
+    "method": "GET",
+    "path": "/admin/validacoes-pessoa/dados",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Cadastro antes da posse: sem link",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/admin/validacoes-pessoa/5",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Cadastro antes da posse: download negado",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/conta/documentos/1/download",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Assumir sem CSRF",
+    "actor": "admin",
+    "method": "POST",
+    "path": "/admin/validacoes-pessoa/5/assumir",
+    "expected": 419,
+    "status": 419,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Assumir cadastro",
+    "actor": "admin",
+    "method": "POST",
+    "path": "/admin/validacoes-pessoa/5/assumir",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Cadastro assumido: link na nova consulta",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/admin/validacoes-pessoa/5",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Cadastro assumido: PDF binário",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/conta/documentos/1/download",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Outro analista da fila cadastral",
+    "actor": "another",
+    "method": "GET",
+    "path": "/conta/documentos/1/download",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Definitiva por comum",
+    "actor": "admin",
+    "method": "POST",
+    "path": "/admin/validacoes-pessoa/5/reprovar-definitivamente",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Renovação com link autorizado",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/admin/antecedentes/renovacoes",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Renovação: PDF binário",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/conta/documentos/3/download",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Renovação: terceiro comum",
+    "actor": "other",
+    "method": "GET",
+    "path": "/conta/documentos/3/download",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Renovação: admin sem capacidade",
+    "actor": "viewer",
+    "method": "GET",
+    "path": "/conta/documentos/3/download",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Renovação: retenção vencida",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/conta/documentos/4/download",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Renovação: versão histórica",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/conta/documentos/5/download",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Renovação: tipo indevido",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/conta/documentos/6/download",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Decidir renovação",
+    "actor": "admin",
+    "method": "PATCH",
+    "path": "/admin/documentos/3/status",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Renovação decidida sai da fila",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/admin/antecedentes/renovacoes",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Conclusão sem motivo",
+    "actor": "sponsor",
+    "method": "POST",
+    "path": "/admin/padrinhos/conclusoes/2/reprovar",
+    "expected": 422,
+    "status": 422,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Sem motivo preserva pendência",
+    "actor": "sponsor",
+    "method": "GET",
+    "path": "/admin/padrinhos/conclusoes/dados",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Conclusão rejeitada com motivo",
+    "actor": "sponsor",
+    "method": "POST",
+    "path": "/admin/padrinhos/conclusoes/2/reprovar",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Conclusão decidida repetida",
+    "actor": "sponsor",
+    "method": "POST",
+    "path": "/admin/padrinhos/conclusoes/2/reprovar",
+    "expected": 409,
+    "status": 409,
+    "check": true,
+    "passed": true
+  }
+]

@@ -1,0 +1,264 @@
+{
+  "data": "2026-11-27",
+  "fuso": "America/Sao_Paulo",
+  "branch": "feat/participacao-administracao",
+  "base": "dev",
+  "git": {
+    "repo": "FelipePietro/ajudae-tcc",
+    "shaLocal": "815617f46c6d676d9681f94a518487f770b88f1a",
+    "shaRemoto": "815617f46c6d676d9681f94a518487f770b88f1a",
+    "shaDev": "74609bfd03cfbdbfa8dbfdcaf603c5dabd91794e",
+    "mergeBase": "74609bfd03cfbdbfa8dbfdcaf603c5dabd91794e",
+    "arvore": "63cf38fb853b96604ec48d5508a9a16865162e69",
+    "ahead": 2,
+    "behind": 0,
+    "confirmadoVia": "GitHub por nome da branch e comparação com dev",
+    "delta": [
+      {
+        "path": ".env.example",
+        "status": "removed"
+      },
+      {
+        "path": "app/Http/Controllers/Api/AdminPadrinhoController.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Http/Controllers/Api/AdminPessoaValidationController.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Http/Controllers/Api/AntecedentesController.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Http/Controllers/Api/DocumentoPessoaController.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Http/Controllers/WebEventParticipationController.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Http/Controllers/WebParticipationController.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Http/Resources/DocumentoPessoaResource.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Models/DocumentoPessoa.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Policies/DocumentoPessoaPolicy.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Services/JustificativaParticipacaoService.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Services/MonitoriaService.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Services/PadrinhoService.php",
+        "status": "modified"
+      },
+      {
+        "path": "app/Support/WebNavigation.php",
+        "status": "modified"
+      },
+      {
+        "path": "docs/bloco-9/CATALOGO_WEB.md",
+        "status": "modified"
+      },
+      {
+        "path": "docs/bloco-9/CONTRATOS_PARTICIPACAO.md",
+        "status": "modified"
+      },
+      {
+        "path": "docs/bloco-9/CORRECOES_QA_LUIZ_MIGUEL_2026-11-27.md",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/LUIZ_MIGUEL_INTEGRACAO.md",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/QA_CORRECAO_R01_R02_LUIZ_MIGUEL_2026-11-27.md",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/QA_INDEPENDENTE_LUIZ_MIGUEL_2026-11-26.md",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/QA_REVALIDACAO_INDEPENDENTE_LUIZ_MIGUEL_2026-11-27.md",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/evidencias/qa-independente-luiz-miguel-2026-11-26/concorrencia.json",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/evidencias/qa-independente-luiz-miguel-2026-11-26/execucao.json",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/evidencias/qa-revalidacao-luiz-miguel-2026-11-27/concorrencia.json",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/evidencias/qa-revalidacao-luiz-miguel-2026-11-27/execucao.json",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/evidencias/qa-revalidacao-luiz-miguel-2026-11-27/http.json",
+        "status": "added"
+      },
+      {
+        "path": "docs/bloco-9/evidencias/qa-revalidacao-luiz-miguel-2026-11-27/persistencia.json",
+        "status": "added"
+      },
+      {
+        "path": "resources/js/modules/admin-operations.js",
+        "status": "added"
+      },
+      {
+        "path": "resources/js/modules/event-moderation.js",
+        "status": "modified"
+      },
+      {
+        "path": "resources/js/modules/participation-management.js",
+        "status": "added"
+      },
+      {
+        "path": "resources/js/modules/participation.js",
+        "status": "modified"
+      },
+      {
+        "path": "resources/js/modules/web-operations.js",
+        "status": "added"
+      },
+      {
+        "path": "resources/views/admin/campanhas-xp.blade.php",
+        "status": "modified"
+      },
+      {
+        "path": "resources/views/admin/conclusoes-padrinho.blade.php",
+        "status": "added"
+      },
+      {
+        "path": "resources/views/admin/log-acoes.blade.php",
+        "status": "modified"
+      },
+      {
+        "path": "resources/views/admin/partials/queue.blade.php",
+        "status": "modified"
+      },
+      {
+        "path": "resources/views/admin/partials/web-operations.blade.php",
+        "status": "added"
+      },
+      {
+        "path": "resources/views/admin/solicitacoes-lgpd.blade.php",
+        "status": "modified"
+      },
+      {
+        "path": "resources/views/components/admin-sidebar.blade.php",
+        "status": "modified"
+      },
+      {
+        "path": "resources/views/components/web-operations-controls.blade.php",
+        "status": "added"
+      },
+      {
+        "path": "resources/views/ong/meus-eventos.blade.php",
+        "status": "modified"
+      },
+      {
+        "path": "resources/views/participacoes/pessoal.blade.php",
+        "status": "modified"
+      },
+      {
+        "path": "resources/views/participacoes/web-gestao.blade.php",
+        "status": "added"
+      },
+      {
+        "path": "routes/web-account-operations.php",
+        "status": "modified"
+      },
+      {
+        "path": "tests/Feature/Bloco9WebAccountOperationsTest.php",
+        "status": "modified"
+      },
+      {
+        "path": "tests/Feature/Bloco9WebDocumentReviewTest.php",
+        "status": "added"
+      },
+      {
+        "path": "tests/Feature/Bloco9WebEventParticipationTest.php",
+        "status": "modified"
+      },
+      {
+        "path": "tests/Feature/IntegratedNavigationTest.php",
+        "status": "modified"
+      }
+    ]
+  },
+  "runtime": {
+    "php": "8.5.5",
+    "laravel": "13.35.0",
+    "phpunit": "12.5.38",
+    "node": "24.16.0",
+    "mysql": "8.4.3",
+    "vite": "8.2.1",
+    "edge": "158.0.4370.45"
+  },
+  "mysql": {
+    "host": "127.0.0.1",
+    "port": 34689,
+    "uuid": "1705c0e7-ea29-11f1-a25f-0250784c2913",
+    "datadir": "<sandbox de QA>/mysql-data",
+    "schemas": [
+      "ajudae_qa_final_suite",
+      "ajudae_qa_final_browser",
+      "ajudae_qa_final_ui"
+    ],
+    "validadoPor": [
+      "cliente MySQL",
+      "PDO do Laravel"
+    ]
+  },
+  "suites": {
+    "integrada": {
+      "aprovados": 162,
+      "assercoes": 2275,
+      "falhas": 0,
+      "ignorados": 0
+    },
+    "demonstrativa": {
+      "aprovados": 18,
+      "assercoes": 309,
+      "falhas": 0,
+      "ignorados": 0
+    },
+    "javascript": {
+      "aprovados": 95,
+      "falhas": 0,
+      "ignorados": 0
+    },
+    "vite": {
+      "modulos": 40
+    },
+    "rotas": 350
+  },
+  "setup": {
+    "templateVersionado": false,
+    "arquivoDeAmbienteNoClone": false,
+    "comando": "php artisan key:generate --no-interaction",
+    "erro": "file_get_contents(.../.env): Failed to open stream: No such file or directory"
+  }
+}

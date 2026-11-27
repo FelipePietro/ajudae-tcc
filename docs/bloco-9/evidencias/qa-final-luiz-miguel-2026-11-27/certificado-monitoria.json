@@ -1,0 +1,7 @@
+{
+    "semMonitoriaBloqueou": true,
+    "comMonitoriaEmitiu": true,
+    "duracaoMinutos": 60,
+    "repeticaoMesmoId": true,
+    "certificadosDaPessoaNoEvento": 1
+}

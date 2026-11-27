@@ -1,0 +1,15 @@
+{
+    "janelaExclusaoServico": {
+        "duracaoEmSegundos": 604800,
+        "pendenteAoSolicitar": true,
+        "cancelouUmSegundoAntes": true,
+        "recusouNoLimite": true,
+        "contaPreservada": true,
+        "continuaPendente": true,
+        "acoesAuditadas": [
+            "conta.exclusao_agendada",
+            "conta.exclusao_cancelada",
+            "conta.exclusao_agendada"
+        ]
+    }
+}

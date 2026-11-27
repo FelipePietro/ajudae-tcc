@@ -1,0 +1,81 @@
+{
+  "data": "2026-11-27",
+  "commit": "9fcd085a1342be00141ec36d1fa92d8f726284d1",
+  "fusoRelatorio": "America/Sao_Paulo",
+  "arvore": "e7e716a8865fbae9770ddcd0b900370b98c16764",
+  "git": {
+    "baseLocal": "74609bfd03cfbdbfa8dbfdcaf603c5dabd91794e",
+    "devGitHub": "74609bfd03cfbdbfa8dbfdcaf603c5dabd91794e",
+    "branchGitHub": "74609bfd03cfbdbfa8dbfdcaf603c5dabd91794e",
+    "consultaCandidatoGitHub": 422,
+    "gitDireto": "Falha de rede na porta 443",
+    "cloneSemAlteracoes": true,
+    "envExampleRastreado": true
+  },
+  "runtime": {
+    "php": "8.5.5",
+    "phpEsperadoEmProducao": "8.4",
+    "composer": "2.9.4",
+    "node": "24.16.0",
+    "vite": "8.2.1",
+    "mysql": "8.4.3"
+  },
+  "instancias": [
+    {
+      "uso": "Suíte PHP integrada",
+      "host": "127.0.0.1",
+      "porta": 34649,
+      "schema": "ajudae_qa9_independente",
+      "uuid": "c33280d6-ea15-11f1-9941-0250784c2913"
+    },
+    {
+      "uso": "HTTP e concorrência",
+      "host": "127.0.0.1",
+      "porta": 34647,
+      "schema": "ajudae_qa9_independente",
+      "uuid": "a05f8607-ea15-11f1-bb41-0250784c2913"
+    }
+  ],
+  "phpIntegrado": {
+    "modo": "AJUDAE_WEB_AUTH=true",
+    "comando": "vendor/bin/phpunit --bootstrap <preflight local> --do-not-cache-result --filter 'Bloco9Web|Bloco81Web(Participation|EventModeration|Certificate)|AuthorizationAdmin|AvaliacaoConfiabilidade|FinalizacaoEventoCertificado|PadrinhoWorkflow|XpCampanhaRanking|PresencaAusenciaDesistencia|PessoaValidation(Workflow|Access)|OrganizadorWorkflow|DocumentoStorageLgpd|Bloco81PrivacyNotifications|IntegratedNavigation'",
+    "aprovados": 139,
+    "assercoes": 2023,
+    "ignorados": 0
+  },
+  "phpDemonstrativo": {
+    "modo": "AJUDAE_WEB_AUTH=false e AJUDAE_DEMO=true",
+    "comando": "vendor/bin/phpunit --do-not-cache-result --filter 'VisualFour|VisualParticipation'",
+    "aprovados": 18,
+    "assercoes": 309,
+    "ignorados": 0
+  },
+  "javascript": {
+    "comando": "node --test --test-reporter=spec tests/Frontend/*.test.mjs",
+    "aprovados": 95,
+    "ignorados": 0
+  },
+  "build": {
+    "comando": "npm.cmd run build",
+    "modulos": 40
+  },
+  "outrasChecagens": [
+    "php artisan route:list -v --except-vendor",
+    "Composer check-platform-reqs --lock",
+    "npm ls --depth=0",
+    "Pint no conjunto corrigido",
+    "php -l em 21 PHP/Blade",
+    "node --check em cinco JS",
+    "git diff --check"
+  ],
+  "e2e": {
+    "status": "NÃO EXECUTADO",
+    "fluxos": 0,
+    "motivo": "Webview não anexado e interrupção da ferramenta por falta de confirmação da URL do navegador Windows.",
+    "largurasPendentes": [
+      360,
+      768,
+      1280
+    ]
+  }
+}

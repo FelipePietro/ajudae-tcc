@@ -1,0 +1,2010 @@
+{
+  "browser": "Edg/158.0.4370.45",
+  "scenarios": [
+    {
+      "label": "Histórico, paginação e titularidade",
+      "persona": "Pessoa titular e Pessoa sem inscrições",
+      "success": false,
+      "error": "Tempo esgotado: button Próxima",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/perfil",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Justificativa enviada pela Pessoa",
+      "persona": "Titular da ausência",
+      "success": false,
+      "error": "Tempo esgotado: button Próxima",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/perfil",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Presença e monitoria",
+      "persona": "ONG proprietária",
+      "success": true,
+      "details": "Presença e monitoria com nova leitura após recarga.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/painel",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/painel_ong-B33iIIoc.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/2",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/agendas/2/inscricoes",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/2/presenca",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/agendas/2/inscricoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/2",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/agendas/2/inscricoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/inscricoes/2/monitoria",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/2/monitoria",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/inscricoes/2/monitoria",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/2",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/agendas/2/inscricoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/inscricoes/2/monitoria",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Justificativa decidida pela ONG",
+      "persona": "ONG proprietária",
+      "success": false,
+      "error": "Tempo esgotado: summary Gerenciar participação",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/painel",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/painel_ong-B33iIIoc.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Avaliação e finalizações",
+      "persona": "ONG proprietária",
+      "success": true,
+      "details": "Agenda, nota e Evento fechados na ordem permitida.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/painel",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/painel_ong-B33iIIoc.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/2",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/gestao/agendas/2/finalizar",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/2",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/2/avaliacoes",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/gestao/eventos/2/avaliacoes/1",
+          "status": 201
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/2/avaliacoes",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/gestao/eventos/2/finalizar",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Cadastro: atribuição, recarga, PDF",
+      "persona": "Admin de revisão",
+      "success": true,
+      "details": {
+        "pdfBytes": 1992,
+        "hashConferido": true
+      },
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/candidatos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/5",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/validacoes-pessoa/5/assumir",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/candidatos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/5",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/conta/documentos/1/download",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Renovação: PDF e decisão",
+      "persona": "Admin de revisão",
+      "success": false,
+      "error": "Tempo esgotado: summary Aprovar documento",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/admin/candidatos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/antecedentes/renovacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/conta/documentos/3/download",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Decisão institucional",
+      "persona": "Admin de ONG",
+      "success": true,
+      "details": "ONG saiu da fila após recarga.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/cadastros-ong",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-ong/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/validacoes-ong/2/status",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-ong/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/cadastros-ong",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-ong/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Decisão de Evento",
+      "persona": "Admin de Eventos",
+      "success": false,
+      "error": "Controle de reprovação não localizado",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Conclusão pela sidebar",
+      "persona": "Admin exclusivo de apadrinhamento",
+      "success": false,
+      "error": "Tempo esgotado: #admin-sidebar a Conclusões de apadrinhamento",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Promoção",
+      "persona": "Admin de promoções",
+      "success": true,
+      "details": "Assunção e reprovação confirmadas após recarga.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/upgrades-org",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/1",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/solicitacoes-organizador/1/iniciar-analise",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/upgrades-org",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/1",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/solicitacoes-organizador/1/reprovar",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/upgrades-org",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Campanha de XP e falha de rede segura",
+      "persona": "Admin de XP",
+      "success": true,
+      "details": "Criar, editar e desativar. Um GET recebeu 503 sintético e o botão de nova tentativa recuperou a listagem.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/1",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp/dados",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/campanhas-xp",
+          "status": 201
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp/dados",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/campanhas-xp/1",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp/dados",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/campanhas-xp/1/status",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp/dados",
+          "status": 503
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/campanhas-xp/dados",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "LGPD e logs",
+      "persona": "Atendente exclusivo e leitor de logs",
+      "success": false,
+      "error": "Tempo esgotado: visível: Resposta sintética de navegador.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/responder-lgpd",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/solicitacoes-lgpd/1/status",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/solicitacoes-lgpd/1/status",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Largura e navegação por teclado",
+      "persona": "Admin exclusivo de apadrinhamento",
+      "success": false,
+      "error": "The expression evaluated to a falsy value:\n\n  assert.ok(keyboardOpened)\n",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/conclusoes-padrinho",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    }
+  ]
+}

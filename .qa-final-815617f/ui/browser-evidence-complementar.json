@@ -1,0 +1,474 @@
+{
+  "browser": "Edg/158.0.4370.45",
+  "scenarios": [
+    {
+      "label": "Decisão de Evento",
+      "persona": "Admin de Eventos",
+      "success": true,
+      "details": "Evento reprovado por formulário.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/fila-eventos/8/decisao",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Aprovação de Evento",
+      "persona": "Admin de Eventos",
+      "success": false,
+      "error": "Tempo esgotado: fila recarregada",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/fila-eventos/5/decisao",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/fila-eventos/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Aprovação de Pessoa e documentos",
+      "persona": "Admin de revisão",
+      "success": false,
+      "error": "Tempo esgotado: fila administrativa recarregada",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/candidatos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/5",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/documentos/1/status",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/5",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/documentos/2/status",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/5",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/validacoes-pessoa/5/aprovar",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/candidatos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    }
+  ]
+}

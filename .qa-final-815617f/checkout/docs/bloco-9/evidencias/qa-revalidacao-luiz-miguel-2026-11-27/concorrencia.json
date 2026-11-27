@@ -1,0 +1,190 @@
+{
+  "data": "2026-11-27",
+  "commit": "9fcd085a1342be00141ec36d1fa92d8f726284d1",
+  "instancia": "127.0.0.1:34647 / MySQL 8.4.3",
+  "uuid": "a05f8607-ea15-11f1-bb41-0250784c2913",
+  "sincronizacao": "O processo pai retém o registro em transação. Dois processos sinalizam prontidão e iniciam a operação antes da liberação. Corridas HTTP usam dois servidores PHP e sessões separadas. Horários Unix em segundos com frações.",
+  "cenarios": 5,
+  "pares": 7,
+  "requisicoesHttp": 6,
+  "resultados": [
+    {
+      "scenario": "campaign-and-xp",
+      "ok": true,
+      "release": 1795751828.935077,
+      "workers": [
+        {
+          "action": "xp",
+          "connection": 75,
+          "result": "success",
+          "value": 1,
+          "started": 1795751828.053744,
+          "finished": 1795751829.122237
+        },
+        {
+          "action": "campaign",
+          "connection": 74,
+          "result": "success",
+          "value": false,
+          "started": 1795751828.046767,
+          "finished": 1795751829.020269
+        }
+      ],
+      "xp": 200,
+      "factors": 1,
+      "xpRows": 1,
+      "historicalXp": 100,
+      "auditPersisted": true
+    },
+    {
+      "scenario": "two-moderators-http",
+      "ok": true,
+      "release": 1795751840.607385,
+      "workers": [
+        {
+          "action": "ativo",
+          "actor": "admin",
+          "port": 8817,
+          "status": 200,
+          "started": 1795751839.834,
+          "finished": 1795751840.745
+        },
+        {
+          "action": "reprovado",
+          "actor": "atendente2",
+          "port": 8818,
+          "status": 409,
+          "started": 1795751839.806,
+          "finished": 1795751840.989
+        }
+      ],
+      "state": "ativo",
+      "auditRows": 1,
+      "auditActorRecorded": true
+    },
+    {
+      "scenario": "privacy-claim-and-response-http",
+      "ok": true,
+      "claim": {
+        "release": 1795751843.413065,
+        "workers": [
+          {
+            "action": "em_analise",
+            "actor": "atendente",
+            "port": 8817,
+            "status": 403,
+            "started": 1795751842.587,
+            "finished": 1795751843.529
+          },
+          {
+            "action": "em_analise",
+            "actor": "atendente2",
+            "port": 8818,
+            "status": 200,
+            "started": 1795751842.556,
+            "finished": 1795751843.516
+          }
+        ]
+      },
+      "response": {
+        "release": 1795751846.291054,
+        "workers": [
+          {
+            "action": "concluida",
+            "actor": "atendente",
+            "port": 8817,
+            "status": 403,
+            "started": 1795751845.484,
+            "finished": 1795751846.506
+          },
+          {
+            "action": "recusada",
+            "actor": "atendente2",
+            "port": 8818,
+            "status": 200,
+            "started": 1795751845.485,
+            "finished": 1795751846.507
+          }
+        ]
+      },
+      "state": "recusada",
+      "auditRows": 2,
+      "sameAssignee": true
+    },
+    {
+      "scenario": "cancel-versus-attendance-xp",
+      "ok": true,
+      "release": 1795751850.417608,
+      "workers": [
+        {
+          "action": "cancel",
+          "connection": 94,
+          "result": "success",
+          "value": "cancelado",
+          "started": 1795751848.934431,
+          "finished": 1795751850.485245
+        },
+        {
+          "action": "attendance",
+          "connection": 95,
+          "result": "conflict",
+          "value": null,
+          "started": 1795751849.591477,
+          "finished": 1795751850.511936
+        }
+      ],
+      "agenda": "cancelado",
+      "inscricao": "aprovado",
+      "xpRows": 0
+    },
+    {
+      "scenario": "certificate-and-event-close",
+      "ok": true,
+      "closing": {
+        "release": 1795751852.981887,
+        "workers": [
+          {
+            "action": "certificate",
+            "connection": 96,
+            "result": "conflict",
+            "value": null,
+            "started": 1795751852.061098,
+            "finished": 1795751852.985813
+          },
+          {
+            "action": "close",
+            "connection": 97,
+            "result": "success",
+            "value": "finalizado",
+            "started": 1795751852.165307,
+            "finished": 1795751853.027353
+          }
+        ]
+      },
+      "duplicate": {
+        "release": 1795751854.756191,
+        "workers": [
+          {
+            "action": "certificate",
+            "connection": 98,
+            "result": "success",
+            "value": 1,
+            "started": 1795751853.81166,
+            "finished": 1795751855.040566
+          },
+          {
+            "action": "certificate",
+            "connection": 99,
+            "result": "success",
+            "value": 1,
+            "started": 1795751853.855743,
+            "finished": 1795751855.055273
+          }
+        ]
+      },
+      "certificateRows": 1,
+      "notes": 1,
+      "xpRows": 1
+    }
+  ]
+}

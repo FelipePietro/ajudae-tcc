@@ -1,0 +1,84 @@
+{
+    "cadastro": {
+        "situacao": "em_analise",
+        "atribuidoAoOperador": true,
+        "dataDaAtribuicao": true
+    },
+    "renovacao": {
+        "situacao": "aprovado",
+        "operadorRegistrado": true,
+        "dataDaDecisao": true,
+        "titular": "aprovado",
+        "janelaRetencaoDias": 30
+    },
+    "download": [
+        {
+            "documento": 1,
+            "atorCorreto": true,
+            "resultado": "entrega_iniciada"
+        },
+        {
+            "documento": 3,
+            "atorCorreto": true,
+            "resultado": "entrega_iniciada"
+        },
+        {
+            "documento": 3,
+            "atorCorreto": true,
+            "resultado": "entrega_iniciada"
+        }
+    ],
+    "apadrinhamento": {
+        "situacao": "rejeitada",
+        "motivoPersistiu": true,
+        "autorRegistrado": true,
+        "dataRegistrada": true,
+        "logs": 1,
+        "logMesmoAutor": true,
+        "logComMotivo": true
+    },
+    "presenca": {
+        "agenda": 2,
+        "presente": true,
+        "data": true,
+        "monitoria": true,
+        "monitoriaAutorONG": true,
+        "camposAutoria": [
+            "presenca_confirmada_por_tipo",
+            "presenca_confirmada_por_id"
+        ]
+    },
+    "justificativa": {
+        "status": "deferida",
+        "autorTipo": "ong",
+        "autorONG": true,
+        "estadoOriginal": "não participou",
+        "presencaOriginal": false,
+        "motivoDecisao": true
+    },
+    "encerramento": {
+        "agenda": "finalizado",
+        "evento": "finalizado",
+        "notaVoluntario": 5,
+        "xp": [
+            100
+        ]
+    },
+    "moderacao": {
+        "ong": "ativo",
+        "evento": "aguardando a confirmação",
+        "promocao": "reprovada"
+    },
+    "campanha": {
+        "presente": true,
+        "multiplicador": "2.500000",
+        "ativa": false,
+        "logs": 3
+    },
+    "lgpd": {
+        "status": "concluida",
+        "ator": true,
+        "resposta": true,
+        "logs": 2
+    }
+}

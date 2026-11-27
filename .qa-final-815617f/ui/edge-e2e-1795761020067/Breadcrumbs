@@ -1,0 +1,77 @@
+0:01:52 Tab1 StartNav40 #typed
+0:01:53 Tab1 FinishNav40
+0:01:53 Tab1 PageLoad
+0:02:02 Memory Pressure: Moderate
+0:02:05 Tab1 StartNav41 #typed
+0:02:06 Tab1 FinishNav41
+0:02:07 Tab1 PageLoad
+0:02:07 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:07 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:07 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:07 Tab1 StartNav42 #renderer-script #form_submit
+0:02:08 Tab1 FinishNav42
+0:02:08 Tab1 PageLoad
+0:02:08 Tab1 StartNav43 #typed
+0:02:09 Tab1 FinishNav43
+0:02:09 Tab1 PageLoad
+0:02:10 Tab1 StartNav44 #reload
+0:02:10 Tab1 FinishNav44
+0:02:11 Tab1 PageLoad
+0:02:12 Tab1 StartNav45 #reload
+0:02:12 Memory Pressure: Moderate
+0:02:12 Tab1 FinishNav45
+0:02:13 Tab1 PageLoad
+0:02:13 Tab1 StartNav46 #typed
+0:02:13 Tab1 FinishNav46
+0:02:13 Tab1 PageLoad
+0:02:13 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:13 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:13 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:14 Tab1 StartNav47 #renderer-script #form_submit
+0:02:14 Tab1 FinishNav47
+0:02:15 Tab1 PageLoad
+0:02:15 Tab1 StartNav48 #typed
+0:02:15 Tab1 FinishNav48
+0:02:16 Tab1 PageLoad
+0:02:17 Tab1 StartNav49 #reload
+0:02:18 Tab1 FinishNav49
+0:02:19 Tab1 PageLoad
+0:02:19 Tab1 StartNav50 #reload
+0:02:19 Tab1 FinishNav50
+0:02:20 Tab1 PageLoad
+0:02:21 Tab1 StartNav51 #typed
+0:02:21 Tab1 FinishNav51
+0:02:21 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:21 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:21 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:21 Tab1 PageLoad
+0:02:21 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:22 Tab1 StartNav52 #renderer-script #form_submit
+0:02:22 Memory Pressure: Moderate
+0:02:23 Tab1 FinishNav52
+0:02:23 Tab1 PageLoad
+0:02:23 Tab1 StartNav53 #typed
+0:02:23 Tab1 FinishNav53
+0:02:23 Tab1 PageLoad
+0:02:24 Tab1 StartNav54 #typed
+0:02:25 Tab1 FinishNav54
+0:02:25 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:25 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:25 Tab1 PageLoad
+0:02:25 Tab1 StartNav55 #renderer-script #form_submit
+0:02:25 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:25 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:26 Tab1 FinishNav55
+0:02:26 Tab1 PageLoad
+0:02:26 Tab1 StartNav56 #typed
+0:02:27 Tab1 FinishNav56
+0:02:27 Tab1 PageLoad
+0:02:32 Memory Pressure: Moderate
+0:02:40 Tab1 StartNav57 #typed
+0:02:40 Tab1 FinishNav57
+0:02:40 Tab1 PageLoad
+0:02:40 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:40 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:40 Microsoft.Autofill.Password.SignIn.NoAutofillSuggestions
+0:02:40 Tab1 StartNav58 #renderer-script #form_submit
+0:02:42 Tab1 FinishNav58

@@ -1,0 +1,264 @@
+{
+  "data": "2026-11-26",
+  "checkout": {
+    "branch": "feat/participacao-administracao",
+    "head": "74609bfd03cfbdbfa8dbfdcaf603c5dabd91794e",
+    "originDevLocal": "74609bfd03cfbdbfa8dbfdcaf603c5dabd91794e",
+    "originDevConsultadoNaRede": false
+  },
+  "phpunit": {
+    "php": "8.5.5",
+    "mysql": "8.4.3",
+    "host": "127.0.0.1",
+    "port": 34627,
+    "database": "ajudae_qa9_independente",
+    "uuid": "f209156b-ea01-11f1-9b23-0250784c2913",
+    "modoWebIntegrado": true,
+    "aprovados": 122,
+    "assercoes": 1463,
+    "ignorados": 0
+  },
+  "javascript": {
+    "node": "24.16.0",
+    "aprovados": 95,
+    "falhas": 0,
+    "ignorados": 0
+  },
+  "build": {
+    "vite": "8.2.1",
+    "modulos": 40
+  },
+  "http": {
+    "host": "127.0.0.1",
+    "port": 8809,
+    "mysqlPort": 33429,
+    "database": "ajudae_luiz_homologacao",
+    "uuid": "90cab891-e9f6-11f1-ab12-0250784c2913",
+    "operacoesDeDominio": "Somente GET, com fluxo de login normal para contas sintéticas.",
+    "verificacoes": [
+      {
+        "label": "Histórico visitante",
+        "path": "/minhas-participacoes/dados",
+        "expected": 401,
+        "actual": 401
+      },
+      {
+        "label": "Histórico titular",
+        "path": "/minhas-participacoes/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Histórico outra Pessoa",
+        "path": "/minhas-participacoes/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Gestão da ONG",
+        "path": "/ong/eventos",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Lista de inscrições da Agenda",
+        "path": "/gestao/agendas/{id}/inscricoes",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Monitoria do titular",
+        "path": "/gestao/inscricoes/{id}/monitoria",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Justificativa persistida",
+        "path": "/gestao/inscricoes/{id}/justificativa",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Avaliação voluntária sob gestão",
+        "path": "/gestao/eventos/{id}/avaliacoes",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Avaliação opcional persistida",
+        "path": "/minhas-participacoes/{id}/avaliacao-ong",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Fila de Pessoas",
+        "path": "/admin/validacoes-pessoa/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Detalhe de validação",
+        "path": "/admin/validacoes-pessoa/{id}",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Fila de renovação documental",
+        "path": "/admin/antecedentes/renovacoes",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Fila privada de ONGs",
+        "path": "/admin/validacoes-ong/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Fila privada de Eventos",
+        "path": "/admin/fila-eventos/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Fila de promoções",
+        "path": "/admin/solicitacoes-organizador/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Fila de conclusões com capacidade exclusiva",
+        "path": "/admin/padrinhos/conclusoes/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Fila de Pessoas com conta de apadrinhamento",
+        "path": "/admin/validacoes-pessoa/dados",
+        "expected": 403,
+        "actual": 403
+      },
+      {
+        "label": "Página de apadrinhamento",
+        "path": "/admin/conclusoes-padrinho",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Campanhas",
+        "path": "/admin/campanhas-xp/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "LGPD administrativa",
+        "path": "/admin/solicitacoes-lgpd/dados",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      },
+      {
+        "label": "Auditoria com filtro exato",
+        "path": "/admin/log-acoes/dados?acao=lgpd.status_atualizado",
+        "expected": 200,
+        "actual": 200,
+        "shape": true
+      }
+    ]
+  },
+  "chromium": {
+    "unidade": "pixels CSS",
+    "larguras": [
+      360,
+      768,
+      1280
+    ],
+    "scrollWidth": {
+      "Entrada": [
+        345,
+        768,
+        1265
+      ],
+      "Histórico com justificativa expandida": [
+        345,
+        753,
+        1265
+      ],
+      "Gestão de participações da ONG": [
+        345,
+        753,
+        1265
+      ],
+      "Validação de Pessoas": [
+        360,
+        768,
+        1265
+      ],
+      "Cadastros de ONG": [
+        360,
+        768,
+        1265
+      ],
+      "Fila de eventos": [
+        360,
+        768,
+        1265
+      ],
+      "Promoções a organizador": [
+        360,
+        768,
+        1265
+      ],
+      "Campanhas de XP": [
+        360,
+        768,
+        1265
+      ],
+      "Solicitações de privacidade": [
+        360,
+        768,
+        1265
+      ],
+      "Resposta a solicitações de privacidade": [
+        360,
+        768,
+        1265
+      ],
+      "Log de ações": [
+        345,
+        753,
+        1265
+      ],
+      "Conclusões de apadrinhamento, fila vazia": [
+        360,
+        768,
+        1280
+      ]
+    },
+    "verificacoes": [
+      "Consulta de justificativa deferida a partir de histórico carregado, com Enter e foco visível.",
+      "Gestão da ONG carregou registros de Eventos do ambiente sintético.",
+      "Detalhe de cadastro Pessoa aberto pela interface.",
+      "Conta com permissão exclusiva de apadrinhamento acessa a fila pelo painel, mas a barra lateral não contém o item.",
+      "A consulta de apadrinhamento apresentou estado vazio. Nenhuma decisão foi enviada pelo navegador."
+    ],
+    "capturas": "Observadas na sessão do navegador para entrada, histórico e apadrinhamento."
+  }
+}

@@ -1,0 +1,5 @@
+2026/11/27-03:30:49.071 8e74 Creating DB C:\laragon\www\ajudae-tcc\.qa-final-815617f\ui\edge-e2e-1795761020067\Default\EdgeCoupons/coupons_data.db since it was missing.
+2026/11/27-03:30:49.173 8e74 Reusing MANIFEST C:\laragon\www\ajudae-tcc\.qa-final-815617f\ui\edge-e2e-1795761020067\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/11/27-03:31:24.177 8dac Level-0 table #5: started
+2026/11/27-03:31:24.189 8dac Level-0 table #5: 683273 bytes OK
+2026/11/27-03:31:24.193 8dac Delete type=0 #3

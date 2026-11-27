@@ -1,0 +1,938 @@
+{
+  "data": "2026-11-27",
+  "commit": "9fcd085a1342be00141ec36d1fa92d8f726284d1",
+  "total": 105,
+  "resultadosConformes": 103,
+  "interpretacao": [
+    "Em Operações autenticadas, o 403 de download de cadastro ocorreu antes de assumir a análise. A policy exige posse. O reteste confirmou 403 antes de assumir e 200 após assumir.",
+    "Na renovação, o operador que vê e aprova a certidão recebe 403 ao tentar abrir o PDF. Essa divergência é o achado QA-R01.",
+    "A contagem exclui logins, sondagens de infraestrutura e seis mutações das corridas HTTP. Identificadores pertencem apenas a fixtures."
+  ],
+  "grupos": [
+    {
+      "nome": "Regressões dos contratos e autorização",
+      "verificacoes": [
+        {
+          "name": "Visita anônima",
+          "actor": "visitante",
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "expected": 401,
+          "status": 401
+        },
+        {
+          "name": "Identidade titular e paginação",
+          "actor": "titular",
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Mais uma página",
+          "actor": "titular",
+          "method": "GET",
+          "path": "/minhas-participacoes/dados?page=2",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Pessoa terceira lê apenas sua projeção",
+          "actor": "terceira",
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Histórico vazio",
+          "actor": "vazio",
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Ausência sem protocolo inicial",
+          "actor": "titular",
+          "method": "GET",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 404,
+          "status": 404
+        },
+        {
+          "name": "Justificativa de outro titular",
+          "actor": "terceira",
+          "method": "POST",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Validação com 2001 caracteres",
+          "actor": "titular",
+          "method": "POST",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 422,
+          "status": 422,
+          "assertion": true
+        },
+        {
+          "name": "Exatamente 2000 caracteres",
+          "actor": "titular",
+          "method": "POST",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 201,
+          "status": 201,
+          "assertion": true
+        },
+        {
+          "name": "Autodeferimento vedado",
+          "actor": "titular",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "ONG terceira sem acesso",
+          "actor": "ongTerceira",
+          "method": "GET",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Decisão sem CSRF",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 419,
+          "status": 419
+        },
+        {
+          "name": "Motivo de decisão inválido",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 422,
+          "status": 422,
+          "assertion": true
+        },
+        {
+          "name": "Indeferimento autorizado com autoria",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Novo GET gerencial tem autor",
+          "actor": "ong",
+          "method": "GET",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Titular relê situação, motivo e data sem autoria",
+          "actor": "titular",
+          "method": "GET",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Repetição de decisão",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/11/justificativa",
+          "expected": 409,
+          "status": 409
+        },
+        {
+          "name": "Ausência preservada no histórico",
+          "actor": "titular",
+          "method": "GET",
+          "path": "/minhas-participacoes/dados?page=2",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Admin sem capacidade",
+          "actor": "leitor",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/1/reprovar",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Visitante sem sessão",
+          "actor": "visitante",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/1/reprovar",
+          "expected": 419,
+          "status": 419
+        },
+        {
+          "name": "Reprovação Web ausente",
+          "actor": "padrinho",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/1/reprovar",
+          "expected": 422,
+          "status": 422,
+          "assertion": true
+        },
+        {
+          "name": "Reprovação Web vazio",
+          "actor": "padrinho",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/1/reprovar",
+          "expected": 422,
+          "status": 422,
+          "assertion": true
+        },
+        {
+          "name": "Reprovação Web somente espaços",
+          "actor": "padrinho",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/1/reprovar",
+          "expected": 422,
+          "status": 422,
+          "assertion": true
+        },
+        {
+          "name": "Reprovação Web acima do limite",
+          "actor": "padrinho",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/1/reprovar",
+          "expected": 422,
+          "status": 422,
+          "assertion": true
+        },
+        {
+          "name": "Pedido permanece pendente após 422",
+          "actor": "padrinho",
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Reprovação Web válida",
+          "actor": "padrinho",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/1/reprovar",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Reprovação repetida",
+          "actor": "padrinho",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/1/reprovar",
+          "expected": 409,
+          "status": 409
+        },
+        {
+          "name": "Nova leitura da fila depois da reprovação",
+          "actor": "padrinho",
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Fila de Pessoas negada à capacidade exclusiva",
+          "actor": "padrinho",
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Lista por capacidade LGPD mostra projeção reduzida",
+          "actor": "leitor",
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Atendente exclusivo sem permissão de lista",
+          "actor": "atendente",
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd/dados",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Leitor sem permissão de decisão",
+          "actor": "leitor",
+          "method": "PATCH",
+          "path": "/admin/solicitacoes-lgpd/1/status",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Evento sem Agenda",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/fila-eventos/9/decisao",
+          "expected": 409,
+          "status": 409
+        },
+        {
+          "name": "Reprovação de Evento sem motivo",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/fila-eventos/8/decisao",
+          "expected": 422,
+          "status": 422,
+          "assertion": true
+        },
+        {
+          "name": "Presença futura",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/3/presenca",
+          "expected": 409,
+          "status": 409
+        },
+        {
+          "name": "Vínculo revogado",
+          "actor": "revogado",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/10/presenca",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Designado ativo consulta Agenda",
+          "actor": "designado",
+          "method": "GET",
+          "path": "/gestao/agendas/2/inscricoes",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "ONG terceira não registra presença",
+          "actor": "ongTerceira",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/2/presenca",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Independente opera no próprio workspace",
+          "actor": "independente",
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Página de diretório explicita indisponibilidade",
+          "actor": "leitor",
+          "method": "GET",
+          "path": "/admin/usuarios",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        }
+      ]
+    },
+    {
+      "nome": "Operações autenticadas das nove frentes",
+      "verificacoes": [
+        {
+          "name": "Link ativo na sidebar e fila acessível",
+          "actor": "padrinho",
+          "method": "GET",
+          "path": "/admin/conclusoes-padrinho",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Sidebar da conta sem capacidade não lista conclusões",
+          "actor": "leitor",
+          "method": "GET",
+          "path": "/admin",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Fila pendente recebe pedido reservado",
+          "actor": "padrinho",
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Decisão Web encerra o segundo pedido",
+          "actor": "padrinho",
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/2/reprovar",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Bearer mantém motivo opcional",
+          "actor": "padrinho",
+          "method": "POST",
+          "path": "/api/v1/admin/padrinhos/conclusoes/3/reprovar",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Fila vazia em nova leitura",
+          "actor": "padrinho",
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Presença registrada",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/2/presenca",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Persistência da presença em nova lista",
+          "actor": "ong",
+          "method": "GET",
+          "path": "/gestao/agendas/2/inscricoes",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Rejeição de monitoria precisa de justificativa",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/2/monitoria",
+          "expected": 422,
+          "status": 422,
+          "assertion": true
+        },
+        {
+          "name": "Monitoria decidida",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/2/monitoria",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Nova leitura da monitoria",
+          "actor": "titular",
+          "method": "GET",
+          "path": "/gestao/inscricoes/2/monitoria",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Nova justificativa pelo titular",
+          "actor": "titular",
+          "method": "POST",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "expected": 201,
+          "status": 201,
+          "assertion": true
+        },
+        {
+          "name": "Deferimento real da ocorrência",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Deferimento após nova leitura do titular",
+          "actor": "titular",
+          "method": "GET",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Evento com Agenda aberta não encerra",
+          "actor": "ong",
+          "method": "POST",
+          "path": "/gestao/eventos/2/finalizar",
+          "expected": 409,
+          "status": 409
+        },
+        {
+          "name": "Encerramento de Agenda",
+          "actor": "ong",
+          "method": "PATCH",
+          "path": "/gestao/agendas/2/finalizar",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Evento sem nota não encerra",
+          "actor": "ong",
+          "method": "POST",
+          "path": "/gestao/eventos/2/finalizar",
+          "expected": 409,
+          "status": 409
+        },
+        {
+          "name": "Nota inválida",
+          "actor": "ong",
+          "method": "POST",
+          "path": "/gestao/eventos/2/avaliacoes/1",
+          "expected": 422,
+          "status": 422
+        },
+        {
+          "name": "Nota única válida",
+          "actor": "ong",
+          "method": "POST",
+          "path": "/gestao/eventos/2/avaliacoes/1",
+          "expected": 201,
+          "status": 201
+        },
+        {
+          "name": "Nota repetida em Evento",
+          "actor": "ong",
+          "method": "POST",
+          "path": "/gestao/eventos/2/avaliacoes/1",
+          "expected": 409,
+          "status": 409
+        },
+        {
+          "name": "Nota persistida em nova leitura",
+          "actor": "ong",
+          "method": "GET",
+          "path": "/gestao/eventos/2/avaliacoes",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Evento encerrado",
+          "actor": "ong",
+          "method": "POST",
+          "path": "/gestao/eventos/2/finalizar",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Avaliação opcional de ONG",
+          "actor": "titular",
+          "method": "POST",
+          "path": "/minhas-participacoes/2/avaliacao-ong",
+          "expected": 201,
+          "status": 201
+        },
+        {
+          "name": "Avaliação da ONG persistida",
+          "actor": "titular",
+          "method": "GET",
+          "path": "/minhas-participacoes/2/avaliacao-ong",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Fila Pessoas com candidato",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Documento privado de outro titular negado",
+          "actor": "terceira",
+          "method": "GET",
+          "path": "/conta/documentos/1/download",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Download de PDF sintético por admin autorizado",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/conta/documentos/1/download",
+          "expected": 200,
+          "status": 403
+        },
+        {
+          "name": "Antecedente de voluntário aprovado em renovação",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/antecedentes/renovacoes",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Reprovação definitiva negada a não Master",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/validacoes-pessoa/5/reprovar-definitivamente",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Assumir validação cadastral",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/validacoes-pessoa/5/assumir",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Rejeitar RG sem motivo",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/documentos/1/status",
+          "expected": 422,
+          "status": 422
+        },
+        {
+          "name": "Aprovar RG",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/documentos/1/status",
+          "expected": 200,
+          "status": 200
+        },
+        {
+          "name": "Aprovar antecedentes",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/documentos/2/status",
+          "expected": 200,
+          "status": 200
+        },
+        {
+          "name": "Aprovar Pessoa com documentos validados",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/validacoes-pessoa/5/aprovar",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Validação cadastral persistida",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/5",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "ONG pendente na fila",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/validacoes-ong/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "ONG aprovada apenas com status",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/validacoes-ong/2/status",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "ONG aprovada sai da fila",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/validacoes-ong/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Evento candidato indisponível ao público",
+          "actor": "terceira",
+          "method": "GET",
+          "path": "/eventos/5",
+          "expected": 404,
+          "status": 404
+        },
+        {
+          "name": "Reprovação de Evento com motivo",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/fila-eventos/8/decisao",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Evento aprovado",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/fila-eventos/5/decisao",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Evento aprovado agora aparece em URL pública",
+          "actor": "terceira",
+          "method": "GET",
+          "path": "/eventos/5",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Iniciar análise de promoção",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/solicitacoes-organizador/1/iniciar-analise",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Motivo obrigatório na reprovação de promoção",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/solicitacoes-organizador/1/reprovar",
+          "expected": 422,
+          "status": 422
+        },
+        {
+          "name": "Reprovação de promoção",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/solicitacoes-organizador/1/reprovar",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Decisão de promoção persistida",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/solicitacoes-organizador/1",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Período inválido de campanha",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/campanhas-xp",
+          "expected": 422,
+          "status": 422
+        },
+        {
+          "name": "Campanha criada",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/campanhas-xp",
+          "expected": 201,
+          "status": 201
+        },
+        {
+          "name": "Campanha editada",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/campanhas-xp/2",
+          "expected": 200,
+          "status": 200
+        },
+        {
+          "name": "Campanha desativada",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/campanhas-xp/2/status",
+          "expected": 200,
+          "status": 200
+        },
+        {
+          "name": "Campanha persistida e desativada",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/campanhas-xp/dados",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Atendente restrito assume protocolo",
+          "actor": "atendente",
+          "method": "PATCH",
+          "path": "/admin/solicitacoes-lgpd/1/status",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Conclusão LGPD sem resposta recusada",
+          "actor": "atendente",
+          "method": "PATCH",
+          "path": "/admin/solicitacoes-lgpd/1/status",
+          "expected": 422,
+          "status": 422
+        },
+        {
+          "name": "Conclusão LGPD com resposta sintética",
+          "actor": "atendente",
+          "method": "PATCH",
+          "path": "/admin/solicitacoes-lgpd/1/status",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Leitor vê protocolo concluído com dados reduzidos",
+          "actor": "leitor",
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd/dados?status=concluida",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Log com filtro e minimização",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/log-acoes/dados?acao=lgpd.status_atualizado",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        }
+      ]
+    },
+    {
+      "nome": "Reteste do download e da revisão de renovação",
+      "verificacoes": [
+        {
+          "name": "Detalhe do cadastro pendente exibe metadados do documento",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/14",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Arquivo privado restrito até assumir análise",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/conta/documentos/4/download",
+          "expected": 403,
+          "status": 403
+        },
+        {
+          "name": "Atribuir análise a administrador habilitado",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/validacoes-pessoa/14/assumir",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "PDF sintético acessível após assumir a análise",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/conta/documentos/4/download",
+          "expected": 200,
+          "status": 200
+        },
+        {
+          "name": "Pendente de renovação aparece para administrador",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/antecedentes/renovacoes",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Binário da renovação deveria estar acessível ao operador autorizado",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/conta/documentos/3/download",
+          "expected": 200,
+          "status": 403
+        },
+        {
+          "name": "O mesmo operador pode aprovar a renovação",
+          "actor": "admin",
+          "method": "PATCH",
+          "path": "/admin/documentos/3/status",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        },
+        {
+          "name": "Renovação decidida desaparece da lista pendente",
+          "actor": "admin",
+          "method": "GET",
+          "path": "/admin/antecedentes/renovacoes",
+          "expected": 200,
+          "status": 200,
+          "assertion": true
+        }
+      ]
+    },
+    {
+      "nome": "Posse de cadastro aprovado",
+      "verificacoes": [
+        {
+          "name": "Assumir cadastro já aprovado não abre análise para renovação",
+          "actor": "admin",
+          "method": "POST",
+          "path": "/admin/validacoes-pessoa/1/assumir",
+          "expected": 409,
+          "status": 409
+        }
+      ]
+    }
+  ]
+}

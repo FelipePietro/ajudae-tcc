@@ -1,0 +1,9 @@
+# Armazenamento documental e LGPD — histórico Firebase/GCS
+
+**Estado atual:** a implementação GCS/Firebase foi substituída pelo Railway Storage Bucket S3 privado. Este arquivo permanece apenas como referência histórica do desenho documental; a configuração ativa está em [railway-storage-s3.md](railway-storage-s3.md). Não configure `firebase_private`, `firebase_images`, `FIREBASE_*` ou `GOOGLE_APPLICATION_CREDENTIALS` para novos uploads.
+
+Documentos pessoais continuam acessíveis somente ao titular ou administrador autorizado, após verificação de papel/permissão feita pelo Laravel antes de qualquer leitura do storage. O MySQL mantém `storage_disk`, `storage_path`, hash, decisões, retenção e trilha de auditoria. Os bytes são armazenados em `local` (desenvolvimento/legado) ou `railway_private` (novos uploads S3 quando explicitamente habilitado). O arquivo é entregue como attachment com `Cache-Control: private, no-store`; não há URL pública de objeto. O scheduler mantém expurgo documental em `--dry-run` e a exclusão de contas também em `--dry-run`.
+
+Trocar `DOCUMENT_PRIVATE_DISK` não move bytes. Referências antigas com `storage_disk=NULL` ou `local` continuam no disk `local`. Eventuais registros `firebase_private` também não são reescritos ou apagados: sem o adaptador GCS, download retorna indisponibilidade controlada até uma migração de bytes planejada e verificada. Não existe bucket GCS real nem objetos reais a transferir neste ambiente acadêmico. Uma migração futura, se necessária, requer inventário, cópia para chave opaca, conferência de hash/tamanho, atualização por registro e rollback com origem preservada. Nenhuma migration deste bloco altera essas referências.
+
+O PDF de certificado continua gerado em memória via DomPDF, a partir de dados congelados no MySQL. O endpoint público valida apenas autenticidade do código; o download exige titular autenticado. Nenhum PDF vai a S3 ou a arquivo persistente.

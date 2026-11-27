@@ -1,0 +1,1264 @@
+{
+  "browser": "Edg/158.0.4370.45",
+  "scenarios": [
+    {
+      "label": "Histórico, paginação e titularidade",
+      "persona": "Pessoa titular e Pessoa sem inscrições",
+      "success": true,
+      "details": "Primeira e segunda páginas, recarga e estado vazio em sessão distinta.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/perfil",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/perfil",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Justificativa enviada pela Pessoa",
+      "persona": "Titular da ausência",
+      "success": true,
+      "details": "POST 201, recarga do histórico.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/perfil",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "status": 404
+        },
+        {
+          "method": "POST",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "status": 201
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/minhas-participacoes/dados",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Justificativa decidida pela ONG",
+      "persona": "ONG proprietária",
+      "success": true,
+      "details": "Autoria visível para a gestão após nova consulta.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/painel",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/painel_ong-B33iIIoc.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/1",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/agendas/1/inscricoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/ong/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/eventos/1",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/agendas/1/inscricoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/gestao/inscricoes/1/justificativa",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Renovação: PDF e decisão",
+      "persona": "Admin de revisão",
+      "success": true,
+      "details": "Segundo PDF validado byte a byte pelo SHA-256 e aprovação pela fila.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/candidatos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/antecedentes/renovacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/conta/documentos/3/download",
+          "status": 200
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/documentos/3/status",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/antecedentes/renovacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/candidatos",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Decisão de Evento",
+      "persona": "Admin de Eventos",
+      "success": false,
+      "error": "Tempo esgotado: /login",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/admin/validacoes-pessoa/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/antecedentes/renovacoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Conclusão pela sidebar",
+      "persona": "Admin exclusivo de apadrinhamento",
+      "success": true,
+      "details": "Link ativo e formulário com validação do campo, decisão e recarga.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/conclusoes-padrinho",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/admin/padrinhos/conclusoes/2/reprovar",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/conclusoes-padrinho",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "LGPD após recarga",
+      "persona": "Administrador com leitura e sem a atribuição do protocolo",
+      "success": true,
+      "details": "Estado concluído após recarga, resposta oculta ao leitor sem atribuição e ação auditada.",
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/solicitacoes-lgpd/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/log-acoes",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/log-acoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "label": "Largura e navegação por teclado",
+      "persona": "Admin exclusivo de apadrinhamento",
+      "success": true,
+      "details": {
+        "sizes": [
+          {
+            "requested": 360,
+            "viewport": 360,
+            "scroll": 360
+          },
+          {
+            "requested": 768,
+            "viewport": 768,
+            "scroll": 768
+          },
+          {
+            "requested": 1280,
+            "viewport": 1280,
+            "scroll": 1280
+          }
+        ],
+        "focus": true,
+        "keyboardOpened": false
+      },
+      "traffic": [
+        {
+          "method": "GET",
+          "path": "/login",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/conclusoes-padrinho",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/app-Bfp5uFnB.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-ByhMKedQ.css",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/accessibility-DhtqhXzn.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/build/assets/identity-B8gT8Scj.js",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/admin/padrinhos/conclusoes/dados",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/favicon.ico",
+          "status": 200
+        }
+      ]
+    }
+  ]
+}

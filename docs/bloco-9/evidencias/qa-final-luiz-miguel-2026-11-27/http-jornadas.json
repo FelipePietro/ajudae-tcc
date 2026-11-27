@@ -1,0 +1,412 @@
+[
+  {
+    "label": "Presença: ONG terceira",
+    "actor": "terceira",
+    "method": "PATCH",
+    "path": "/gestao/inscricoes/2/presenca",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Presença: agenda futura",
+    "actor": "ong",
+    "method": "PATCH",
+    "path": "/gestao/inscricoes/3/presenca",
+    "expected": 409,
+    "status": 409,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Gestão: designado consulta a Agenda",
+    "actor": "designado",
+    "method": "GET",
+    "path": "/gestao/agendas/2/inscricoes",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Registrar presença",
+    "actor": "ong",
+    "method": "PATCH",
+    "path": "/gestao/inscricoes/2/presenca",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Presença em novo GET",
+    "actor": "ong",
+    "method": "GET",
+    "path": "/gestao/agendas/2/inscricoes",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Rejeitar monitoria sem justificativa",
+    "actor": "ong",
+    "method": "PATCH",
+    "path": "/gestao/inscricoes/2/monitoria",
+    "expected": 422,
+    "status": 422,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Confirmar monitoria",
+    "actor": "ong",
+    "method": "PATCH",
+    "path": "/gestao/inscricoes/2/monitoria",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Titular lê decisão de monitoria",
+    "actor": "titular",
+    "method": "GET",
+    "path": "/gestao/inscricoes/2/monitoria",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Motivo acima do limite",
+    "actor": "titular",
+    "method": "POST",
+    "path": "/gestao/inscricoes/1/justificativa",
+    "expected": 422,
+    "status": 422,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Enviar justificativa",
+    "actor": "titular",
+    "method": "POST",
+    "path": "/gestao/inscricoes/1/justificativa",
+    "expected": 201,
+    "status": 201,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Titular não decide",
+    "actor": "titular",
+    "method": "PATCH",
+    "path": "/gestao/inscricoes/1/justificativa",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Gestor decide",
+    "actor": "ong",
+    "method": "PATCH",
+    "path": "/gestao/inscricoes/1/justificativa",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Gestor lê autoria minimizada",
+    "actor": "ong",
+    "method": "GET",
+    "path": "/gestao/inscricoes/1/justificativa",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Titular lê decisão sem autoria",
+    "actor": "titular",
+    "method": "GET",
+    "path": "/gestao/inscricoes/1/justificativa",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Evento com agenda aberta",
+    "actor": "ong",
+    "method": "POST",
+    "path": "/gestao/eventos/2/finalizar",
+    "expected": 409,
+    "status": 409,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Finalizar Agenda",
+    "actor": "ong",
+    "method": "PATCH",
+    "path": "/gestao/agendas/2/finalizar",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Evento com avaliação pendente",
+    "actor": "ong",
+    "method": "POST",
+    "path": "/gestao/eventos/2/finalizar",
+    "expected": 409,
+    "status": 409,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Registrar nota",
+    "actor": "ong",
+    "method": "POST",
+    "path": "/gestao/eventos/2/avaliacoes/1",
+    "expected": 201,
+    "status": 201,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Bloquear nota duplicada",
+    "actor": "ong",
+    "method": "POST",
+    "path": "/gestao/eventos/2/avaliacoes/1",
+    "expected": 409,
+    "status": 409,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Finalizar Evento",
+    "actor": "ong",
+    "method": "POST",
+    "path": "/gestao/eventos/2/finalizar",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Evento finalizado em novo GET",
+    "actor": "ong",
+    "method": "GET",
+    "path": "/gestao/eventos/2",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Avaliação opcional da ONG",
+    "actor": "titular",
+    "method": "POST",
+    "path": "/minhas-participacoes/2/avaliacao-ong",
+    "expected": 201,
+    "status": 201,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Histórico atualizado após encerramento",
+    "actor": "titular",
+    "method": "GET",
+    "path": "/minhas-participacoes/dados",
+    "expected": 200,
+    "status": 200,
+    "check": false,
+    "passed": false
+  },
+  {
+    "label": "ONG: aprovar somente com status_ong",
+    "actor": "admin",
+    "method": "PATCH",
+    "path": "/admin/validacoes-ong/2/status",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "ONG saiu da fila",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/admin/validacoes-ong/dados",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Evento: reprovação sem motivo",
+    "actor": "admin",
+    "method": "PATCH",
+    "path": "/admin/fila-eventos/8/decisao",
+    "expected": 422,
+    "status": 422,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Evento: reprovação com motivo",
+    "actor": "admin",
+    "method": "PATCH",
+    "path": "/admin/fila-eventos/8/decisao",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Evento: repetir decisão",
+    "actor": "admin",
+    "method": "PATCH",
+    "path": "/admin/fila-eventos/8/decisao",
+    "expected": 409,
+    "status": 409,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Promoção: assumir",
+    "actor": "admin",
+    "method": "POST",
+    "path": "/admin/solicitacoes-organizador/1/iniciar-analise",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Promoção: reprovar",
+    "actor": "admin",
+    "method": "POST",
+    "path": "/admin/solicitacoes-organizador/1/reprovar",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Promoção: consulta após decisão",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/admin/solicitacoes-organizador/1",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Campanha: criar",
+    "actor": "admin",
+    "method": "POST",
+    "path": "/admin/campanhas-xp",
+    "expected": 201,
+    "status": 201,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Campanha: editar",
+    "actor": "admin",
+    "method": "PATCH",
+    "path": "/admin/campanhas-xp/2",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Campanha: desativar",
+    "actor": "admin",
+    "method": "PATCH",
+    "path": "/admin/campanhas-xp/2/status",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Campanha: estado após nova consulta",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/admin/campanhas-xp/dados",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "LGPD: leitor recebe versão reduzida",
+    "actor": "leitor",
+    "method": "GET",
+    "path": "/admin/solicitacoes-lgpd/dados",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "LGPD: atendente exclusivo sem listagem",
+    "actor": "atendente",
+    "method": "GET",
+    "path": "/admin/solicitacoes-lgpd/dados",
+    "expected": 403,
+    "status": 403,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "LGPD: assumir",
+    "actor": "atendente",
+    "method": "PATCH",
+    "path": "/admin/solicitacoes-lgpd/1/status",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "LGPD: não conclui sem resposta",
+    "actor": "atendente",
+    "method": "PATCH",
+    "path": "/admin/solicitacoes-lgpd/1/status",
+    "expected": 422,
+    "status": 422,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "LGPD: concluir",
+    "actor": "atendente",
+    "method": "PATCH",
+    "path": "/admin/solicitacoes-lgpd/1/status",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  },
+  {
+    "label": "Auditoria: filtro e projeção minimizada",
+    "actor": "admin",
+    "method": "GET",
+    "path": "/admin/log-acoes/dados?acao=lgpd.status_atualizado",
+    "expected": 200,
+    "status": 200,
+    "check": true,
+    "passed": true
+  }
+]

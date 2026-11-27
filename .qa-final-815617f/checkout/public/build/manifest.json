@@ -1,0 +1,78 @@
+{
+  "_accessibility-ByhMKedQ.css": {
+    "file": "assets/accessibility-ByhMKedQ.css",
+    "src": "_accessibility-ByhMKedQ.css"
+  },
+  "_accessibility-DhtqhXzn.js": {
+    "file": "assets/accessibility-DhtqhXzn.js",
+    "name": "accessibility",
+    "css": [
+      "assets/accessibility-ByhMKedQ.css"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-Bfp5uFnB.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/cadastro_ong.css": {
+    "file": "assets/cadastro_ong-DyITj_Qm.css",
+    "name": "cadastro_ong",
+    "names": [
+      "cadastro_ong.css"
+    ],
+    "src": "resources/css/cadastro_ong.css",
+    "isEntry": true
+  },
+  "resources/css/editar_ong.css": {
+    "file": "assets/editar_ong-B60rOvCT.css",
+    "name": "perfil_ong",
+    "names": [
+      "editar_ong.css",
+      "perfil_ong.css"
+    ],
+    "src": "resources/css/editar_ong.css",
+    "isEntry": true
+  },
+  "resources/css/painel_ong.css": {
+    "file": "assets/painel_ong-B33iIIoc.css",
+    "name": "painel_ong",
+    "names": [
+      "painel_ong.css"
+    ],
+    "src": "resources/css/painel_ong.css",
+    "isEntry": true
+  },
+  "resources/css/perfil_ong.css": {
+    "file": "assets/editar_ong-B60rOvCT.css",
+    "name": "perfil_ong",
+    "names": [
+      "editar_ong.css",
+      "perfil_ong.css"
+    ],
+    "src": "resources/css/editar_ong.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-C_yL0q6J.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_accessibility-DhtqhXzn.js"
+    ]
+  },
+  "resources/js/identity.js": {
+    "file": "assets/identity-B8gT8Scj.js",
+    "name": "identity",
+    "src": "resources/js/identity.js",
+    "isEntry": true,
+    "imports": [
+      "_accessibility-DhtqhXzn.js"
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+/* Small additions use existing card/field colors and geometry. No replacement design system. */
+.event-flow { min-width:0; }
+.event-flow [hidden] { display:none !important; }
+.event-flow input, .event-flow select { max-width:100%; min-width:0; }
+.event-flow input:focus-visible, .event-flow select:focus-visible { outline:3px solid #df9729; outline-offset:3px; }
+.event-flow dialog::backdrop { background:rgb(0 0 0 / .45); }
+.event-flow dialog { margin:auto; max-width:calc(100vw - 2rem); }
+body:has([data-nav-layout="institution"]) > main:not(.ong-page-content) { min-width:0; }
+@media(min-width:1024px) { body:has([data-nav-layout="institution"]) > main:not(.ong-page-content):not([class*="ml-"]) { margin-left:230px; width:calc(100% - 230px); } }
+
+@media(min-width:1024px) { body:has([data-nav-layout="public"]) > .ong-page-content, body:has([data-nav-layout="person"]) > .ong-page-content, body:has([data-nav-layout="person"]) > main[class*="ml-"] { margin-left:0; width:100%; } }
+
+.event-flow dialog[data-withdraw-dialog], .event-flow dialog[data-candidate-confirm] { width:min(28rem,calc(100vw - 2rem)); max-width:28rem; max-height:calc(100dvh - 2rem); overflow:auto; padding:1.5rem; border-radius:1rem; margin:auto; }
+.event-flow textarea { max-width:100%; }
+.event-flow .agenda-selected { border-color:#174b36; background:#eef7f2; box-shadow:0 0 0 1px #174b36; }
+.event-flow [aria-current="step"] { color:#174b36; font-weight:700; text-decoration:underline; text-underline-offset:4px; }
+.event-flow textarea:focus-visible, .event-flow summary:focus-visible { outline:3px solid #df9729; outline-offset:3px; }
+/* B3.1: explicit content-sized dialog variants, independent of Tailwind max-width order. */
+dialog.ajudae-dialog, .event-flow dialog.ajudae-dialog {
+    box-sizing:border-box; position:fixed; inset:0; margin:auto;
+    width:min(28rem,calc(100vw - 2rem)); max-width:calc(100vw - 2rem);
+    max-height:calc(100dvh - 2rem); overflow:auto; overscroll-behavior:contain;
+    padding:1.5rem; border:1px solid #dedbd1; border-radius:1rem; background:#fff; color:#17392a;
+}
+.event-flow dialog.ajudae-dialog--review { width:min(32rem,calc(100vw - 2rem)); }
+dialog.ajudae-dialog--account { width:min(30rem,calc(100vw - 2rem)); }
+dialog.ajudae-dialog::backdrop { background:rgb(15 35 25 / .5); }
+.ajudae-dialog > h2 { padding-right:5rem; margin:0 0 1rem; line-height:1.35; }
+.ajudae-dialog .dialog-close { position:absolute; top:1rem; right:1rem; }
+.dialog-review { white-space:pre-wrap; overflow-wrap:anywhere; border-left:3px solid #bd861a; background:#f7f6f2; padding:1rem; margin:1rem 0; font-size:.875rem; }
+.organizer-event-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,24rem),1fr)); gap:1rem; }
+.organizer-event-card { margin:0; min-width:0; display:flex; flex-direction:column; }
+.organizer-event-actions { display:flex; gap:.75rem; flex-wrap:wrap; }
+.organizer-event-card p, [data-organizer-link] p { overflow-wrap:anywhere; }
+[data-organizer-root] details, [data-event-disclosure] { min-width:0; max-width:100%; }
+@media(max-width:480px) { .organizer-event-actions > * { width:100%; } }
+
+body:has(dialog.ajudae-dialog[open]) { overflow:hidden; }
+dialog.ajudae-dialog.ajudae-dialog--legacy, .event-flow dialog.ajudae-dialog.ajudae-dialog--legacy { padding:0; }

@@ -1,0 +1,65 @@
+{
+  "mysql": {
+    "host": "127.0.0.1",
+    "port": 34631,
+    "database": "ajudae_qa9_independente",
+    "uuid": "59ae42f1-ea03-11f1-bd24-0250784c2913"
+  },
+  "ambiente": "MySQL 8.4.3 descartável. Dois processos PHP e duas conexões independentes por combinação, com uma barreira inicial de linha de Evento. Serviços Laravel chamados em modo testing.",
+  "resultados": [
+    {
+      "scenario": "double-event-close",
+      "workers": [
+        {
+          "action": "finish-event",
+          "connection": 13,
+          "result": "conflict"
+        },
+        {
+          "action": "finish-event",
+          "connection": 12,
+          "result": "success"
+        }
+      ],
+      "event": "finalizado",
+      "authorPersisted": true,
+      "xpRows": 1
+    },
+    {
+      "scenario": "attendance-versus-agenda-close",
+      "workers": [
+        {
+          "action": "attendance",
+          "connection": 15,
+          "result": "success"
+        },
+        {
+          "action": "finish-agenda",
+          "connection": 14,
+          "result": "success"
+        }
+      ],
+      "agendaBeforeRetry": "finalizado",
+      "xpBeforeRetry": 1,
+      "xpRows": 1
+    },
+    {
+      "scenario": "rating-versus-event-close",
+      "workers": [
+        {
+          "action": "rate",
+          "connection": 16,
+          "result": "success"
+        },
+        {
+          "action": "finish-event",
+          "connection": 17,
+          "result": "conflict"
+        }
+      ],
+      "eventBeforeRetry": "ativo",
+      "ratingRows": 1
+    }
+  ],
+  "resultadoDaRepeticaoDepoisDaNota": "Evento finalizado"
+}
