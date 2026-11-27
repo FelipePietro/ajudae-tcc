@@ -18,6 +18,7 @@ use App\Services\ManagedImageStorage;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 final class WebEventManagementController extends Controller
 {
@@ -52,7 +53,11 @@ final class WebEventManagementController extends Controller
         $ator = $this->ator($request);
         Gate::forUser($ator)->authorize('create', Evento::class);
         $dados = $request->validate(EventoManagementService::regrasCriacao(false, $request->input('modalidade_evento') === 'online'));
-        $evento = $service->criar($ator, $dados, $dados['imagem_evento'] ?? null);
+        $chave = $request->header('Idempotency-Key');
+        if ($chave !== null && ! preg_match('/\A[A-Za-z0-9._:-]{1,128}\z/', $chave)) {
+            throw ValidationException::withMessages(['idempotency_key' => 'A chave de criação é inválida.']);
+        }
+        $evento = $service->criar($ator, $dados, $dados['imagem_evento'] ?? null, $chave);
 
         return ApiResponse::success(new EventoResource($evento), 'Evento criado com sucesso.', 201);
     }

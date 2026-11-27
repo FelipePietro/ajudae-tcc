@@ -156,13 +156,13 @@
             {{-- ESTATÍSTICAS --}}
             {{-- ================================================= --}}
 
-            @if($integrated)<p id="painel-indicadores" class="mb-2 text-sm text-[#56594f]">Indicadores operacionais ainda indisponíveis.</p>@endif
+            @if($integrated)<p id="painel-indicadores" class="mb-2 text-sm text-[#56594f]">Indicadores de Eventos são carregados da gestão; os demais indicadores ainda estão indisponíveis.</p>@endif
             <section class="stats-grid" aria-label="Indicadores da organização" @if($integrated) aria-describedby="painel-indicadores" @endif>
 
                 <div class="stat-card">
 
                     <div class="stat-value stat-dark">
-                        {{ $integrated ? '—' : ($stats['eventos_ativos'] ?? count($eventos ?? [])) }}
+                        <span @if($integrated) data-dashboard-active @endif>{{ $integrated ? '—' : ($stats['eventos_ativos'] ?? count($eventos ?? [])) }}</span>
                     </div>
 
                     <div class="stat-label">
@@ -201,7 +201,7 @@
                 <div class="stat-card">
 
                     <div class="stat-value stat-dark">
-                        {{ $integrated ? '—' : ($stats['eventos_realizados'] ?? 32) }}
+                        <span @if($integrated) data-dashboard-completed @endif>{{ $integrated ? '—' : ($stats['eventos_realizados'] ?? 32) }}</span>
                     </div>
 
                     <div class="stat-label">
@@ -303,7 +303,7 @@
 
 
                         @if($integrated)
-                            <p class="mt-4 text-sm text-[#56594f]">A consulta e a gestão de Eventos ainda estão indisponíveis.</p>
+                            <x-managed-events dashboard />
                         @else
                         {{-- ===================================== --}}
                         {{-- DESKTOP / TABLET --}}

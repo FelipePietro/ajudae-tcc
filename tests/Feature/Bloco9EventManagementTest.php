@@ -71,6 +71,127 @@ class Bloco9EventManagementTest extends TestCase
         $this->get("/api/v1/eventos/{$id}/imagem")->assertNotFound();
     }
 
+    public function test_web_reenvia_a_mesma_criacao_sem_duplicar_e_rejeita_dados_diferentes(): void
+    {
+        $this->webComo($this->createOng('ativo'));
+        $cabecalho = ['Idempotency-Key' => 'criacao-json-1'];
+        $agendas = [$this->agenda(2), $this->agenda(5, 3)];
+        $dados = [...$this->evento(), 'agendas' => $agendas];
+
+        $id = $this->postJson('/gestao/eventos', $dados, $cabecalho)->assertCreated()->json('data.evento_id');
+        $this->postJson('/gestao/eventos', array_reverse([
+            ...$dados,
+            'agendas' => array_map(fn ($agenda) => array_reverse($agenda, true), $agendas),
+        ], true), $cabecalho)->assertCreated()->assertJsonPath('data.evento_id', $id)
+            ->assertJsonPath('data.agendas.0.vagas_agenda', 2)->assertJsonPath('data.agendas.1.vagas_agenda', 5);
+        $this->postJson('/gestao/eventos', [...$dados, 'agendas' => array_reverse($agendas)], $cabecalho)
+            ->assertConflict();
+        $this->postJson('/gestao/eventos', $dados, ['Idempotency-Key' => 'chave inválida'])
+            ->assertUnprocessable()->assertJsonValidationErrors('idempotency_key');
+        $this->assertDatabaseCount('evento', 1);
+        $this->assertDatabaseCount('agenda', 2);
+        $this->assertDatabaseCount('evento_criacao_idempotencia', 1);
+
+        $outro = $this->postJson('/gestao/eventos', $dados, ['Idempotency-Key' => 'criacao-json-2'])
+            ->assertCreated()->json('data.evento_id');
+        $this->assertNotSame($id, $outro);
+        $this->assertDatabaseCount('evento', 2);
+        $this->assertDatabaseCount('agenda', 4);
+    }
+
+    public function test_chave_web_respeita_o_ator_e_nao_recria_evento_excluido(): void
+    {
+        $ong = $this->createOng('ativo');
+        $organizador = $this->createPessoa('organizador');
+        $dados = [...$this->evento(), 'agendas' => [$this->agenda(2)]];
+        $cabecalho = ['Idempotency-Key' => 'criacao-por-ator'];
+
+        $this->webComo($ong);
+        $id = $this->postJson('/gestao/eventos', $dados, $cabecalho)->assertCreated()->json('data.evento_id');
+
+        $this->webComo($organizador);
+        $outroId = $this->postJson('/gestao/eventos', $dados, $cabecalho)->assertCreated()
+            ->assertJsonPath('data.pessoa_id', $organizador->getKey())->json('data.evento_id');
+        $this->assertNotSame($id, $outroId);
+
+        $evento = Evento::findOrFail($id);
+        $evento->agendas()->delete();
+        $evento->delete();
+        $this->webComo($ong);
+        $this->postJson('/gestao/eventos', $dados, $cabecalho)->assertConflict();
+        $this->assertDatabaseCount('evento', 1);
+        $this->assertDatabaseCount('evento_criacao_idempotencia', 2);
+    }
+
+    public function test_web_reenvia_multipart_sem_duplicar_objeto_e_detecta_banner_diferente(): void
+    {
+        $this->webComo($this->createOng('ativo'));
+        config()->set('filesystems.image_storage_disk', 'image_local');
+        $disk = Storage::fake('image_local');
+        $dados = [...$this->evento(), 'agendas' => [$this->agenda(2)]];
+        $cabecalho = ['Accept' => 'application/json', 'Idempotency-Key' => 'criacao-multipart'];
+
+        $id = $this->post('/gestao/eventos', [
+            ...$dados, 'imagem_evento' => UploadedFile::fake()->image('banner.png', 64, 48),
+        ], $cabecalho)->assertCreated()->json('data.evento_id');
+        $this->post('/gestao/eventos', [
+            ...$dados, 'imagem_evento' => UploadedFile::fake()->image('mesmo-banner.png', 64, 48),
+        ], $cabecalho)->assertCreated()->assertJsonPath('data.evento_id', $id);
+        $this->post('/gestao/eventos', [
+            ...$dados, 'imagem_evento' => UploadedFile::fake()->image('outro-banner.png', 48, 64),
+        ], $cabecalho)->assertConflict();
+        $this->assertCount(1, $disk->allFiles());
+        $this->assertDatabaseCount('evento', 1);
+    }
+
+    public function test_capa_publica_prioriza_imagem_gerenciada_e_nao_expoe_imagem_pendente(): void
+    {
+        $this->withoutVite();
+        $this->webComo($this->createOng('ativo'));
+        config()->set('filesystems.image_storage_disk', 'image_local');
+        Storage::fake('image_local');
+        $id = $this->post('/gestao/eventos', [
+            ...$this->evento(),
+            'agendas' => [$this->agenda(2)],
+            'imagem_evento' => UploadedFile::fake()->image('banner.png', 64, 48),
+        ], ['Accept' => 'application/json'])->assertCreated()->json('data.evento_id');
+
+        $evento = Evento::findOrFail($id);
+        $evento->forceFill(['imagem_evento_link' => 'https://example.test/banner-legado.jpg'])->save();
+        $this->get("/eventos/{$id}")->assertNotFound();
+        $this->get("/api/v1/eventos/{$id}/imagem")->assertNotFound();
+
+        $evento->forceFill(['status_evento' => 'ativo'])->save();
+        $this->get("/eventos/{$id}")->assertOk()
+            ->assertSee("/api/v1/eventos/{$id}/imagem?v=", false)
+            ->assertDontSee('banner-legado.jpg')->assertDontSee($evento->managed_image_path);
+        $this->get("/api/v1/eventos/{$id}/imagem")->assertOk()->assertHeader('Content-Type', 'image/png');
+    }
+
+    public function test_capa_publica_exibe_banner_legado_valido_e_omite_referencias_privadas_ou_ausentes(): void
+    {
+        $this->withoutVite();
+        $this->webComo($this->createOng('ativo'));
+        $id = $this->postJson('/gestao/eventos', [
+            ...$this->evento(), 'agendas' => [$this->agenda(2)],
+        ])->assertCreated()->json('data.evento_id');
+        $evento = Evento::findOrFail($id);
+        $evento->forceFill(['status_evento' => 'ativo'])->save();
+
+        foreach ([
+            'https://example.test/banner.jpg' => 'https://example.test/banner.jpg',
+            'imagens/banner.jpg' => '/imagens/banner.jpg',
+        ] as $link => $src) {
+            $evento->forceFill(['imagem_evento_link' => $link])->save();
+            $this->get("/eventos/{$id}")->assertOk()
+                ->assertSee("data-public-event-image src=\"{$src}\"", false);
+        }
+        foreach (["/gestao/eventos/{$id}/imagem", '/storage/private/banner.png', null] as $link) {
+            $evento->forceFill(['imagem_evento_link' => $link])->save();
+            $this->get("/eventos/{$id}")->assertOk()->assertDontSee('data-public-event-image');
+        }
+    }
+
     public function test_agenda_invalida_impede_qualquer_gravacao(): void
     {
         $this->webComo($this->createOng('ativo'));
@@ -94,15 +215,28 @@ class Bloco9EventManagementTest extends TestCase
             }
         });
 
+        $dados = $this->evento();
+        $cabecalho = ['Accept' => 'application/json', 'Idempotency-Key' => 'criacao-rollback'];
         $this->post('/gestao/eventos', [
-            ...$this->evento(),
+            ...$dados,
             'agendas' => [$this->agenda(50), $this->agenda(61, 3)],
             'imagem_evento' => UploadedFile::fake()->image('banner.png', 64, 48),
-        ], ['Accept' => 'application/json'])->assertServerError();
+        ], $cabecalho)->assertServerError();
 
         $this->assertDatabaseCount('evento', 0);
         $this->assertDatabaseCount('agenda', 0);
+        $this->assertDatabaseCount('evento_criacao_idempotencia', 0);
         $this->assertSame([], $disk->allFiles());
+
+        $this->post('/gestao/eventos', [
+            ...$dados,
+            'agendas' => [$this->agenda(50), $this->agenda(60, 3)],
+            'imagem_evento' => UploadedFile::fake()->image('banner.png', 64, 48),
+        ], $cabecalho)->assertCreated();
+        $this->assertDatabaseCount('evento', 1);
+        $this->assertDatabaseCount('agenda', 2);
+        $this->assertDatabaseCount('evento_criacao_idempotencia', 1);
+        $this->assertCount(1, $disk->allFiles());
     }
 
     public function test_banner_invalido_identifica_o_campo_da_criacao_e_nao_grava_evento(): void
@@ -217,6 +351,8 @@ class Bloco9EventManagementTest extends TestCase
             $this->markTestSkipped('Executar com AJUDAE_WEB_AUTH=true.');
         }
         $conta->refresh();
+        $this->flushSession();
+        Auth::forgetGuards();
         $tipo = $conta instanceof Pessoa ? 'pessoa' : 'ong';
         $guard = Auth::guard("web_{$tipo}");
         $guard->setUser($conta);

@@ -7,6 +7,7 @@ use App\Models\Evento;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Support\AccountAccess;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
@@ -18,6 +19,8 @@ use RuntimeException;
 
 final class EventoManagementService
 {
+    private const CRIACOES_IDEMPOTENTES = 'evento_criacao_idempotencia';
+
     private const ASSOCIACOES = [
         'habilidades' => 'habilidade',
         'causas' => 'causa',
@@ -95,7 +98,7 @@ final class EventoManagementService
         return $regras;
     }
 
-    public function criar(Pessoa|Ong $ator, array $dados, ?UploadedFile $imagem = null): Evento
+    public function criar(Pessoa|Ong $ator, array $dados, ?UploadedFile $imagem = null, ?string $chave = null): Evento
     {
         Gate::forUser($ator)->authorize('create', Evento::class);
         $agendas = $dados['agendas'] ?? [];
@@ -106,9 +109,22 @@ final class EventoManagementService
             AgendaManagementService::validarDuracao($agenda['data_inicio'], $agenda['data_fim'], "agendas.{$indice}.data_fim");
         }
 
-        $persistir = function (array $metadados = []) use ($ator, $dados, $agendas): Evento {
-            return DB::transaction(function () use ($ator, $dados, $agendas, $metadados) {
+        $intencao = $chave === null ? [] : [
+            'ator_tipo' => $ator instanceof Ong ? 'ong' : 'pessoa',
+            'ator_id' => $ator->getKey(),
+            'chave_hash' => hash('sha256', $chave),
+        ];
+        $dadosHash = $intencao === [] ? null : $this->hashDaCriacao($dados, $imagem);
+        if ($dadosHash !== null && ($repeticao = $this->repetirCriacao($ator, $intencao, $dadosHash)) !== null) {
+            return $repeticao;
+        }
+
+        $persistir = function (array $metadados = []) use ($ator, $dados, $agendas, $intencao, $dadosHash): Evento {
+            return DB::transaction(function () use ($ator, $dados, $agendas, $metadados, $intencao, $dadosHash) {
                 Gate::forUser($ator)->authorize('create', [Evento::class, true]);
+                if ($dadosHash !== null) {
+                    DB::table(self::CRIACOES_IDEMPOTENTES)->insert([...$intencao, 'dados_hash' => $dadosHash]);
+                }
                 $evento = new Evento($this->atributos($dados));
                 if (! $evento->forceFill([
                     ...$metadados,
@@ -126,12 +142,65 @@ final class EventoManagementService
                     }
                 }
                 $this->sincronizarAssociacoes($evento, $dados);
+                if ($dadosHash !== null) {
+                    DB::table(self::CRIACOES_IDEMPOTENTES)->where($intencao)->update(['evento_id' => $evento->getKey()]);
+                }
 
                 return $this->carregarDetalhes($evento->refresh());
             }, 3);
         };
 
-        return $imagem === null ? $persistir() : $this->images->withNewEventImage($imagem, $persistir);
+        try {
+            return $imagem === null ? $persistir() : $this->images->withNewEventImage($imagem, $persistir);
+        } catch (UniqueConstraintViolationException $exception) {
+            // A requisição concorrente pode ter concluído enquanto preparávamos a gravação.
+            if ($dadosHash !== null && ($repeticao = $this->repetirCriacao($ator, $intencao, $dadosHash)) !== null) {
+                return $repeticao;
+            }
+
+            throw $exception;
+        }
+    }
+
+    private function repetirCriacao(Pessoa|Ong $ator, array $intencao, string $dadosHash): ?Evento
+    {
+        $criacao = DB::table(self::CRIACOES_IDEMPOTENTES)->where($intencao)->useWritePdo()->first();
+        if ($criacao === null) {
+            return null;
+        }
+        if (! hash_equals($criacao->dados_hash, $dadosHash)) {
+            throw new ValidationConflictException('Esta tentativa de criação já foi usada com outros dados. Confira seus Eventos antes de iniciar outro cadastro.');
+        }
+
+        $evento = Evento::query()->useWritePdo()->find($criacao->evento_id);
+        if ($evento === null) {
+            throw new ValidationConflictException('O Evento desta tentativa de criação não está mais disponível.');
+        }
+
+        return $this->consultar($ator, $evento);
+    }
+
+    private function hashDaCriacao(array $dados, ?UploadedFile $imagem): string
+    {
+        unset($dados['imagem_evento']);
+        if ($imagem !== null) {
+            $hash = hash_file('sha256', $imagem->getPathname());
+            if ($hash === false) {
+                throw ValidationException::withMessages(['imagem_evento' => 'Não foi possível ler a imagem.']);
+            }
+            $dados['imagem_evento_sha256'] = $hash;
+        }
+
+        return hash('sha256', json_encode($this->ordenarDados($dados), JSON_THROW_ON_ERROR));
+    }
+
+    private function ordenarDados(array $dados): array
+    {
+        if (! array_is_list($dados)) {
+            ksort($dados, SORT_STRING);
+        }
+
+        return array_map(fn ($valor) => is_array($valor) ? $this->ordenarDados($valor) : $valor, $dados);
     }
 
     public function listar(Pessoa|Ong $ator, int $porPagina): Paginator

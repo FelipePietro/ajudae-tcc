@@ -68,9 +68,15 @@
 
         @if($integrated || ($flow['management_allowed'] ?? true))
         @if($integrated)
-            <div>
-            <p class="mx-auto mt-5 max-w-[1450px] px-4 text-sm sm:px-6 lg:px-8" id="event-editor-status">O envio do Evento para aprovação ainda está indisponível.</p>
-            <fieldset disabled class="min-w-0" aria-describedby="event-editor-status">
+            <form data-managed-create data-creation-scope="{{ $organizerManagement ? 'pessoa' : 'ong' }}:{{ request()->attributes->get('web_account')->getKey() }}"
+                data-csrf="{{ csrf_token() }}" data-list-url="{{ route($listRoute) }}" method="POST" action="{{ route('identity.events.store') }}" enctype="multipart/form-data">
+            @csrf
+            <p class="mx-auto mt-5 max-w-[1450px] px-4 text-sm sm:px-6 lg:px-8" id="event-editor-status" role="status" aria-live="polite">Carregando catálogos…</p>
+            <div data-creation-conflict hidden class="mx-auto mt-3 max-w-[1450px] px-4 sm:px-6 lg:px-8">
+                <x-botao-secundario :href="route($listRoute)" size="sm">Consultar meus Eventos</x-botao-secundario>
+                <x-botao-secundario as="button" type="button" data-new-creation size="sm">Iniciar outro Evento</x-botao-secundario>
+            </div>
+            <fieldset disabled data-create-fields class="min-w-0" aria-describedby="event-editor-status">
             <legend class="sr-only">Campos do evento</legend>
         @else
         <form data-event-editor onsubmit="return false;"
@@ -310,7 +316,7 @@
                                             type="number"
                                             id="vagas_evento"
                                             name="vagas_evento"
-                                            min="1"
+                                            min="1" max="4294967295"
                                             required
                                             value="{{ $integrated ? '' : old('vagas_evento', 30) }}"
                                             class="w-full min-w-0
@@ -472,7 +478,7 @@
                                        sm:p-6"
                             >
 
-                                <x-agenda-editor :flow="$flow ?? ['catalogs' => []]" :disabled="$integrated" />
+                                <x-agenda-editor :flow="$flow ?? ['catalogs' => []]" :disabled="false" />
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><label class="text-sm">Cidade<input name="cidade_evento" @unless($integrated) value="Guarulhos" @endunless class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2" maxlength="64"></label><label class="text-sm">Bairro<input name="bairro_evento" @unless($integrated) value="Bairro Exemplo" @endunless class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2" maxlength="64"></label><label class="text-sm">UF<input name="uf_evento" @unless($integrated) value="SP" @endunless maxlength="2" class="block w-full rounded-xl border border-[#d8d4ca] px-4 py-3 mt-2"></label></div>
                                 {{-- CEP --}}
                                 <div
@@ -494,7 +500,7 @@
                                         <input
                                             type="text"
                                             id="cep_evento"
-                                            name="cep_evento" data-event-postcode inputmode="numeric" autocomplete="postal-code" maxlength="9" pattern="[0-9]{5}-?[0-9]{3}" aria-describedby="event-postcode-hint"
+                                            name="cep_evento" data-event-postcode inputmode="numeric" autocomplete="postal-code" maxlength="9" pattern="[0-9]{5}-?[0-9]{3}" @unless($integrated) aria-describedby="event-postcode-hint" @endunless
                                             maxlength="8"
                                             required
                                             placeholder="11070100"
@@ -668,7 +674,7 @@
                                     </label>
 
 
-                                    <div
+                                    <div @if($integrated) data-create-skills @endif
                                         class="mt-3 flex
                                                flex-wrap gap-2"
                                     >
@@ -755,13 +761,13 @@
                                                    leading-5
                                                    text-neutral-400"
                                         >
-                                            PNG ou JPG · Máximo 5 MB · 16:9
+                                            PNG, JPG ou WebP · Máximo 5 MiB · 16:9 recomendado
                                         </span>
 
                                         <input
                                             type="file"
                                             name="imagem_evento"
-                                            accept="image/png,image/jpeg"
+                                            accept="image/png,image/jpeg,image/webp"
                                             class="hidden"
                                         >
 
@@ -1122,7 +1128,7 @@
 
             </div>
 
-        @if($integrated)</fieldset></div>@else</form>@endif
+        @if($integrated)</fieldset></form>@else</form>@endif
         @else
         <div class="px-4 py-6">@unless($integrated)<x-organizer-scope :flow="$flow" />@endunless</div>
         @endif

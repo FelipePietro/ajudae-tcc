@@ -63,11 +63,7 @@
 
             <h1 class="text-2xl font-semibold mb-5">Gestão de candidatos</h1>@unless($integrated)<x-organizer-scope :flow="$flow" />@endunless
             @if($integrated)
-                <section class="account-card">
-                    <h2>Candidaturas por Agenda</h2>
-                    <p class="mt-2">A consulta e a seleção de candidaturas ainda estão indisponíveis.</p>
-                    <x-botao-secundario :href="route('ong.eventos.index')" class="mt-4">Ver meus eventos</x-botao-secundario>
-                </section>
+                <x-managed-events candidates-only />
             @else
             @foreach($flow['candidate_events'] as $candidateEvent)
                 <x-agenda-candidates :flow="$candidateEvent" :expanded="$loop->first" />

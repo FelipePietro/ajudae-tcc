@@ -47,7 +47,11 @@
                from-[#174b36] to-[#4b9c73]"
     >
 
-        @if(!$integrated && $evento->imagem_evento_link)
+        @if($integrated)
+            @if($publicEventCover)
+                <img data-public-event-image src="{{ $publicEventCover }}" alt="" referrerpolicy="no-referrer" class="h-full w-full object-cover" hidden>
+            @endif
+        @elseif($evento->imagem_evento_link)
 
             <img
                 src="{{ $evento->imagem_evento_link }}"
@@ -112,7 +116,12 @@
             @if($integrated)
                 <section id="agendas-evento" class="rounded-xl border border-[#dedbd1] bg-white p-5">
                     <h2 class="font-semibold">Agendas e candidaturas</h2>
-                    <p class="mt-2 text-sm">A consulta de Agendas e o envio de candidaturas ainda estão indisponíveis.</p>
+                    @php($candidateViewer = request()->attributes->get('web_account'))
+                    @if($candidateViewer instanceof \App\Models\Pessoa && $candidateViewer->isApprovedVolunteer() && \App\Support\AccountAccess::canOperate($candidateViewer))
+                        <div data-public-agendas="{{ route('identity.application.agendas', $evento) }}" class="mt-3 space-y-2" role="status">Carregando Agendas…</div>
+                    @else
+                        <p class="mt-2 text-sm">Entre com uma conta de voluntário aprovada para consultar disponibilidade e se candidatar.</p>
+                    @endif
                 </section>
                 @if($place)
                     <section class="grid gap-6 rounded-xl border border-[#dedbd1] bg-white p-6">

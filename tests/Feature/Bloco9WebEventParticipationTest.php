@@ -157,6 +157,37 @@ class Bloco9WebEventParticipationTest extends TestCase
         $this->assertSame($independente->getKey(), $eventoIndependente->fresh()->finalizado_por_id);
     }
 
+    public function test_gestao_expoe_confiabilidade_formada_ou_em_formacao_separada_do_match(): void
+    {
+        $this->sessionFor($ong = $this->createOng('ativo'));
+        $evento = $this->evento($ong);
+        $formada = $this->pessoa();
+        $emFormacao = $this->pessoa();
+
+        for ($i = 0; $i < 3; $i++) {
+            $agenda = $this->agenda($evento);
+            $this->inscricao($agenda, $formada, 'participou')->forceFill([
+                'presenca' => true, 'presenca_confirmada_em' => now()->subDay(),
+            ])->save();
+        }
+        $agenda = $this->agenda($evento);
+        $this->inscricao($agenda, $formada, 'não participou')->forceFill([
+            'presenca' => false, 'presenca_confirmada_em' => now(),
+        ])->save();
+
+        $selecao = $this->agenda($evento);
+        $this->inscricao($selecao, $formada);
+        $this->inscricao($selecao, $emFormacao);
+        $candidaturas = collect($this->getJson("/gestao/agendas/{$selecao->getKey()}/inscricoes")
+            ->assertOk()->assertJsonCount(2, 'data.data')->json('data.data'))->keyBy('pessoa_id');
+
+        $this->assertSame(['formada' => true, 'score' => 80], $candidaturas[$formada->getKey()]['confiabilidade']);
+        $this->assertSame(0, $candidaturas[$formada->getKey()]['match']['total']);
+        $this->assertFalse($candidaturas[$emFormacao->getKey()]['confiabilidade']['formada']);
+        $this->assertNull($candidaturas[$emFormacao->getKey()]['confiabilidade']['score']);
+        $this->assertSame('Em formação — 0 de 3', $candidaturas[$emFormacao->getKey()]['confiabilidade']['estado']);
+    }
+
     private function pessoa(string $role = 'voluntario'): Pessoa
     {
         $id = ++$this->sequence;

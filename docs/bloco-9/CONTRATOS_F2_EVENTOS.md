@@ -75,7 +75,15 @@ Exemplo abreviado do 201 em sessão de ONG
 }
 ```
 
-Para incluir banner na criação, use multipart com os mesmos campos, `agendas[0][data_inicio]`, `agendas[0][data_fim]`, `agendas[0][vagas_agenda]` e `imagem_evento`. Aceita JPEG, PNG ou WebP íntegros até 5 MiB, 8.000 px por lado e 25 megapixels. Na gestão, `imagem_evento_link` aponta à leitura privada enquanto a imagem estiver no armazenamento gerenciado. A leitura pública da imagem gerenciada é liberada com a publicação.
+Para incluir banner na criação, use multipart com os mesmos campos, `agendas[0][data_inicio]`, `agendas[0][data_fim]`, `agendas[0][vagas_agenda]` e `imagem_evento`. Aceita JPEG, PNG ou WebP íntegros até 5 MiB, 8.000 px por lado e 25 megapixels. Na gestão, `imagem_evento_link` aponta à leitura privada enquanto a imagem estiver no armazenamento gerenciado. A leitura pública da imagem gerenciada é liberada com a publicação. No detalhe publicado, essa capa tem prioridade. Eventos sem referência gerenciada válida podem exibir a imagem legada pública. O detalhe não publica referências do disco privado.
+
+## Repetição da criação Web
+
+Na criação por `POST /gestao/eventos`, o cliente pode enviar o cabeçalho `Idempotency-Key` em JSON ou multipart. A chave aceita de 1 a 128 caracteres ASCII entre letras, números, ponto, sublinhado, hífen e dois-pontos. O editor integrado gera a chave e reaproveita a mesma tentativa ao reenviar uma solicitação sem confirmação.
+
+A operação e o tipo e ID do ator delimitam a chave. Após gravação, a mesma chave com os mesmos dados validados, incluindo as Agendas na mesma ordem e o conteúdo binário do banner, devolve 201 com o ID e a projeção atual do Evento. Dados validados diferentes para a mesma chave retornam 409. Uma chave nova pode criar outro Evento com os mesmos dados. Se o Evento associado à tentativa tiver sido removido, o reenvio retorna 409. Uma falha antes do commit permite repetir a tentativa.
+
+A chave é opcional para clientes Web existentes. O contrato Bearer mantém seu formato anterior.
 
 ## Erros e compatibilidade
 
