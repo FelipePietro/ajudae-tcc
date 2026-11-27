@@ -86,7 +86,9 @@ class IdentityBoundaryTest extends TestCase
         $this->get('/cadastro')->assertOk()
             ->assertSee('data-web-registration', false)
             ->assertDontSee('data-demo-seed', false);
-        $this->get('/cadastro/ong')->assertOk()->assertSee('O cadastro está indisponível');
+        $this->get('/cadastro/ong')->assertOk()
+            ->assertSee('data-web-registration', false)
+            ->assertDontSee('data-demo-seed', false);
         $this->get('/certificados/verificar')->assertOk()->assertSee('data-web-certificate-verification', false);
     }
 

@@ -115,6 +115,11 @@ export function initializeOrganizerLinks() {
             const { url, method, body } = selected;
             const { message } = await requestJson(url, { method, body, csrfToken });
             dialog.close();
+            if (!form && (body?.aceitar === true || method === 'DELETE')) {
+                location.reload();
+                return;
+            }
+            if (method === 'DELETE') document.dispatchEvent(new Event('organizer-links-updated'));
             await load(message, true);
             feedback.focus();
         } catch (error) {

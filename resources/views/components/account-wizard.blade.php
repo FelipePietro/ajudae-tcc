@@ -1,5 +1,5 @@
-@props(['demo' => null, 'sections', 'integrated' => false])
-@php($actor = $integrated ? 'pessoa' : $demo['actor'])
+@props(['demo' => null, 'sections', 'integrated' => false, 'integratedActor' => 'pessoa'])
+@php($actor = $integrated ? $integratedActor : $demo['actor'])
 <section class="account-wizard" data-account-wizard data-actor="{{ $actor }}" @if($integrated) data-web-registration @endif>
     <aside class="account-wizard-rail">
         <span class="account-eyebrow">Um passo de cada vez</span><h2>Comece a fazer parte.</h2>
@@ -11,7 +11,7 @@
         <div class="account-wizard-progress"><span data-step-count>Passo 1 de {{ count($sections) }}</span><span>Cadastro {{ $actor === 'ong' ? 'da ONG' : 'de Pessoa' }}</span></div>
         <progress data-step-progress max="{{ count($sections) }}" value="1" aria-label="Progresso do cadastro"></progress>
         <div data-wizard-error class="account-form-error" role="alert" tabindex="-1" hidden></div>
-        <form method="POST" action="{{ $integrated ? route('identity.registration.store') : ($actor === 'ong' ? route('ong.cadastrar') : route('cadastro.pessoa.finalizar')) }}" @unless($integrated) data-demo-registration onsubmit="return false;" autocomplete="off" @endunless novalidate>
+        <form method="POST" action="{{ $integrated ? route($actor === 'ong' ? 'identity.ong.registration' : 'identity.registration.store') : ($actor === 'ong' ? route('ong.cadastrar') : route('cadastro.pessoa.finalizar')) }}" @if($integrated && $actor === 'ong') enctype="multipart/form-data" @endif @unless($integrated) data-demo-registration onsubmit="return false;" autocomplete="off" @endunless novalidate>
             @csrf
             @foreach($sections as $index => $section)
                 <section data-step="{{ $index }}" @if($index) hidden @endif aria-labelledby="step-heading-{{ $index }}">
@@ -22,12 +22,12 @@
                             @if(request()->boolean('inspecao'))<x-botao-secundario as="button" :href="null" type="button" data-fill-example size="sm">Preencher campos</x-botao-secundario>@endif
                             <div class="account-note" data-document data-required-selection><strong>{{ $demo['actor'] === 'ong' ? 'Logo institucional' : 'Foto de perfil' }} · obrigatória</strong><p>Selecione uma imagem para conferir o cadastro.</p><x-botao-secundario as="label" size="sm" for="profile-image">Escolher imagem local</x-botao-secundario><input id="profile-image" type="file" accept="image/jpeg,image/png,image/webp" data-local-file>@if(request()->boolean('inspecao'))<x-botao-secundario as="button" :href="null" type="button" data-file-example size="sm">Continuar sem arquivo</x-botao-secundario>@endif<p data-file-feedback role="status">Nenhuma imagem enviada.</p><x-botao-secundario as="button" :href="null" type="button" data-file-clear hidden size="sm">Descartar seleção</x-botao-secundario></div>
                         @endif
-                        @if($actor === 'ong' && $index === 0)@if(request()->boolean('inspecao'))<x-botao-secundario as="button" :href="null" type="button" data-cnpj-demo>Conferir CNPJ</x-botao-secundario>@endif<p data-cnpj-feedback role="status" class="account-hint"></p>@endif
+                        @if(!$integrated && $actor === 'ong' && $index === 0)@if(request()->boolean('inspecao'))<x-botao-secundario as="button" :href="null" type="button" data-cnpj-demo>Conferir CNPJ</x-botao-secundario>@endif<p data-cnpj-feedback role="status" class="account-hint"></p>@endif
                     @elseif($section['special'] === 'preferences')
                         <x-volunteer-preferences :demo="$demo" />
                     @elseif($section['special'] === 'documents')
                         @if($integrated)
-                            <div class="account-note"><p>O envio de arquivos não está disponível neste formulário. Sua conta permanece pendente da validação dos documentos.</p></div>
+                            <div class="account-note"><p>Depois de criar a conta, entre para enviar os documentos pela sua área privada.</p></div>
                             <div class="account-field">
                                 <label for="codigo_padrinho">Código de indicação de padrinho (opcional)</label>
                                 <input id="codigo_padrinho" name="codigo_padrinho" maxlength="64" pattern="[0-9a-fA-F]{64}" autocomplete="off" spellcheck="false" aria-describedby="codigo_padrinho-hint codigo_padrinho-error">
@@ -39,13 +39,18 @@
                             <x-private-documents :demo="$demo" :registration="true" />
                         @endif
                     @elseif($section['special'] === 'ong-documents')
+                        @if($integrated)
+                            <x-private-documents institutional-registration />
+                        @else
                         <div class="account-document" data-document data-required-selection><div class="account-document-body"><h3>Identidade do responsável <small>Obrigatória</small></h3><p>A identificação do responsável fica na área privada. Nenhum documento será enviado nesta revisão.</p><x-botao-secundario as="label" size="sm" for="ong-document">Selecionar arquivo local</x-botao-secundario><input id="ong-document" type="file" data-local-file accept="application/pdf,image/jpeg,image/png">@if(request()->boolean('inspecao'))<x-botao-secundario as="button" :href="null" type="button" data-file-example size="sm">Continuar sem arquivo</x-botao-secundario>@endif<p data-file-feedback role="status">Nenhum documento enviado ou armazenado.</p><x-botao-secundario as="button" :href="null" type="button" data-file-clear hidden size="sm">Descartar seleção</x-botao-secundario></div></div>
+                        @endif
                     @elseif($section['special'] === 'credentials')
                         <x-account-field :field="['key' => 'login_'.$actor, 'label' => 'Login da conta', 'type' => 'text', 'required' => true, 'hint' => 'Informe seu nome de login.']" :value="!$integrated && $demo['seed'] ? $demo['account']['login_'.$actor] : ''" />
                         @if($integrated)
+                            @php($password = 'senha_'.$actor)
                             <div class="account-fields">
-                                <div class="account-field"><label for="senha_pessoa">Senha *</label><input id="senha_pessoa" name="senha_pessoa" type="password" required minlength="8" autocomplete="new-password" aria-describedby="senha_pessoa-hint senha_pessoa-error"><small id="senha_pessoa-hint">Mínimo de 8 caracteres.</small><small id="senha_pessoa-error" class="account-error" data-field-error></small></div>
-                                <div class="account-field"><label for="senha_pessoa_confirmation">Confirmar senha *</label><input id="senha_pessoa_confirmation" name="senha_pessoa_confirmation" type="password" required minlength="8" autocomplete="new-password" aria-describedby="senha_pessoa_confirmation-error"><small id="senha_pessoa_confirmation-error" class="account-error" data-field-error></small></div>
+                                <div class="account-field"><label for="{{ $password }}">Senha *</label><input id="{{ $password }}" name="{{ $password }}" type="password" required minlength="8" autocomplete="new-password" aria-describedby="{{ $password }}-hint {{ $password }}-error"><small id="{{ $password }}-hint">Mínimo de 8 caracteres.</small><small id="{{ $password }}-error" class="account-error" data-field-error></small></div>
+                                <div class="account-field"><label for="{{ $password }}_confirmation">Confirmar senha *</label><input id="{{ $password }}_confirmation" name="{{ $password }}_confirmation" type="password" required minlength="8" autocomplete="new-password" aria-describedby="{{ $password }}_confirmation-error"><small id="{{ $password }}_confirmation-error" class="account-error" data-field-error></small></div>
                             </div>
                         @else
                         <div class="account-fields">
@@ -74,9 +79,9 @@
         @if($integrated)
             <section class="account-completion" data-completion hidden tabindex="-1">
                 <span class="account-completion-icon" aria-hidden="true">✓</span>
-                <h1>Conta criada</h1>
-                <p>Entre com seu login para acompanhar a validação do cadastro.</p>
-                <x-botao-primario :href="route('login')">Entrar na minha conta</x-botao-primario>
+                <h1>{{ $actor === 'ong' ? 'Cadastro da ONG recebido' : 'Conta criada' }}</h1>
+                <p>{{ $actor === 'ong' ? 'O cadastro institucional aguarda aprovação.' : 'Seu cadastro aguarda validação. Entre para enviar os documentos e acompanhar a análise.' }}</p>
+                <x-botao-primario :href="route('login', $actor === 'ong' ? ['tipo' => 'ong'] : [])">Entrar na minha conta</x-botao-primario>
             </section>
             <noscript><x-feedback>Ative o JavaScript para preencher e enviar o cadastro.</x-feedback></noscript>
         @else

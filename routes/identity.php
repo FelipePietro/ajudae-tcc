@@ -14,6 +14,7 @@ use App\Http\Controllers\WebPrivacyRequestController;
 use App\Http\Controllers\WebRankingController;
 use App\Http\Middleware\ResolveWebAccount;
 use App\Support\WebNavigation;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(ResolveWebAccount::class.':public')->group(function (): void {
@@ -32,7 +33,11 @@ Route::middleware(ResolveWebAccount::class.':public')->group(function (): void {
     Route::get('/cadastro', [WebPessoaRegistrationController::class, 'create'])->name('cadastro.pessoa')->block();
     Route::post('/cadastro', [WebPessoaRegistrationController::class, 'store'])
         ->middleware('throttle:5,1')->name('identity.registration.store')->block();
-    Route::view('/cadastro/ong', 'auth.registration-unavailable', ['institution' => true])->name('ong.cadastrar.form')->block();
+    Route::get('/cadastro/ong', function (Request $request) {
+        return $request->attributes->has('web_account')
+            ? redirect()->route('conta')
+            : view('ong.cadastro_ong');
+    })->name('ong.cadastrar.form')->block();
 });
 
 require __DIR__.'/web-account-operations.php';
