@@ -2,9 +2,13 @@
 @section('title', 'Minha jornada')
 @section('content')
 @if(isset($ownProfile))
-<div data-own-profile>
+<div data-own-profile data-person-id="{{ request()->attributes->get('web_account')?->pessoa_id }}">
     <section class="account-profile-hero">
-        <div class="account-avatar" aria-hidden="true">{{ $webNavigation->initials }}</div>
+        @if(!empty($ownProfile['photoUrl']))
+            <img class="account-avatar" src="{{ $ownProfile['photoUrl'] }}" alt="Foto de {{ $ownProfile['name'] }}">
+        @else
+            <div class="account-avatar" aria-hidden="true">{{ $webNavigation->initials }}</div>
+        @endif
         <div>
             <span class="account-eyebrow">Meus dados pessoais</span>
             <h1 class="break-words">{{ $ownProfile['name'] }}</h1>
@@ -87,11 +91,13 @@
                 </section>
             @endif
             @if($ownProfile['approved'])
-                <section id="confiabilidade" tabindex="-1" class="account-card">
-                    <h2>Confiabilidade</h2><p>A consulta da confiabilidade ainda está indisponível nesta página.</p>
+                <section id="confiabilidade" tabindex="-1" class="account-card" data-reliability data-reliability-url="/conta/pessoa/{{ request()->attributes->get('web_account')?->pessoa_id }}/confiabilidade">
+                    <h2>Confiabilidade</h2>
+                    <p data-reliability-status>Carregando confiabilidade…</p>
                 </section>
-                <section id="meu-xp" tabindex="-1" class="account-card">
-                    <h2>Meu XP</h2><p>A consulta de XP e conquistas ainda está indisponível nesta página.</p>
+                <section id="meu-xp" tabindex="-1" class="account-card" data-own-xp>
+                    <h2>Meu XP</h2>
+                    <p data-own-xp-status>Carregando XP…</p>
                 </section>
             @endif
         </div>

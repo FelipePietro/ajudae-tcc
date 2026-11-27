@@ -5,7 +5,11 @@
 @if(isset($ownProfile))
 <x-breadcrumb-ong :raiz-href="$webNavigation->institutionalPanel ? route('ong.painel') : route('inicio')" :raiz-label="$webNavigation->institutionalPanel ? 'Dashboard' : 'Início'" :itens="[['label' => 'Minha organização']]" />
 <section class="account-profile-hero">
-    <div class="account-avatar" aria-hidden="true">{{ $webNavigation->initials }}</div>
+    @if(!empty($ownProfile['photoUrl']))
+        <img class="account-avatar" src="{{ $ownProfile['photoUrl'] }}" alt="Foto de {{ $ownProfile['name'] }}">
+    @else
+        <div class="account-avatar" aria-hidden="true">{{ $webNavigation->initials }}</div>
+    @endif
     <div>
         <span class="account-eyebrow">Minha organização</span>
         <h1 class="break-words">{{ $ownProfile['name'] }}</h1>

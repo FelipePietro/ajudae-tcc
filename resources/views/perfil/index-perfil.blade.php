@@ -68,7 +68,11 @@
                         >
 
                             @if($integrated)
-                                <span aria-hidden="true" class="text-xl font-semibold">{{ mb_strtoupper(mb_substr($nome_user, 0, 2)) }}</span>
+                                @if(!empty($foto_user))
+                                    <img src="{{ $foto_user }}" alt="Foto de {{ $nome_user }}" class="h-full w-full object-cover">
+                                @else
+                                    <span aria-hidden="true" class="text-xl font-semibold">{{ mb_strtoupper(mb_substr($nome_user, 0, 2)) }}</span>
+                                @endif
                             @else
                             <img
                                 src="{{ $foto_user }}"
