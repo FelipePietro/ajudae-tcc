@@ -7,6 +7,8 @@ Route::prefix('gestao')->name('identity.events.')->group(function (): void {
     Route::get('/eventos', [WebEventManagementController::class, 'index'])->name('index')->block();
     Route::get('/eventos/catalogos', [WebEventManagementController::class, 'catalogos'])->name('catalogs')->block();
     Route::post('/eventos', [WebEventManagementController::class, 'store'])->name('store')->block();
+    Route::match(['get', 'post'], '/eventos/intencao', [WebEventManagementController::class, 'creationIntent'])->name('intent')->block();
+    Route::delete('/eventos/intencao', [WebEventManagementController::class, 'clearCreationIntent'])->name('intent.clear')->block();
     Route::get('/eventos/{evento}', [WebEventManagementController::class, 'show'])->whereNumber('evento')->name('show')->block();
     Route::patch('/eventos/{evento}', [WebEventManagementController::class, 'update'])->whereNumber('evento')->name('update')->block();
     Route::post('/eventos/{evento}/cancelar', [WebEventManagementController::class, 'cancelar'])->whereNumber('evento')->name('cancel')->block();

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Agenda;
 use App\Models\CatEvento;
 use App\Models\Evento;
+use App\Models\Inscricao;
 use App\Models\Ong;
 use App\Models\Pessoa;
 use App\Models\VinculoOngOrganizador;
@@ -69,6 +70,50 @@ class Bloco9EventManagementTest extends TestCase
             ->assertHeader('Cache-Control', 'no-store, private');
         $this->getJson("/api/v1/eventos/{$id}")->assertNotFound();
         $this->get("/api/v1/eventos/{$id}/imagem")->assertNotFound();
+    }
+
+    public function test_web_retem_intencao_na_sessao_ate_confirmacao_do_cliente(): void
+    {
+        $this->webComo($this->createOng('ativo'));
+        $url = '/gestao/eventos/intencao';
+        $this->getJson($url)->assertOk()->assertJsonPath('data.chave', null);
+        $chave = $this->postJson($url)->assertOk()->json('data.chave');
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{32}$/', $chave);
+        $this->postJson($url)->assertOk()->assertJsonPath('data.chave', $chave);
+
+        $dados = [...$this->evento(), 'agendas' => [$this->agenda(2)]];
+        $cabecalho = ['Idempotency-Key' => $chave];
+        $id = $this->postJson('/gestao/eventos', $dados, $cabecalho)->assertCreated()->json('data.evento_id');
+
+        $this->getJson($url)->assertOk()->assertJsonPath('data.chave', $chave);
+        $this->postJson('/gestao/eventos', $dados, $cabecalho)->assertCreated()->assertJsonPath('data.evento_id', $id);
+        $this->assertDatabaseCount('evento', 1);
+        $this->assertDatabaseCount('agenda', 1);
+
+        $outra = ($chave[0] === 'a' ? 'b' : 'a').substr($chave, 1);
+        $this->deleteJson($url, ['chave' => $outra])->assertNoContent();
+        $this->getJson($url)->assertOk()->assertJsonPath('data.chave', $chave);
+
+        $this->deleteJson($url, ['chave' => $chave])->assertNoContent();
+        $this->getJson($url)->assertOk()->assertJsonPath('data.chave', null);
+        $nova = $this->postJson($url)->assertOk()->json('data.chave');
+        $this->assertNotSame($chave, $nova);
+
+        $this->deleteJson($url, ['chave' => $chave])->assertNoContent();
+        $this->getJson($url)->assertOk()->assertJsonPath('data.chave', $nova);
+    }
+
+    public function test_intencao_web_exige_ator_autorizado_para_criar_evento(): void
+    {
+        if (! config('identity.enabled')) {
+            $this->markTestSkipped('Executar com AJUDAE_WEB_AUTH=true.');
+        }
+        $url = '/gestao/eventos/intencao';
+        $this->getJson($url)->assertUnauthorized();
+        $this->webComo($this->createOng());
+        $this->getJson($url)->assertForbidden();
+        $this->postJson($url)->assertForbidden();
+        $this->deleteJson($url, ['chave' => str_repeat('a', 32)])->assertForbidden();
     }
 
     public function test_web_reenvia_a_mesma_criacao_sem_duplicar_e_rejeita_dados_diferentes(): void
@@ -189,6 +234,100 @@ class Bloco9EventManagementTest extends TestCase
         foreach (["/gestao/eventos/{$id}/imagem", '/storage/private/banner.png', null] as $link) {
             $evento->forceFill(['imagem_evento_link' => $link])->save();
             $this->get("/eventos/{$id}")->assertOk()->assertDontSee('data-public-event-image');
+        }
+    }
+
+    public function test_detalhe_de_evento_publicado_mostra_a_disponibilidade_de_agendas_em_todos_os_contextos(): void
+    {
+        $this->withoutVite();
+        $this->webComo($ong = $this->createOng('ativo'));
+
+        $inicio = now()->addMinutes(30);
+        $id = $this->postJson('/gestao/eventos', [
+            ...$this->evento(),
+            'agendas' => [
+                $this->agenda(2),
+                $this->agenda(1, 3),
+                $this->agenda(3, 4),
+                [
+                    'data_inicio' => $inicio->toISOString(),
+                    'data_fim' => $inicio->copy()->addHour()->toISOString(),
+                    'vagas_agenda' => 7,
+                ],
+            ],
+        ])->assertCreated()->json('data.evento_id');
+        $evento = Evento::findOrFail($id);
+        [$aberta, $lotada, $cancelada] = $evento->agendas()->orderBy('agenda_id')->get()->all();
+        $cancelada->forceFill([
+            'status_ativo' => 'cancelado', 'motivo_cancelamento' => 'Motivo sintético reservado',
+        ])->save();
+
+        $voluntario = $this->createPessoa();
+        $outraPessoa = $this->createPessoa('voluntario', [
+            'cpf_pessoa' => '00000000001', 'email_pessoa' => 'outro@example.test', 'login_pessoa' => 'outro',
+        ]);
+        $pendente = $this->createPessoa('voluntario', [
+            'cpf_pessoa' => '00000000002', 'email_pessoa' => 'pendente@example.test', 'login_pessoa' => 'pendente',
+            'status_validacao' => 'aguardando_validacao',
+        ]);
+        $organizador = $this->createPessoa('organizador', [
+            'cpf_pessoa' => '00000000003', 'email_pessoa' => 'organizador@example.test', 'login_pessoa' => 'organizador',
+        ]);
+
+        foreach ([[$aberta, $voluntario, 'aprovado'], [$aberta, $outraPessoa, 'pendente'], [$lotada, $voluntario, 'aprovado']] as [$agenda, $pessoa, $status]) {
+            Inscricao::create([
+                'agenda_id' => $agenda->getKey(),
+                'pessoa_id' => $pessoa->getKey(),
+                'status_inscricao' => $status,
+                'dt_inscricao' => now(),
+                'carta_apresentacao' => 'Carta sintética reservada',
+            ]);
+        }
+
+        $url = "/eventos/{$id}";
+        $candidatura = "/candidatura/{$id}/agendas";
+        $this->flushSession();
+        Auth::forgetGuards();
+        $this->get($url)->assertNotFound();
+        $evento->forceFill(['status_evento' => 'ativo'])->save();
+
+        $this->get($url)->assertOk()
+            ->assertSee('1 vaga disponível')
+            ->assertSee('A agenda já está lotada.')
+            ->assertSee('O evento ou a agenda não está disponível para candidaturas.')
+            ->assertSee('A candidatura fecha uma hora antes do início da agenda.')
+            ->assertSee($aberta->data_inicio->toIso8601String())
+            ->assertDontSee('Carta sintética reservada')
+            ->assertDontSee('Motivo sintético reservado')
+            ->assertDontSee('7 vagas disponíveis')
+            ->assertDontSee('data-agenda-choice="available"', false)
+            ->assertDontSee('data-personalized-agendas', false);
+        $this->getJson($candidatura)->assertUnauthorized();
+
+        foreach ([$ong, $pendente, $organizador] as $conta) {
+            $this->webComo($conta);
+            $this->get($url)->assertOk()->assertSee('1 vaga disponível')->assertDontSee('data-personalized-agendas', false);
+            $this->getJson($candidatura)->assertForbidden();
+        }
+
+        $this->webComo($voluntario);
+        $this->get($url)->assertOk()->assertSee('1 vaga disponível')->assertSee('data-personalized-agendas', false)
+            ->assertSee('data-agenda-choice="unavailable" hidden="hidden"', false)
+            ->assertDontSee('data-agenda-choice="available" hidden="hidden"', false)
+            ->assertDontSee('Você já possui uma inscrição nesta agenda.');
+        $this->getJson($candidatura)->assertOk()->assertJsonFragment([
+            'id' => $aberta->getKey(), 'impedimento' => 'Você já possui uma inscrição nesta agenda.',
+        ]);
+
+        $aberta->update(['vagas_agenda' => 1]);
+        $this->get($url)->assertOk()
+            ->assertSee('data-agenda-choice="available" hidden="hidden"', false)
+            ->assertDontSee('data-agenda-choice="unavailable" hidden="hidden"', false)
+            ->assertSee('Nenhuma Agenda disponível para candidatura.');
+
+        foreach (['aguardando a confirmação', 'cancelado'] as $status) {
+            $evento->forceFill(['status_evento' => $status])->save();
+            $this->get($url)->assertNotFound();
         }
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evento;
+use App\Services\CandidaturaService;
 use App\Services\ManagedImageStorage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -40,15 +41,16 @@ final class PublicEventPagesController extends Controller
         ]);
     }
 
-    public function show(Request $request, ManagedImageStorage $images, string $id)
+    public function show(Request $request, ManagedImageStorage $images, CandidaturaService $candidaturas, string $id)
     {
         $evento = $this->published()->addSelect([
-            'imagem_evento_link', 'managed_image_disk', 'managed_image_path',
+            'status_evento', 'imagem_evento_link', 'managed_image_disk', 'managed_image_path',
             'managed_image_mime', 'managed_image_size',
         ])->whereKey($id)->firstOrFail();
 
         return view('eventos.detalhe', [
             'publicEvent' => $evento,
+            'publicAgendas' => $candidaturas->agendasPublicas($evento),
             'publicEventCover' => $images->safeReference($evento)
                 ? $images->publicUrl($evento)
                 : $this->capaLegada($evento->imagem_evento_link, $request->getHost()),

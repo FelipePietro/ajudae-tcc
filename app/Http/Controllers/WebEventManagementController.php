@@ -43,6 +43,44 @@ final class WebEventManagementController extends Controller
         ]);
     }
 
+    public function creationIntent(Request $request)
+    {
+        $ator = $this->ator($request);
+        Gate::forUser($ator)->authorize('create', Evento::class);
+
+        $sessao = $request->session();
+        $campo = $this->creationIntentSessionKey($ator);
+        $chave = $sessao->get($campo);
+        if ($chave === null && $request->isMethod('POST')) {
+            $chave = bin2hex(random_bytes(16));
+            $sessao->put($campo, $chave);
+        }
+
+        return ApiResponse::success(['chave' => $chave]);
+    }
+
+    public function clearCreationIntent(Request $request)
+    {
+        $ator = $this->ator($request);
+        Gate::forUser($ator)->authorize('create', Evento::class);
+        $dados = $request->validate(['chave' => ['required', 'string', 'regex:/\\A[a-f0-9]{32}\\z/']]);
+
+        $sessao = $request->session();
+        $campo = $this->creationIntentSessionKey($ator);
+        if ($sessao->get($campo) === $dados['chave']) {
+            $sessao->forget($campo);
+        }
+
+        return response()->noContent();
+    }
+
+    private function creationIntentSessionKey(Pessoa|Ong $ator): string
+    {
+        $tipo = $ator instanceof Ong ? 'ong' : 'pessoa';
+
+        return "web_event_creation_intents.{$tipo}.{$ator->getKey()}";
+    }
+
     public function show(Request $request, Evento $evento, EventoManagementService $service)
     {
         return ApiResponse::success(new EventoResource($service->consultar($this->ator($request), $evento)));

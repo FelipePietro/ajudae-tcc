@@ -43,6 +43,23 @@ test('vagas inválidas são rejeitadas, capacidade da Agenda independe do Evento
     assert.equal(agendaPayload(row('2026-12-04T09:00','2026-12-04T10:00','1.5')), null);
     assert.equal(agendaPayload(row('2026-12-04T09:00','2026-12-04T10:00','50')).vagas_agenda,50);
 });
+test('edição ignora horários com segundos quando os campos de minuto não mudaram', () => {
+    const inicio = '2026-12-04T09:00';
+    const fim = '2026-12-04T10:00';
+    const agenda = {
+        data_inicio: new Date(inicio + ':37').toISOString(),
+        data_fim: new Date(fim + ':37').toISOString(),
+        vagas_agenda: 4,
+    };
+
+    assert.deepEqual(agendaPayload(row(inicio, fim, '4'), agenda), {});
+    assert.deepEqual(agendaPayload(row(inicio, fim, '5'), agenda), { vagas_agenda: 5 });
+    assert.equal(agendaPayload(row(inicio, '2026-12-04T09:30', '4'), agenda), null);
+    assert.deepEqual(agendaPayload(row(inicio, '2026-12-04T09:31', '4'), agenda), {
+        data_fim: new Date('2026-12-04T09:31').toISOString(),
+    });
+});
+
 test('multipart aninha múltiplas Agendas e imagem_evento, sem campos de titularidade', () => {
     const payload = eventPayload(form('online', {habilidades:['8']}));
     payload.agendas = [agendaPayload(row('2026-12-04T09:00','2026-12-04T10:00','50')),agendaPayload(row('2026-12-05T09:00','2026-12-05T10:00','60'))];
@@ -70,10 +87,23 @@ test('a mesma criação conserva a chave entre tentativas e ao reabrir a página
     const key = draft.get();
     assert.match(key, /^[a-f0-9]{32}$/);
     assert.equal(draft.get(), key);
+    assert.equal(draft.stored(), key);
     assert.equal(eventCreationIntent('ong:1', storage).get(), key);
     assert.notEqual(eventCreationIntent('pessoa:1', storage).get(), key);
     draft.clear();
     assert.notEqual(eventCreationIntent('ong:1', storage).get(), key);
+});
+
+test('intenção mantida só em memória é reconhecida quando o navegador recusa a gravação', () => {
+    const storage = {
+        getItem: () => null,
+        setItem: () => { throw new DOMException('Sem espaço', 'QuotaExceededError'); },
+    };
+    const draft = eventCreationIntent('ong:1', storage);
+    const key = draft.get();
+
+    assert.equal(draft.get(), key);
+    assert.equal(draft.stored(), null);
 });
 
 test('confiabilidade exibe a pontuação formada ou o estado informado pelo contrato', () => {
