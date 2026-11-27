@@ -69,7 +69,8 @@
         @if($integrated || ($flow['management_allowed'] ?? true))
         @if($integrated)
             <form data-managed-create data-creation-scope="{{ $organizerManagement ? 'pessoa' : 'ong' }}:{{ request()->attributes->get('web_account')->getKey() }}"
-                data-csrf="{{ csrf_token() }}" data-list-url="{{ route($listRoute) }}" method="POST" action="{{ route('identity.events.store') }}" enctype="multipart/form-data">
+                data-creation-intent-url="{{ route('identity.events.intent') }}" data-csrf="{{ csrf_token() }}" data-list-url="{{ route($listRoute) }}"
+                method="POST" action="{{ route('identity.events.store') }}" enctype="multipart/form-data">
             @csrf
             <p class="mx-auto mt-5 max-w-[1450px] px-4 text-sm sm:px-6 lg:px-8" id="event-editor-status" role="status" aria-live="polite">Carregando catálogos…</p>
             <div data-creation-conflict hidden class="mx-auto mt-3 max-w-[1450px] px-4 sm:px-6 lg:px-8">

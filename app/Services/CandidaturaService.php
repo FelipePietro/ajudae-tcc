@@ -8,6 +8,7 @@ use App\Models\Evento;
 use App\Models\Inscricao;
 use App\Models\Pessoa;
 use App\Support\AccountAccess;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 final class CandidaturaService
@@ -72,22 +73,44 @@ final class CandidaturaService
 
     public function agendas(Evento $evento, Pessoa $pessoa): array
     {
-        return $evento->agendas()
-            ->withCount(['inscricoes as ocupadas' => fn ($query) => $query
-                ->whereIn('status_inscricao', EventoOperationalService::STATUS_OCUPANDO_VAGA)])
+        return $this->agendasComOcupacao($evento)
             ->withExists(['inscricoes as inscrita' => fn ($query) => $query
                 ->where('pessoa_id', $pessoa->getKey())])
-            ->orderBy('data_inicio')
-            ->orderBy('agenda_id')
             ->get()
             ->map(fn (Agenda $agenda) => [
                 'id' => $agenda->getKey(),
                 'inicio' => $agenda->data_inicio->toISOString(),
                 'fim' => $agenda->data_fim->toISOString(),
                 'vagas' => $agenda->vagas_agenda,
-                'disponiveis' => max(0, $agenda->vagas_agenda - $agenda->ocupadas),
-                'impedimento' => $this->impedimento($evento, $agenda, $agenda->inscrita, $agenda->ocupadas),
+                ...$this->disponibilidade($evento, $agenda, $agenda->inscrita),
             ])->all();
+    }
+
+    public function agendasPublicas(Evento $evento): array
+    {
+        return $this->agendasComOcupacao($evento)->get()
+            ->map(fn (Agenda $agenda) => [
+                'inicio' => $agenda->data_inicio,
+                'fim' => $agenda->data_fim,
+                ...$this->disponibilidade($evento, $agenda, false),
+            ])->all();
+    }
+
+    private function agendasComOcupacao(Evento $evento): HasMany
+    {
+        return $evento->agendas()
+            ->withCount(['inscricoes as ocupadas' => fn ($query) => $query
+                ->whereIn('status_inscricao', EventoOperationalService::STATUS_OCUPANDO_VAGA)])
+            ->orderBy('data_inicio')
+            ->orderBy('agenda_id');
+    }
+
+    private function disponibilidade(Evento $evento, Agenda $agenda, bool $inscrita): array
+    {
+        return [
+            'disponiveis' => max(0, $agenda->vagas_agenda - $agenda->ocupadas),
+            'impedimento' => $this->impedimento($evento, $agenda, $inscrita, $agenda->ocupadas),
+        ];
     }
 
     public function desistir(Pessoa $pessoa, Inscricao $inscricao): Inscricao

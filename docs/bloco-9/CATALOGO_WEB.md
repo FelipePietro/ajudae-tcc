@@ -45,8 +45,8 @@ Uploads usam `local` privado ou `railway_private`, guardam disco, chave interna,
 
 | Operação e tela | Método e URI | Acesso e entrada | Resposta e implementação |
 | --- | --- | --- | --- |
-| Feed e detalhe | `GET /feed`, `GET /eventos/{id}` | Público, apenas Evento publicado no detalhe público. Filtros do feed no GET. | HTML com projeção pública de `PublicEventPagesController`, RN011–RN016. |
-| Escolher Agenda | `GET /candidatura/{evento}/agendas` | Voluntário aprovado, Evento público. | `data` lista com Agenda, janela, vagas e motivo de indisponibilidade, `CandidaturaService`. |
+| Feed e detalhe | `GET /feed`, `GET /eventos/{id}` | Público, apenas Evento publicado no detalhe público. Filtros do feed no GET. | HTML com projeção pública de `PublicEventPagesController`. O detalhe inclui os horários e a disponibilidade agregada por Agenda, inclusive os estados de lotação, indisponibilidade e prazo encerrado. RN011–RN016. |
+| Escolher Agenda | `GET /candidatura/{evento}/agendas` | Voluntário aprovado, Evento público. | `data` lista com Agenda, janela, vagas e impedimentos pessoais ou gerais, `CandidaturaService`. A tela de candidatura e o detalhe para elegíveis podem consultar essa projeção. |
 | Enviar candidatura | `POST /candidatura/{evento}/enviar` | Voluntário aprovado. `agenda_id` positivo, `declarou_estudante` booleano opcional e `carta_apresentacao` opcional até 2.000 caracteres. | `201`, `InscricaoResource`. `409` se inelegível, duplicada, vencida ou lotada. RN014–RN017. |
 | Minhas candidaturas e desistência | `GET /minhas-candidaturas/dados`, `DELETE /minhas-candidaturas/{inscricao}` | Titular voluntário. `page` na lista, sem body na desistência. | Paginação simples com `evento`, `inicio`, `status`, `carta`, `desistir_url`. Desistência `data:null`, preserva histórico, RN017/RN018. |
 

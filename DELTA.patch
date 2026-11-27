@@ -1,0 +1,75 @@
+--- a/resources/views/eventos/detalhe.blade.php
++++ b/resources/views/eventos/detalhe.blade.php
+@@ -4,6 +4,7 @@
+     $viewer = $integrated ? request()->attributes->get('web_account') : null;
+     $canApply = $viewer instanceof \App\Models\Pessoa
+         && $viewer->isApprovedVolunteer() && \App\Support\AccountAccess::canOperate($viewer);
++    $hasOpenAgenda = $integrated && collect($publicAgendas)->contains(fn ($agenda) => $agenda['impedimento'] === null);
+     $place = implode(', ', array_filter([$evento->cidade_evento, $evento->uf_evento]));
+     $mode = match ($evento->modalidade_evento) {
+         'presencial' => 'Presencial', 'online' => 'Online', 'hibrido' => 'Híbrido', default => null,
+@@ -343,12 +344,14 @@
+                 </p>
+ 
+                 @if($integrated)
+-                    <p id="agenda-availability" class="mt-2 text-sm">A disponibilidade é consultada por Agenda.</p>
++                    <p id="agenda-availability" class="mt-2 text-sm" role="status">
++                        <span data-agenda-open @if(!$hasOpenAgenda) hidden @endif>A disponibilidade é consultada por Agenda.</span>
++                        <span data-agenda-unavailable @if($hasOpenAgenda) hidden @endif>Nenhuma Agenda disponível para candidatura.</span>
++                    </p>
+                     @if($canApply)
+-                        <x-botao-primario :href="route('candidatura.form', ['evento' => $evento->getKey()])" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
+-                    @else
+-                        <x-botao-primario as="button" disabled aria-describedby="agenda-availability" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
++                        <x-botao-primario :href="route('candidatura.form', ['evento' => $evento->getKey()])" data-agenda-choice="available" :hidden="!$hasOpenAgenda" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
+                     @endif
++                    <x-botao-primario as="button" disabled aria-describedby="agenda-availability" data-agenda-choice="unavailable" :hidden="$canApply && $hasOpenAgenda" class="mt-6 w-full">Escolher uma Agenda</x-botao-primario>
+                 @else
+                 <p class="mt-1 text-4xl font-medium">
+                     {{ $vagasDisponiveis ?? 0 }}
+--- a/resources/js/modules/managed-events.js
++++ b/resources/js/modules/managed-events.js
+@@ -546,7 +546,13 @@
+                 const vagas = agenda.disponiveis === 1 ? '1 vaga disponível' : `${agenda.disponiveis} vagas disponíveis`;
+                 return el('p', `${date(agenda.inicio)} – ${date(agenda.fim)} · ${agenda.impedimento ?? vagas}`, 'text-sm rounded-xl border border-[#dedbd1] p-3');
+             });
+-            if (agendas.length) node.replaceChildren(...agendas);
++            node.replaceChildren(...(agendas.length ? agendas : [el('p', 'Nenhuma Agenda disponível.', 'text-sm')]));
++
++            const canChoose = data.some(agenda => !agenda.impedimento);
++            $(document, '[data-agenda-choice="available"]').hidden = !canChoose;
++            $(document, '[data-agenda-choice="unavailable"]').hidden = canChoose;
++            $(document, '[data-agenda-open]').hidden = !canChoose;
++            $(document, '[data-agenda-unavailable]').hidden = canChoose;
+         } catch { /* A disponibilidade pública já está no HTML. */ }
+     });
+ }
+--- a/tests/Feature/Bloco9EventManagementTest.php
++++ b/tests/Feature/Bloco9EventManagementTest.php
+@@ -300,6 +300,7 @@
+             ->assertDontSee('Carta sintética reservada')
+             ->assertDontSee('Motivo sintético reservado')
+             ->assertDontSee('7 vagas disponíveis')
++            ->assertDontSee('data-agenda-choice="available"', false)
+             ->assertDontSee('data-personalized-agendas', false);
+         $this->getJson($candidatura)->assertUnauthorized();
+ 
+@@ -311,10 +312,18 @@
+ 
+         $this->webComo($voluntario);
+         $this->get($url)->assertOk()->assertSee('1 vaga disponível')->assertSee('data-personalized-agendas', false)
++            ->assertSee('data-agenda-choice="unavailable" hidden="hidden"', false)
++            ->assertDontSee('data-agenda-choice="available" hidden="hidden"', false)
+             ->assertDontSee('Você já possui uma inscrição nesta agenda.');
+         $this->getJson($candidatura)->assertOk()->assertJsonFragment([
+             'id' => $aberta->getKey(), 'impedimento' => 'Você já possui uma inscrição nesta agenda.',
+         ]);
++
++        $aberta->update(['vagas_agenda' => 1]);
++        $this->get($url)->assertOk()
++            ->assertSee('data-agenda-choice="available" hidden="hidden"', false)
++            ->assertDontSee('data-agenda-choice="unavailable" hidden="hidden"', false)
++            ->assertSee('Nenhuma Agenda disponível para candidatura.');
+ 
+         foreach (['aguardando a confirmação', 'cancelado'] as $status) {
+             $evento->forceFill(['status_evento' => $status])->save();

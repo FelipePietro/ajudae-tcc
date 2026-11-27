@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-26",
+  "synthetic": true,
+  "qa04": {
+    "semMudanca": {
+      "patches": 0,
+      "publico": 200,
+      "inicio": "2026-12-01T02:30:37.000000Z",
+      "fim": "2026-12-01T03:30:37.000000Z",
+      "excecao": null
+    },
+    "somenteVagas": {
+      "patch": {
+        "vagas_agenda": 5
+      },
+      "inicio": "2026-12-01T02:30:37.000000Z",
+      "fim": "2026-12-01T03:30:37.000000Z",
+      "publico": 404,
+      "excecao": null
+    },
+    "alteracaoReal": {
+      "patch": {
+        "data_fim": "2026-12-01T04:00:00.000Z"
+      },
+      "inicio": "2026-12-01T02:30:37.000000Z",
+      "fim": "2026-12-01T04:00:00.000000Z",
+      "excecao": "2026-12-01T02:30:37.000000Z"
+    }
+  },
+  "qa05": {
+    "resposta201Perdida": true,
+    "quotaSimulada": true,
+    "mesmaChaveNaSessao": true,
+    "mesmoEvento": "2",
+    "registrosAposReenvio": 1,
+    "chaveConfirmadaEEncerrada": true,
+    "novaIntencaoExplicita": 2
+  },
+  "php": {
+    "tests": 112,
+    "assertions": 1226
+  },
+  "js": {
+    "tests": 104
+  },
+  "vite": {
+    "version": "8.2.1",
+    "modules": 38
+  },
+  "selectionRace": {
+    "waiting": 2,
+    "codes": [
+      200,
+      409
+    ],
+    "approved": 1
+  }
+}

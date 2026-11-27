@@ -64,12 +64,24 @@ export function eventPayload(form) {
     return result;
 }
 
-export function agendaPayload(row) {
-    const start = $(row, '[data-agenda-start]'), end = $(row, '[data-agenda-end]'), capacity = $(row, '[data-agenda-capacity]');
-    const minutes = (new Date(end.value) - new Date(start.value))/60000;
-    end.setCustomValidity(start.value && end.value && minutes >= 30 ? '' : 'A duração mínima da Agenda é de 30 minutos.');
+export function agendaPayload(row, agenda = null) {
+    const start = $(row, '[data-agenda-start]');
+    const end = $(row, '[data-agenda-end]');
+    const capacity = $(row, '[data-agenda-capacity]');
+
+    const startChanged = !agenda || start.value !== local(agenda.data_inicio);
+    const endChanged = !agenda || end.value !== local(agenda.data_fim);
+    const slots = Number(capacity.value);
+    const duration = Date.parse(endChanged ? end.value : agenda.data_fim) -
+        Date.parse(startChanged ? start.value : agenda.data_inicio);
+    end.setCustomValidity(duration >= 30 * 60000 ? '' : 'A duração mínima da Agenda é de 30 minutos.');
     if (!start.reportValidity() || !end.reportValidity() || !capacity.reportValidity()) return null;
-    return { data_inicio: iso(start.value), data_fim: iso(end.value), vagas_agenda: Number(capacity.value) };
+
+    const changes = {};
+    if (startChanged) changes.data_inicio = iso(start.value);
+    if (endChanged) changes.data_fim = iso(end.value);
+    if (!agenda || slots !== Number(agenda.vagas_agenda)) changes.vagas_agenda = slots;
+    return changes;
 }
 
 export async function validateImage(file) {
@@ -112,10 +124,14 @@ function showErrors(form, error, status) {
 export function eventCreationIntent(scope, storage) {
     const storageKey = 'ajudae:event-creation:' + scope;
     let key;
+    const stored = () => {
+        try { return storage?.getItem(storageKey); } catch { return undefined; }
+    };
     return {
+        stored,
         get() {
             if (!key) {
-                try { key = storage?.getItem(storageKey); } catch { /* A tentativa continua em memória. */ }
+                key = stored();
                 if (!key) {
                     const bytes = crypto.getRandomValues(new Uint8Array(16));
                     key = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
@@ -151,13 +167,43 @@ function createEvent(form) {
     let storage;
     try { storage = window.sessionStorage; } catch { /* Disponibilidade depende do navegador. */ }
     const intent = eventCreationIntent(form.dataset.creationScope, storage);
-    $(conflict, '[data-new-creation]').addEventListener('click', () => {
-        intent.clear();
-        conflict.hidden = true;
-        status.textContent = 'Revise os dados antes de enviar o novo Evento.';
-        form.elements.nm_evento.focus();
+    const intentUrl = form.dataset.creationIntentUrl;
+    const newCreation = $(conflict, '[data-new-creation]');
+    let busy = false, previewUrl, sessionKey;
+
+    const clearSessionIntent = chave => request(form, intentUrl, 'DELETE', { chave });
+    const creationKey = async () => {
+        if (sessionKey) return sessionKey;
+
+        const key = intent.get();
+        if (intent.stored() === key) return key;
+
+        const { data } = await request(form, intentUrl, 'POST');
+        if (typeof data?.chave !== 'string' || !data.chave) {
+            throw new Error('Não foi possível registrar a tentativa de criação. Tente novamente.');
+        }
+        sessionKey = data.chave;
+        return sessionKey;
+    };
+
+    newCreation.addEventListener('click', async () => {
+        if (busy) return;
+        busy = true;
+        newCreation.disabled = true;
+        try {
+            if (sessionKey) await clearSessionIntent(sessionKey);
+            sessionKey = null;
+            intent.clear();
+            conflict.hidden = true;
+            status.textContent = 'Revise os dados antes de enviar o novo Evento.';
+            form.elements.nm_evento.focus();
+        } catch (error) {
+            status.textContent = errorText(error);
+        } finally {
+            busy = false;
+            newCreation.disabled = false;
+        }
     });
-    let busy = false, previewUrl;
     const preview = () => {
         say(form, '#preview-titulo', form.elements.nm_evento.value || 'Prévia do evento');
         say(form, '#preview-categoria', form.elements.cat_evento_id.selectedOptions[0]?.textContent || 'Categoria');
@@ -194,21 +240,29 @@ function createEvent(form) {
     form.addEventListener('submit', async event => {
         event.preventDefault(); if (busy) return;
         $$(form, '[data-field-error]').forEach(node => node.remove());
-        const agendas = $$(rows, '[data-agenda-row]').map(agendaPayload);
+        const agendas = $$(rows, '[data-agenda-row]').map(row => agendaPayload(row));
         if (!agendas.length || agendas.some(a => !a)) { status.textContent = 'Revise as Agendas: informe horários válidos e pelo menos 30 minutos.'; return; }
         const payload = { ...eventPayload(form), agendas }; const image = file.files[0];
         busy = true; fieldsBox.disabled = true; conflict.hidden = true; status.textContent = 'Enviando Evento e Agendas…';
         let saved = false;
         try {
             await validateImage(image);
-            const response = await request(form, base, 'POST', image ? multipartEvent(payload, image) : payload, intent.get());
+            const key = await creationKey();
+            const response = await request(form, base, 'POST', image ? multipartEvent(payload, image) : payload, key);
+            if (response.success !== true || !Number.isInteger(response.data?.evento_id)) {
+                throw new Error('Não foi possível confirmar a criação. Reenvie os mesmos dados para consultar o resultado.');
+            }
             saved = true;
             intent.clear();
+            if (sessionKey) {
+                // Se a confirmação falhar, a mesma chave continua disponível para retomada.
+                clearSessionIntent(sessionKey).catch(() => {});
+            }
             status.textContent = `${response.message} Estado: ${labels[response.data.status_evento] ?? response.data.status_evento}.`;
             const link = el('a', 'Ver Evento na gestão', 'btn-primario'); link.href = `${form.dataset.listUrl}?evento=${encodeURIComponent(response.data.evento_id)}`; status.after(link); link.focus();
         } catch (error) {
             showErrors(form, error, status);
-            conflict.hidden = error.status !== 409;
+            conflict.hidden = error.status !== 409 && !sessionKey;
             status.scrollIntoView({ block: 'center' });
         } finally {
             busy = false;
@@ -217,7 +271,21 @@ function createEvent(form) {
         }
     });
     const load = async () => {
-        try { const { data } = await request(form, `${base}/catalogos`); fillCatalogs(form, data); fieldsBox.disabled = false; setAddress(form); add(); status.textContent = 'Preencha os dados e pelo menos uma Agenda. O Evento será enviado para análise.'; }
+        try {
+            const [catalogs, pending] = await Promise.all([
+                request(form, `${base}/catalogos`),
+                intent.stored() ? null : request(form, intentUrl),
+            ]);
+            sessionKey = pending?.data?.chave ?? null;
+            fillCatalogs(form, catalogs.data);
+            fieldsBox.disabled = false;
+            setAddress(form);
+            add();
+            conflict.hidden = !sessionKey;
+            status.textContent = sessionKey
+                ? 'Há uma tentativa de criação em aberto. Reenvie os mesmos dados para retomá-la.'
+                : 'Preencha os dados e pelo menos uma Agenda. O Evento será enviado para análise.';
+        }
         catch (error) { status.textContent = errorText(error); const retry = el('button', 'Tentar novamente', 'btn-secundario'); retry.type = 'button'; retry.addEventListener('click', () => { retry.remove(); load(); }); status.after(retry); }
     };
     load();
@@ -345,7 +413,19 @@ function management(root) {
             $(row, '[data-agenda-end]').value = local(agenda?.data_fim);
             $(row, '[data-agenda-capacity]').value = agenda?.vagas_agenda ?? 1;
             row.addEventListener('input', () => $(row, '[data-agenda-end]').setCustomValidity(''));
-            row.addEventListener('submit', e => { e.preventDefault(); if (busy) return; const data = agendaPayload(row); if (data) run(agenda ? agendaUrl(agenda.agenda_id) : `${eventUrl(event.evento_id)}/agendas`, agenda ? 'PATCH' : 'POST', data, row); });
+            row.addEventListener('submit', e => {
+                e.preventDefault();
+                if (busy) return;
+                const changes = agendaPayload(row, agenda);
+                if (changes === null) return;
+                $$(row, '[data-field-error]').forEach(node => node.remove());
+                if (Object.keys(changes).length === 0) {
+                    feedback.textContent = 'Nenhuma alteração para salvar.';
+                    return;
+                }
+
+                run(agenda ? agendaUrl(agenda.agenda_id) : `${eventUrl(event.evento_id)}/agendas`, agenda ? 'PATCH' : 'POST', changes, row);
+            });
             if (agenda && !terminal(agenda.status_ativo) && !closed) {
                 const actions = $(row, '[data-agenda-actions]');
                 if (owned && event.agendas.length > 1) actions.append(button('Excluir Agenda', () => { if (window.confirm('Excluir Agenda? O servidor só permite se não houver inscrições e se outra Agenda permanecer.')) run(agendaUrl(agenda.agenda_id), 'DELETE'); }));
@@ -458,11 +538,21 @@ export function initializeManagedEvents() {
         const show = () => { img.hidden = !img.naturalWidth; };
         img.addEventListener('load', show); img.addEventListener('error', show); if (img.complete) show();
     });
-    $$(document, '[data-public-agendas]').forEach(async node => {
+    $$(document, '[data-public-agenda-time]').forEach(time => { time.textContent = date(time.dateTime); });
+    $$(document, '[data-personalized-agendas]').forEach(async node => {
         try {
-            const { data } = await requestJson(node.dataset.publicAgendas);
-            node.replaceChildren(...data.map(agenda => el('p', `${date(agenda.inicio)} – ${date(agenda.fim)} · ${agenda.impedimento ?? `${agenda.disponiveis} vagas disponíveis`}`, 'text-sm rounded-xl border border-[#dedbd1] p-3')));
-            if (!data.length) node.textContent = 'Nenhuma Agenda disponível.';
-        } catch (error) { node.textContent = errorText(error); }
+            const { data } = await requestJson(node.dataset.personalizedAgendas);
+            const agendas = data.map(agenda => {
+                const vagas = agenda.disponiveis === 1 ? '1 vaga disponível' : `${agenda.disponiveis} vagas disponíveis`;
+                return el('p', `${date(agenda.inicio)} – ${date(agenda.fim)} · ${agenda.impedimento ?? vagas}`, 'text-sm rounded-xl border border-[#dedbd1] p-3');
+            });
+            node.replaceChildren(...(agendas.length ? agendas : [el('p', 'Nenhuma Agenda disponível.', 'text-sm')]));
+
+            const canChoose = data.some(agenda => !agenda.impedimento);
+            $(document, '[data-agenda-choice="available"]').hidden = !canChoose;
+            $(document, '[data-agenda-choice="unavailable"]').hidden = canChoose;
+            $(document, '[data-agenda-open]').hidden = !canChoose;
+            $(document, '[data-agenda-unavailable]').hidden = canChoose;
+        } catch { /* A disponibilidade pública já está no HTML. */ }
     });
 }

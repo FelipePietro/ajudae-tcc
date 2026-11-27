@@ -1,0 +1,31 @@
+{
+  "integrado": {
+    "tests": 113,
+    "assertions": 1267
+  },
+  "demonstrativo": {
+    "tests": 9,
+    "assertions": 778
+  },
+  "javascript": {
+    "tests": 35
+  },
+  "vite": {
+    "version": "8.4.0",
+    "modules": 38
+  },
+  "browser": {
+    "widths": [
+      360,
+      768,
+      1280
+    ],
+    "lotadaDesabilita": true,
+    "lotadaForaDoFoco": true,
+    "agendaMistaAbreFormularioPorEnter": true,
+    "impedimentoPessoalDesabilita": true,
+    "falhas503": 2,
+    "fallbackConservouEstadoPublico": true,
+    "visitanteSemAcao": true
+  }
+}
